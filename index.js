@@ -25,8 +25,8 @@ mongoose
 // });
 // const person = await Person.create({account_id: account._id, username: 'Lê Tuấn', address: '275 QT', gender: true, dob: new Date()});
 // const patient = await Patient.create({person: person._id, blood: 'O'});
-const patient = await Patient.findById('63bd87f418bb2d4de6661bb5').populate('person');
-console.log(patient);
+// const patient = await Patient.findById('63bd87f418bb2d4de6661bb5').populate('person');
+// console.log(patient);
 
 const PORT = process.env.PORT || 3001;
 
