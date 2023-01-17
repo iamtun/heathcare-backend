@@ -12,6 +12,10 @@ router
 router.route('/get/:id').get(DoctorController.findDoctorById);
 
 router
+    .route('/update/:id')
+    .post(AuthController.authentication, DoctorController.updateDoctorInfoById);
+
+router
     .route('/waiting-accept')
     .get(DoctorController.getDoctorListWaitingAccept);
 

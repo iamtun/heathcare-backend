@@ -39,6 +39,56 @@ const createDoctor = async (req, res, next) => {
     }
 };
 
+const updateDoctorInfoById = async (req, res, next) => {
+    const { rule } = req;
+    const { id } = req.params;
+    if (rule === 'doctor') {
+        const { username, dob, address, gender, avatar } = req.body;
+        if ((username || dob || address || gender) && id) {
+            const doctorModel = await Doctor.findById(id);
+            if (doctorModel) {
+                const { person } = doctorModel;
+                const personModel = await Person.findById(person);
+                personModel.username = username || personModel.username;
+                personModel.dob = dob || personModel.dob;
+                personModel.address = address || personModel.address;
+                personModel.avatar = avatar || personModel.avatar;
+
+                const personModelUpdated = await personModel.save();
+                res.status(201).json({
+                    status: 'success',
+                    data: personModelUpdated,
+                });
+            } else {
+                return next(
+                    new AppError(
+                        404,
+                        'fail',
+                        `Don't find doctor with id = ${id}`
+                    ),
+                    req,
+                    res,
+                    next
+                );
+            }
+        } else {
+            return next(
+                new AppError(400, 'fail', 'Please provide enough information!'),
+                req,
+                res,
+                next
+            );
+        }
+    } else {
+        return next(
+            new AppError(403, 'fail', 'You no permission!'),
+            req,
+            res,
+            next
+        );
+    }
+};
+
 const findDoctorById = async (req, res, next) => {
     try {
         const id = req.params.id;
@@ -95,4 +145,5 @@ export default {
     findDoctorById,
     getAllDoctors,
     getDoctorListWaitingAccept,
+    updateDoctorInfoById,
 };
