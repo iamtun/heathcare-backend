@@ -110,14 +110,12 @@ const authentication = async (req, res, next) => {
 
     const verify = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    console.log(verify);
     //check verify
     if (verify?.error) {
         return next(new AppError(401, 'fail', 'JWT malformed')), req, res, next;
     }
 
     const account = await Account.findById(verify.account_id);
-    console.log(account);
     req.rule = account.rule;
     req.account_id = account._id;
 

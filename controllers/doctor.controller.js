@@ -45,27 +45,36 @@ const updateDoctorInfoById = async (req, res, next) => {
     if (rule === 'doctor') {
         const { username, dob, address, gender, avatar } = req.body;
         if ((username || dob || address || gender) && id) {
-            const doctorModel = await Doctor.findById(id);
-            if (doctorModel) {
-                const { person } = doctorModel;
-                const personModel = await Person.findById(person);
-                personModel.username = username || personModel.username;
-                personModel.dob = dob || personModel.dob;
-                personModel.address = address || personModel.address;
-                personModel.avatar = avatar || personModel.avatar;
+            try {
+                const doctorModel = await Doctor.findById(id);
+                if (doctorModel) {
+                    const { person } = doctorModel;
+                    const personModel = await Person.findById(person);
+                    personModel.username = username || personModel.username;
+                    personModel.dob = dob || personModel.dob;
+                    personModel.address = address || personModel.address;
+                    personModel.avatar = avatar || personModel.avatar;
 
-                const personModelUpdated = await personModel.save();
-                res.status(201).json({
-                    status: 'success',
-                    data: personModelUpdated,
-                });
-            } else {
+                    const personModelUpdated = await personModel.save();
+                    res.status(201).json({
+                        status: 'success',
+                        data: personModelUpdated,
+                    });
+                } else {
+                    return next(
+                        new AppError(
+                            404,
+                            'fail',
+                            `Don't find doctor with id = ${id}`
+                        ),
+                        req,
+                        res,
+                        next
+                    );
+                }
+            } catch (error) {
                 return next(
-                    new AppError(
-                        404,
-                        'fail',
-                        `Don't find doctor with id = ${id}`
-                    ),
+                    new AppError(501, 'fail', `${error.message}`),
                     req,
                     res,
                     next
