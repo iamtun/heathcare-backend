@@ -6,37 +6,46 @@ import Account from '../models/account.model.js';
 const register = async (req, res, next) => {
     try {
         const { phone_number, password, rule } = req.body;
-        console.log(phone_number, password, rule);
-        //decode password
-        const _password = await bcrypt.hash(password, 12);
-        let account;
-        if (rule) {
-            account = await Account.create({
-                phone_number: phone_number,
-                password: _password,
-                rule: rule,
+
+        if (phone_number && password) {
+            //decode password
+            const _password = await bcrypt.hash(password, 12);
+            let account;
+            if (rule) {
+                account = await Account.create({
+                    phone_number: phone_number,
+                    password: _password,
+                    rule: rule,
+                });
+            } else {
+                account = await Account.create({
+                    phone_number: phone_number,
+                    password: _password,
+                });
+            }
+
+            //create payload
+            const account_id = { account_id: account._id };
+
+            const accessToken = jwt.sign(
+                account_id,
+                process.env.ACCESS_TOKEN_SECRET
+            );
+
+            res.status(201).json({
+                status: 'success',
+                data: {
+                    accessToken,
+                },
             });
         } else {
-            account = await Account.create({
-                phone_number: phone_number,
-                password: _password,
-            });
+            return next(
+                new AppError(400, 'fail', 'Vui lòng nhập đầy đủ thông tin'),
+                req,
+                res,
+                next
+            );
         }
-
-        //create payload
-        const account_id = { account_id: account._id };
-
-        const accessToken = jwt.sign(
-            account_id,
-            process.env.ACCESS_TOKEN_SECRET
-        );
-
-        res.status(201).json({
-            status: 'success',
-            data: {
-                accessToken,
-            },
-        });
     } catch (error) {
         next(error);
     }
@@ -51,13 +60,27 @@ const login = async (req, res, next) => {
     try {
         const { phone_number, password } = req.body;
         //check user send phone_number & password
-        if (!phone_number || !password) {
+        if (!phone_number && !password) {
             return next(
-                new AppError(
-                    401,
-                    'fail',
-                    'Please provide phone_number or password'
-                ),
+                new AppError(400, 'fail', 'Vui lòng nhập đầy đủ thông tin'),
+                req,
+                res,
+                next
+            );
+        }
+
+        if (!phone_number) {
+            return next(
+                new AppError(400, 'fail', 'Vui lòng nhập số điện thoại'),
+                req,
+                res,
+                next
+            );
+        }
+
+        if (!password) {
+            return next(
+                new AppError(400, 'fail', 'Vui lòng nhập mật khẩu'),
                 req,
                 res,
                 next
@@ -72,9 +95,9 @@ const login = async (req, res, next) => {
             return (
                 next(
                     new AppError(
-                        401,
+                        404,
                         'fail',
-                        'Phone_number or Password is wrong'
+                        'Tài khoản hoặc mật khẩu bạn nhập không chính xác'
                     )
                 ),
                 req,
