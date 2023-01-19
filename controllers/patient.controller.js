@@ -1,27 +1,35 @@
 import Patient from '../models/patient.model.js';
-import Person from '../models/person.model.js';
 import AppError from '../utils/error.util.js';
+import { createPerson } from '../utils/person.util.js';
 
 const createPatient = async (req, res, next) => {
     const { rule, account_id } = req;
     if (rule === 'patient') {
         const { username, dob, address, gender, avatar, blood } = req.body;
         if (username && dob && address && gender && blood && account_id) {
-            const personModel = await Person.create({
+            const person = {
                 username,
                 dob,
                 address,
                 gender,
                 avatar,
                 account: account_id,
-            });
+            };
+            const { personModel, error } = await createPerson(person);
+            if (error) {
+                return next(
+                    new AppError(400, 'fail', 'account id exist'),
+                    req,
+                    res,
+                    next
+                );
+            } else {
+                const patient = await Patient.create({
+                    person: personModel._id,
+                });
 
-            const patientModel = await Patient.create({
-                person: personModel._id,
-                blood,
-            });
-
-            res.status(201).json({ status: 'success', data: patientModel });
+                res.status(201).json({ status: 'success', data: patient });
+            }
         } else {
             return next(
                 new AppError(400, 'fail', 'Please provide enough information!'),
