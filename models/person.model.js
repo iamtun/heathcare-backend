@@ -21,7 +21,7 @@ const personSchema = new Schema({
         type: String,
         // validate: [validator.isDataURI, "Please provide a avatar uri"],
     },
-    account: { type: Schema.Types.ObjectId, ref: 'accounts' },
+    account: { type: Schema.ObjectId, ref: 'accounts', unique: true },
 });
 
 const Person = mongoose.model('persons', personSchema);

@@ -1,26 +1,35 @@
 import Doctor from '../models/doctor.model.js';
-import Person from '../models/person.model.js';
 import AppError from '../utils/error.util.js';
+import { createPerson, updatePerson } from '../utils/person.util.js';
 
 const createDoctor = async (req, res, next) => {
     const { rule, account_id } = req;
     if (rule === 'doctor') {
         const { username, dob, address, gender, avatar } = req.body;
         if (username && dob && address && gender && account_id) {
-            const personModel = await Person.create({
+            const person = {
                 username,
                 dob,
                 address,
                 gender,
                 avatar,
                 account: account_id,
-            });
+            };
+            const { personModel, error } = await createPerson(person);
+            if (error) {
+                return next(
+                    new AppError(400, 'fail', 'account id exist'),
+                    req,
+                    res,
+                    next
+                );
+            } else {
+                const doctorModel = await Doctor.create({
+                    person: personModel._id,
+                });
 
-            const doctorModel = await Doctor.create({
-                person: personModel._id,
-            });
-
-            res.status(201).json({ status: 'success', data: doctorModel });
+                res.status(201).json({ status: 'success', data: doctorModel });
+            }
         } else {
             return next(
                 new AppError(400, 'fail', 'Please provide enough information!'),
@@ -47,15 +56,14 @@ const updateDoctorInfoById = async (req, res, next) => {
         if ((username || dob || address || gender) && id) {
             try {
                 const doctorModel = await Doctor.findById(id);
+                const newPerson = { username, dob, address, gender };
                 if (doctorModel) {
                     const { person } = doctorModel;
-                    const personModel = await Person.findById(person);
-                    personModel.username = username || personModel.username;
-                    personModel.dob = dob || personModel.dob;
-                    personModel.address = address || personModel.address;
-                    personModel.avatar = avatar || personModel.avatar;
 
-                    const personModelUpdated = await personModel.save();
+                    const personModelUpdated = await updatePerson(
+                        newPerson,
+                        person
+                    );
                     res.status(201).json({
                         status: 'success',
                         data: personModelUpdated,
