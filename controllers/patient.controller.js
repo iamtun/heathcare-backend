@@ -3,16 +3,16 @@ import AppError from '../utils/error.util.js';
 import { createPerson } from '../utils/person.util.js';
 
 const createPatient = async (req, res, next) => {
-    const { rule, account_id } = req;
+    const { rule, account_id, file } = req;
     if (rule === 'patient') {
-        const { username, dob, address, gender, avatar, blood } = req.body;
+        const { username, dob, address, gender, blood } = req.body;
         if (username && dob && address && gender && blood && account_id) {
             const person = {
                 username,
                 dob,
                 address,
                 gender,
-                avatar,
+                avatar: file ? file.path : '',
                 account: account_id,
             };
             const { personModel, error } = await createPerson(person);

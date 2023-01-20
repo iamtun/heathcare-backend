@@ -13,13 +13,21 @@ const createPerson = async (person) => {
 };
 
 const updatePerson = async (newPerson, id) => {
-    const oldPerson = await Person.findById(id);
+    let oldPerson = null;
+    let _error = null;
+    try {
+        oldPerson = await Person.findById(id);
 
-    oldPerson.username = newPerson.username || oldPerson.username;
-    oldPerson.dob = newPerson.dob || oldPerson.dob;
-    oldPerson.address = newPerson.address || oldPerson.address;
-    oldPerson.avatar = newPerson.avatar || oldPerson.avatar;
+        oldPerson.username = newPerson.username || oldPerson.username;
+        oldPerson.dob = newPerson.dob || oldPerson.dob;
+        oldPerson.address = newPerson.address || oldPerson.address;
+        oldPerson.avatar = newPerson.avatar || oldPerson.avatar;
 
-    return await oldPerson.save();
+        oldPerson = await oldPerson.save();
+    } catch (error) {
+        _error = error;
+    }
+
+    return { oldPerson, error: _error };
 };
 export { createPerson, updatePerson };

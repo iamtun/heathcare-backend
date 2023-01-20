@@ -139,10 +139,14 @@ const authentication = async (req, res, next) => {
     }
 
     const account = await Account.findById(verify.account_id);
-    req.rule = account.rule;
-    req.account_id = account._id;
+    if (account) {
+        req.rule = account.rule;
+        req.account_id = account._id;
 
-    next();
+        next();
+    } else {
+        return next(new AppError(401, 'fail', 'Token fail')), req, res, next;
+    }
 };
 
 export default {
