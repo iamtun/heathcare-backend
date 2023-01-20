@@ -3,16 +3,16 @@ import AppError from '../utils/error.util.js';
 import { createPerson, updatePerson } from '../utils/person.util.js';
 
 const createDoctor = async (req, res, next) => {
-    const { rule, account_id } = req;
+    const { rule, account_id, file } = req;
     if (rule === 'doctor') {
-        const { username, dob, address, gender, avatar } = req.body;
+        const { username, dob, address, gender } = req.body;
         if (username && dob && address && gender && account_id) {
             const person = {
                 username,
                 dob,
                 address,
                 gender,
-                avatar,
+                avatar: file ? file.path : '',
                 account: account_id,
             };
             const { personModel, error } = await createPerson(person);
@@ -52,7 +52,7 @@ const updateDoctorInfoById = async (req, res, next) => {
     const { rule } = req;
     const { id } = req.params;
     if (rule === 'doctor') {
-        const { username, dob, address, gender, avatar } = req.body;
+        const { username, dob, address, gender } = req.body;
         if ((username || dob || address || gender) && id) {
             try {
                 const doctorModel = await Doctor.findById(id);
@@ -60,10 +60,14 @@ const updateDoctorInfoById = async (req, res, next) => {
                 if (doctorModel) {
                     const { person } = doctorModel;
 
-                    const personModelUpdated = await updatePerson(
+                    const { oldPerson, error } = await updatePerson(
                         newPerson,
                         person
                     );
+                    if (error) {
+                        return next(error);
+                    }
+
                     res.status(201).json({
                         status: 'success',
                         data: personModelUpdated,
@@ -81,12 +85,7 @@ const updateDoctorInfoById = async (req, res, next) => {
                     );
                 }
             } catch (error) {
-                return next(
-                    new AppError(501, 'fail', `${error.message}`),
-                    req,
-                    res,
-                    next
-                );
+                next(error);
             }
         } else {
             return next(
@@ -137,7 +136,9 @@ const getAllDoctors = async (req, res, next) => {
             );
         }
         res.status(200).json({ status: 'success', data: doctors });
-    } catch (error) {}
+    } catch (error) {
+        next(error);
+    }
 };
 
 const getDoctorListWaitingAccept = async (req, res, next) => {
@@ -154,7 +155,9 @@ const getDoctorListWaitingAccept = async (req, res, next) => {
             );
         }
         res.status(200).json({ status: 'success', data: doctors });
-    } catch (error) {}
+    } catch (error) {
+        next(error);
+    }
 };
 
 export default {
