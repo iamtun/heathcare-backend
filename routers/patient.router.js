@@ -11,8 +11,7 @@ router
         AuthController.authentication,
         UploadCloud.uploadCloud.single('avatar'),
         PatientController.createPatient
-    );
-
-router.route('/:id').get(PatientController.findPatientById);
+    )
+    .get(AuthController.authentication, PatientController.findPatientByToken);
 
 export default router;

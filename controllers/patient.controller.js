@@ -1,4 +1,5 @@
 import Patient from '../models/patient.model.js';
+import Person from '../models/person.model.js';
 import AppError from '../utils/error.util.js';
 import { createPerson } from '../utils/person.util.js';
 
@@ -26,6 +27,7 @@ const createPatient = async (req, res, next) => {
             } else {
                 const patient = await Patient.create({
                     person: personModel._id,
+                    blood: blood,
                 });
 
                 res.status(201).json({ status: 'success', data: patient });
@@ -48,23 +50,39 @@ const createPatient = async (req, res, next) => {
     }
 };
 
-const findPatientById = async (req, res, next) => {
-    try {
-        const id = req.params.id;
-        const patient = await Patient.findById(id).populate('person');
-        if (!patient) {
-            return next(
-                new AppError(404, 'fail', `Don't find patient with id = ${id}`),
-                req,
-                res,
-                next
-            );
-        }
+const findPatientByToken = async (req, res, next) => {
+    const { account_id, rule } = req;
+    if (rule === 'patient') {
+        try {
+            const person = await Person.findOne({ account: account_id });
+            const patient = await Patient.findOne({
+                person: person._id,
+            }).populate('person');
+            if (!patient) {
+                return next(
+                    new AppError(
+                        404,
+                        'fail',
+                        `Don't find patient with id = ${id}`
+                    ),
+                    req,
+                    res,
+                    next
+                );
+            }
 
-        res.status(200).json({ status: 'success', data: patient });
-    } catch (error) {
-        next(error);
+            res.status(200).json({ status: 'success', data: patient });
+        } catch (error) {
+            next(error);
+        }
+    } else {
+        return next(
+            new AppError(403, 'fail', 'You no permission!'),
+            req,
+            res,
+            next
+        );
     }
 };
 
-export default { createPatient, findPatientById };
+export default { createPatient, findPatientByToken };
