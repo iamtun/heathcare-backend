@@ -1,11 +1,17 @@
-import { model } from 'mongoose';
 import AppError from '../../utils/error.util.js';
 
-const createOne = (Model) => async (model) => {
+const createOne = (Model) => async (req, res, next) => {
     try {
-        const doc = await Model.create(model);
+        try {
+            const doc = await Model.create(req.body);
 
-        return doc;
+            res.status(201).json({
+                status: 'success',
+                data: doc,
+            });
+        } catch (error) {
+            next(error);
+        }
     } catch (error) {
         next(error);
     }
