@@ -117,7 +117,7 @@ const login = async (req, res, next) => {
         res.status(200).json({
             status: 'success',
             data: {
-                token: accessToken,
+                accessToken: accessToken,
             },
         });
     } catch (error) {

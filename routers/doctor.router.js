@@ -12,13 +12,10 @@ router
         AuthController.authentication,
         UploadCloud.uploadCloud.single('avatar'),
         DoctorController.createDoctor
-    );
+    )
+    .put(AuthController.authentication, DoctorController.updateDoctorInfoById);
 
 router.route('/get/:id').get(DoctorController.findDoctorById);
-
-router
-    .route('/update/:id')
-    .put(AuthController.authentication, DoctorController.updateDoctorInfoById);
 
 router
     .route('/profile')
