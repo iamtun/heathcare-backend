@@ -50,12 +50,11 @@ const createDoctor = async (req, res, next) => {
 
 const updateDoctorInfoById = async (req, res, next) => {
     const { rule } = req;
-    const { id } = req.params;
     if (rule === 'doctor') {
-        const { username, dob, address, gender } = req.body;
-        if ((username || dob || address || gender) && id) {
+        const { username, dob, address, gender, doctor_id } = req.body;
+        if ((username || dob || address || gender) && doctor_id) {
             try {
-                const doctorModel = await Doctor.findById(id);
+                const doctorModel = await Doctor.findById(doctor_id);
                 const newPerson = { username, dob, address, gender };
                 if (doctorModel) {
                     const { person } = doctorModel;
