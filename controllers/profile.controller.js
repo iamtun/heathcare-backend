@@ -40,10 +40,21 @@ const createProfileToDoctor = async (req, res, next) => {
             try {
                 const profileModel = await Profile.create(profile);
                 if (profileModel) {
-                    res.status(201).json({
-                        status: 'success',
-                        data: profileModel,
-                    });
+                    const profile = await Profile.findOne({
+                        _id: profileModel._id,
+                    }).populate('doctor');
+
+                    if (profile) {
+                        const person = await Person.findById(
+                            profile.doctor.person
+                        );
+                        profile['doctor']['person'] = person;
+
+                        res.status(200).json({
+                            status: 'success',
+                            data: profile,
+                        });
+                    }
                 }
             } catch (error) {
                 return next(
