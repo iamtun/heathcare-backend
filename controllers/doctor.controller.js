@@ -70,7 +70,7 @@ const updateDoctorInfoById = async (req, res, next) => {
 
                     res.status(201).json({
                         status: 'success',
-                        data: personModelUpdated,
+                        data: oldPerson,
                     });
                 } else {
                     return next(
