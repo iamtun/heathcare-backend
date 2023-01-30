@@ -7,7 +7,7 @@
     "author": "iamtun",
     "license": "MIT",
     "scripts": {
-        "start": "node index"
+        "start": "nodemon index"
     },
     "dependencies": {
         "bcryptjs": "^2.4.3",

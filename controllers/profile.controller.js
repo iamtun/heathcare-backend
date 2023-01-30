@@ -81,6 +81,11 @@ const findDoctorProfileByDoctorId = async (req, res, next) => {
                 data: profile,
             });
         }
+
+        res.status(404).json({
+            status: 'fail',
+            message: `no find profile with id ${id}`,
+        });
     } catch (error) {
         next(error);
     }

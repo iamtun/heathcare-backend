@@ -7,7 +7,7 @@ import GlobalHandler from './controllers/utils/error.controller.js';
 import AuthRouters from './routers/auth.router.js';
 import PatientRouters from './routers/patient.router.js';
 import DoctorRouters from './routers/doctor.router.js';
-
+import AccountRouters from './routers/account.router.js';
 const app = express();
 
 app.use(cors());
@@ -17,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api/v1/auth', AuthRouters);
 app.use('/api/v1/patients', PatientRouters);
 app.use('/api/v1/doctors', DoctorRouters);
+app.use('/api/v1/accounts', AccountRouters);
 
 app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');
