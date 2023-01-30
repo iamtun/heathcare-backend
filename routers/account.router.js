@@ -1,12 +1,13 @@
-import express from "express";
-import AccountController from "../controllers/account.controller.js";
+import express from 'express';
+import AccountController from '../controllers/account.controller.js';
 
 const router = express.Router();
 
 router
-    .route("/")
+    .route('/')
     .get(AccountController.getAllAccount)
+    .delete(AccountController.removeAccount);
 
-router.route("/:id").get(AccountController.getAccount);
+router.route('/:id').get(AccountController.getAccount);
 
 export default router;

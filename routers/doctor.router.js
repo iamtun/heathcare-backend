@@ -18,7 +18,7 @@ router.route('/get/:id').get(DoctorController.findDoctorById);
 
 router
     .route('/update/:id')
-    .post(AuthController.authentication, DoctorController.updateDoctorInfoById);
+    .put(AuthController.authentication, DoctorController.updateDoctorInfoById);
 
 router
     .route('/profile')
