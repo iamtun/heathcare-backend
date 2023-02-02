@@ -9,6 +9,8 @@ import PatientRouters from './routers/patient.router.js';
 import DoctorRouters from './routers/doctor.router.js';
 import AccountRouters from './routers/account.router.js';
 import ShiftRouters from './routers/shift.router.js';
+import DayRouters from './routers/day.router.js';
+
 const app = express();
 
 app.use(cors());
@@ -20,6 +22,7 @@ app.use('/api/v1/patients', PatientRouters);
 app.use('/api/v1/doctors', DoctorRouters);
 app.use('/api/v1/accounts', AccountRouters);
 app.use('/api/v1/shifts', ShiftRouters);
+app.use('/api/v1/days', DayRouters);
 
 app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');
