@@ -1,3 +1,4 @@
+import { RULE_ADMIN } from '../common/constant.js';
 import Doctor from '../models/doctor.model.js';
 import AppError from '../utils/error.util.js';
 import { createPerson, updatePerson } from '../utils/person.util.js';
@@ -160,7 +161,19 @@ const getDoctorListWaitingAccept = async (req, res, next) => {
     }
 };
 
-const censorship = Base.updateOne(Doctor);
+const censorship = async (req, res, next) => {
+    const { rule } = req;
+    if (rule === RULE_ADMIN) {
+        return Base.updateOne(Doctor)(req, res, next);
+    } else {
+        return next(
+            new AppError(403, 'fail', 'You no permission!'),
+            req,
+            res,
+            next
+        );
+    }
+};
 
 export default {
     createDoctor,

@@ -30,6 +30,6 @@ router
 router
     .route('/:id')
     .get(DoctorController.findDoctorById)
-    .put(DoctorController.censorship);
+    .put(AuthController.authentication, DoctorController.censorship);
 
 export default router;
