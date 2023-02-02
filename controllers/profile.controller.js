@@ -1,5 +1,6 @@
 import Profile from '../models/profile.model.js';
 import Person from '../models/person.model.js';
+import Doctor from '../models/doctor.model.js';
 import AppError from '../utils/error.util.js';
 
 const createProfileToDoctor = async (req, res, next) => {
@@ -79,22 +80,39 @@ const findDoctorProfileByDoctorId = async (req, res, next) => {
     const { id } = req.params;
 
     try {
-        const profile = await Profile.findOne({ doctor: `${id}` }).populate(
-            'doctor'
-        );
+        const person = await Person.findOne({ account: id });
+        if (person) {
+            const doctor = await Doctor.findOne({ person: person._id });
 
-        if (profile) {
-            const person = await Person.findById(profile.doctor.person);
-            profile['doctor']['person'] = person;
+            if (doctor) {
+                const profile = await Profile.findOne({
+                    doctor: `${doctor._id}`,
+                }).populate('doctor');
 
-            res.status(200).json({
-                status: 'success',
-                data: profile,
-            });
+                if (profile) {
+                    const person = await Person.findById(profile.doctor.person);
+                    profile['doctor']['person'] = person;
+
+                    res.status(200).json({
+                        status: 'success',
+                        data: profile,
+                    });
+                } else {
+                    res.status(404).json({
+                        status: 'fail',
+                        message: `no find profile with doctor id ${doctor._id}`,
+                    });
+                }
+            } else {
+                res.status(404).json({
+                    status: 'fail',
+                    message: `no find doctor with person id: ${person._id}`,
+                });
+            }
         } else {
             res.status(404).json({
                 status: 'fail',
-                message: `no find profile with id ${id}`,
+                message: `no find person with account id: ${id}`,
             });
         }
     } catch (error) {
