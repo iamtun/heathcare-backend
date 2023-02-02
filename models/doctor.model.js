@@ -10,6 +10,10 @@ const doctorSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        deleted: {
+            type: Boolean,
+            default: false,
+        },
         rating: {
             type: Number,
             min: 0,

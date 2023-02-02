@@ -1,6 +1,7 @@
 import Doctor from '../models/doctor.model.js';
 import AppError from '../utils/error.util.js';
 import { createPerson, updatePerson } from '../utils/person.util.js';
+import Base from './utils/base.controller.js';
 
 const createDoctor = async (req, res, next) => {
     const { rule, account_id, file } = req;
@@ -159,10 +160,13 @@ const getDoctorListWaitingAccept = async (req, res, next) => {
     }
 };
 
+const censorship = Base.updateOne(Doctor);
+
 export default {
     createDoctor,
     findDoctorById,
     getAllDoctors,
     getDoctorListWaitingAccept,
     updateDoctorInfoById,
+    censorship,
 };
