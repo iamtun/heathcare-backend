@@ -15,16 +15,21 @@ router
     )
     .put(AuthController.authentication, DoctorController.updateDoctorInfoById);
 
-router.route('/get/:id').get(DoctorController.findDoctorById);
-
-router
-    .route('/profile')
-    .post(AuthController.authentication, ProfileToDoctor.createProfileToDoctor);
-
-router.route('/profile/:id').get(ProfileToDoctor.findDoctorProfileByDoctorId);
-
 router
     .route('/waiting-accept')
     .get(DoctorController.getDoctorListWaitingAccept);
+
+router
+    .route('/profile')
+    .post(AuthController.authentication, ProfileToDoctor.createProfileToDoctor)
+    .get(
+        AuthController.authentication,
+        ProfileToDoctor.findDoctorProfileByDoctorId
+    );
+
+router
+    .route('/:id')
+    .get(DoctorController.findDoctorById)
+    .put(DoctorController.censorship);
 
 export default router;

@@ -77,10 +77,10 @@ const createProfileToDoctor = async (req, res, next) => {
 };
 
 const findDoctorProfileByDoctorId = async (req, res, next) => {
-    const { id } = req.params;
+    const { account_id } = req;
 
     try {
-        const person = await Person.findOne({ account: id });
+        const person = await Person.findOne({ account: account_id });
         if (person) {
             const doctor = await Doctor.findOne({ person: person._id });
 
