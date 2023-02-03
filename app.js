@@ -10,6 +10,7 @@ import DoctorRouters from './routers/doctor.router.js';
 import AccountRouters from './routers/account.router.js';
 import ShiftRouters from './routers/shift.router.js';
 import DayRouters from './routers/day.router.js';
+import ScheduleRouters from './routers/schedule.router.js';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/v1/doctors', DoctorRouters);
 app.use('/api/v1/accounts', AccountRouters);
 app.use('/api/v1/shifts', ShiftRouters);
 app.use('/api/v1/days', DayRouters);
+app.use('/api/v1/schedules', ScheduleRouters);
 
 app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');

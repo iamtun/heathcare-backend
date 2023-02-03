@@ -1,6 +1,7 @@
-import { RULE_ADMIN } from '../common/constant.js';
-import Day from '../models/day.model.js';
-import Base from './utils/base.controller.js';
+import { RULE_ADMIN } from '../../common/constant.js';
+import Day from '../../models/day.model.js';
+import AppError from '../../utils/error.util.js';
+import Base from '../utils/base.controller.js';
 
 const createDay = async (req, res, next) => {
     const { rule } = req;
@@ -16,4 +17,5 @@ const createDay = async (req, res, next) => {
     }
 };
 
-export default { createDay };
+const getAllDay = Base.getAll(Day);
+export default { createDay, getAllDay };

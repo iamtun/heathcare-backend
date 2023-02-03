@@ -1,3 +1,4 @@
+import { RULE_PATIENT } from '../common/constant.js';
 import Patient from '../models/patient.model.js';
 import Person from '../models/person.model.js';
 import AppError from '../utils/error.util.js';
@@ -5,7 +6,7 @@ import { createPerson } from '../utils/person.util.js';
 
 const createPatient = async (req, res, next) => {
     const { rule, account_id, file } = req;
-    if (rule === 'patient') {
+    if (rule === RULE_PATIENT) {
         const { username, dob, address, gender, blood } = req.body;
         if (username && dob && address && gender && blood && account_id) {
             const person = {
@@ -52,7 +53,7 @@ const createPatient = async (req, res, next) => {
 
 const findPatientByToken = async (req, res, next) => {
     const { account_id, rule } = req;
-    if (rule === 'patient') {
+    if (rule === RULE_PATIENT) {
         try {
             const person = await Person.findOne({ account: account_id });
             const patient = await Patient.findOne({
