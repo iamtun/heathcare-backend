@@ -1,7 +1,7 @@
 import express from 'express';
-import AuthController from '../controllers/auth.controller.js';
+import AuthController from '../controllers/auth/auth.controller.js';
 import DoctorController from '../controllers/doctor/doctor.controller.js';
-import ProfileToDoctor from '../controllers/profile.controller.js';
+import ProfileToDoctor from '../controllers/utils/profile.controller.js';
 import UploadCloud from '../configs/cloudinary.config.js';
 const router = express.Router();
 

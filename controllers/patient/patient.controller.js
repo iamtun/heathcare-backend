@@ -1,8 +1,8 @@
-import { RULE_PATIENT } from '../common/constant.js';
-import Patient from '../models/patient.model.js';
-import Person from '../models/person.model.js';
-import AppError from '../utils/error.util.js';
-import { createPerson } from '../utils/person.util.js';
+import { RULE_PATIENT } from '../../common/constant.js';
+import Patient from '../../models/patient.model.js';
+import Person from '../../models/person.model.js';
+import AppError from '../../utils/error.util.js';
+import { createPerson } from '../../utils/person.util.js';
 
 const createPatient = async (req, res, next) => {
     const { rule, account_id, file } = req;

@@ -1,10 +1,10 @@
-import Account from '../models/account.model.js';
-import Person from '../models/person.model.js';
-import Doctor from '../models/doctor.model.js';
-import Profile from '../models/profile.model.js';
+import Account from '../../models/account.model.js';
+import Person from '../../models/person.model.js';
+import Doctor from '../../models/doctor.model.js';
+import Profile from '../../models/profile.model.js';
 
-import AppError from '../utils/error.util.js';
-import Base from './utils/base.controller.js';
+import AppError from '../../utils/error.util.js';
+import Base from '../utils/base.controller.js';
 
 const getAllAccount = Base.getAll(Account);
 const getAccount = Base.getOne(Account);

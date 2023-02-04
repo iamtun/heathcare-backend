@@ -1,5 +1,5 @@
 import express from 'express';
-import AuthController from '../controllers/auth.controller.js';
+import AuthController from '../controllers/auth/auth.controller.js';
 import ShiftController from '../controllers/admin/shift.controller.js';
 
 const router = express.Router();
