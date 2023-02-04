@@ -1,20 +1,30 @@
+import { Model } from 'mongoose';
 import AppError from '../../utils/error.util.js';
 
 const createOne = (Model) => async (req, res, next) => {
     try {
-        try {
-            const doc = await Model.create(req.body);
+        const doc = await Model.create(req.body);
 
-            res.status(201).json({
-                status: 'success',
-                data: doc,
-            });
-        } catch (error) {
-            next(error);
-        }
+        res.status(201).json({
+            status: 'success',
+            data: doc,
+        });
     } catch (error) {
         next(error);
     }
+};
+
+const createAndReturnObject = (Model) => async (req, res, next) => {
+    let data = {};
+    try {
+        const doc = await Model.create(req.body);
+
+        data.doc = doc;
+    } catch (error) {
+        data.error = error;
+    }
+
+    return data;
 };
 
 const updateOne = (Model) => async (req, res, next) => {
@@ -98,4 +108,11 @@ const getAll = (Model) => async (req, res, next) => {
     } catch (error) {}
 };
 
-export default { createOne, updateOne, deleteOne, getOne, getAll };
+export default {
+    createOne,
+    createAndReturnObject,
+    updateOne,
+    deleteOne,
+    getOne,
+    getAll,
+};
