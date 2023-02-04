@@ -1,12 +1,12 @@
-import { RULE_ADMIN } from '../common/constant.js';
-import Doctor from '../models/doctor.model.js';
-import AppError from '../utils/error.util.js';
-import { createPerson, updatePerson } from '../utils/person.util.js';
-import Base from './utils/base.controller.js';
+import { RULE_ADMIN, RULE_DOCTOR } from '../../common/constant.js';
+import Doctor from '../../models/doctor.model.js';
+import AppError from '../../utils/error.util.js';
+import { createPerson, updatePerson } from '../../utils/person.util.js';
+import Base from '../utils/base.controller.js';
 
 const createDoctor = async (req, res, next) => {
     const { rule, account_id, file } = req;
-    if (rule === 'doctor') {
+    if (rule === RULE_DOCTOR) {
         const { username, dob, address, gender } = req.body;
         if (username && dob && address && gender && account_id) {
             const person = {
@@ -52,7 +52,7 @@ const createDoctor = async (req, res, next) => {
 
 const updateDoctorInfoById = async (req, res, next) => {
     const { rule } = req;
-    if (rule === 'doctor') {
+    if (rule === RULE_DOCTOR) {
         const { username, dob, address, gender, doctor_id } = req.body;
         if ((username || dob || address || gender) && doctor_id) {
             try {

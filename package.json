@@ -25,5 +25,14 @@
     },
     "devDependencies": {
         "nodemon": "^2.0.20"
+    },
+    "_moduleAliases": {},
+    "imports": {
+        "@auth-controllers": "./controllers/auth/*",
+        "@common:": "./common",
+        "@configs": "./config",
+        "@models": "./models",
+        "@routers": "./routers",
+        "@utils": "./utils"
     }
 }

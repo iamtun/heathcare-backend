@@ -1,8 +1,7 @@
-import e from 'express';
-import { RULE_ADMIN } from '../common/constant.js';
-import Shift from '../models/shift.model.js';
-import AppError from '../utils/error.util.js';
-import Base from './utils/base.controller.js';
+import { RULE_ADMIN } from '../../common/constant.js';
+import Shift from '../../models/shift.model.js';
+import AppError from '../../utils/error.util.js';
+import Base from '../utils/base.controller.js';
 
 const getShiftById = Base.getOne(Shift);
 const getAllShifts = Base.getAll(Shift);

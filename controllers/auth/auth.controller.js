@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import AppError from '../utils/error.util.js';
-import Account from '../models/account.model.js';
+import AppError from '../../utils/error.util.js';
+import Account from '../../models/account.model.js';
 
 const register = async (req, res, next) => {
     try {

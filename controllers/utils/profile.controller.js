@@ -1,12 +1,13 @@
-import Profile from '../models/profile.model.js';
-import Person from '../models/person.model.js';
-import Doctor from '../models/doctor.model.js';
-import AppError from '../utils/error.util.js';
+import Profile from '../../models/profile.model.js';
+import Person from '../../models/person.model.js';
+import Doctor from '../../models/doctor.model.js';
+import AppError from '../../utils/error.util.js';
+import { RULE_DOCTOR } from '../../common/constant.js';
 
 const createProfileToDoctor = async (req, res, next) => {
     const { rule } = req;
 
-    if (rule === 'doctor') {
+    if (rule === RULE_DOCTOR) {
         const {
             specialist,
             training_place,

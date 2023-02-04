@@ -1,6 +1,6 @@
 import express from 'express';
-import AuthController from '../controllers/auth.controller.js';
-import PatientController from '../controllers/patient.controller.js';
+import AuthController from '../controllers/auth/auth.controller.js';
+import PatientController from '../controllers/patient/patient.controller.js';
 import UploadCloud from '../configs/cloudinary.config.js';
 
 const router = express.Router();
