@@ -52,6 +52,31 @@ const updateOne = (Model) => async (req, res, next) => {
     }
 };
 
+const updateAndReturnObject = (Model) => async (req, res, next) => {
+    let data = {};
+    try {
+        const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+
+        if (!doc) {
+            return next(
+                new AppError(404, 'fail', 'No document found with that id'),
+                req,
+                res,
+                next
+            );
+        }
+
+        data.doc = doc;
+    } catch (error) {
+        data.error = error;
+    }
+
+    return data;
+};
+
 const deleteOne = (Model) => async (req, res, next) => {
     try {
         const doc = await Model.findByIdAndDelete(req.params.id);
@@ -65,7 +90,7 @@ const deleteOne = (Model) => async (req, res, next) => {
             );
         }
 
-        res.status(204).json({
+        res.status(200).json({
             status: 'success',
             data: doc._id,
         });
@@ -112,6 +137,7 @@ export default {
     createOne,
     createAndReturnObject,
     updateOne,
+    updateAndReturnObject,
     deleteOne,
     getOne,
     getAll,
