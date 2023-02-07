@@ -77,7 +77,7 @@ const createProfileToDoctor = async (req, res, next) => {
     }
 };
 
-const findDoctorProfileByDoctorId = async (req, res, next) => {
+const findDoctorProfileByAccountId = async (req, res, next) => {
     const { account_id } = req;
 
     try {
@@ -120,4 +120,45 @@ const findDoctorProfileByDoctorId = async (req, res, next) => {
         next(error);
     }
 };
-export default { createProfileToDoctor, findDoctorProfileByDoctorId };
+
+const findDoctorProfileById = async (req, res, next) => {
+    const { id } = req.params;
+
+    console.log(id);
+    try {
+        const doctor = await Doctor.findById(id);
+
+        if (doctor) {
+            const profile = await Profile.findOne({
+                doctor: `${doctor._id}`,
+            }).populate('doctor');
+
+            if (profile) {
+                const person = await Person.findById(profile.doctor.person);
+                profile['doctor']['person'] = person;
+
+                res.status(200).json({
+                    status: 'success',
+                    data: profile,
+                });
+            } else {
+                res.status(404).json({
+                    status: 'fail',
+                    message: `no find profile with doctor id ${doctor._id}`,
+                });
+            }
+        } else {
+            res.status(404).json({
+                status: 'fail',
+                message: `no find doctor with person id: ${person._id}`,
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+export default {
+    createProfileToDoctor,
+    findDoctorProfileByAccountId,
+    findDoctorProfileById,
+};
