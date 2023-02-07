@@ -24,8 +24,10 @@ router
     .post(AuthController.authentication, ProfileToDoctor.createProfileToDoctor)
     .get(
         AuthController.authentication,
-        ProfileToDoctor.findDoctorProfileByDoctorId
+        ProfileToDoctor.findDoctorProfileByAccountId
     );
+
+router.route('/profile/:id').get(ProfileToDoctor.findDoctorProfileById);
 
 router
     .route('/:id')
