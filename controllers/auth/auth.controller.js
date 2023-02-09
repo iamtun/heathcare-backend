@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AppError from '../../utils/error.util.js';
 import Account from '../../models/account.model.js';
+import { STATUS_FAIL, STATUS_SUCCESS } from '../../common/constant.js';
 
 const register = async (req, res, next) => {
     try {
@@ -33,14 +34,18 @@ const register = async (req, res, next) => {
             );
 
             res.status(201).json({
-                status: 'success',
+                status: STATUS_SUCCESS,
                 data: {
                     accessToken,
                 },
             });
         } else {
             return next(
-                new AppError(400, 'fail', 'Vui lòng nhập đầy đủ thông tin'),
+                new AppError(
+                    400,
+                    STATUS_FAIL,
+                    'Vui lòng nhập đầy đủ thông tin'
+                ),
                 req,
                 res,
                 next
@@ -62,7 +67,11 @@ const login = async (req, res, next) => {
         //check user send phone_number & password
         if (!phone_number && !password) {
             return next(
-                new AppError(400, 'fail', 'Vui lòng nhập đầy đủ thông tin'),
+                new AppError(
+                    400,
+                    STATUS_FAIL,
+                    'Vui lòng nhập đầy đủ thông tin'
+                ),
                 req,
                 res,
                 next
@@ -71,7 +80,7 @@ const login = async (req, res, next) => {
 
         if (!phone_number) {
             return next(
-                new AppError(400, 'fail', 'Vui lòng nhập số điện thoại'),
+                new AppError(400, STATUS_FAIL, 'Vui lòng nhập số điện thoại'),
                 req,
                 res,
                 next
@@ -80,7 +89,7 @@ const login = async (req, res, next) => {
 
         if (!password) {
             return next(
-                new AppError(400, 'fail', 'Vui lòng nhập mật khẩu'),
+                new AppError(400, STATUS_FAIL, 'Vui lòng nhập mật khẩu'),
                 req,
                 res,
                 next
@@ -96,7 +105,7 @@ const login = async (req, res, next) => {
                 next(
                     new AppError(
                         404,
-                        'fail',
+                        STATUS_FAIL,
                         'Tài khoản hoặc mật khẩu bạn nhập không chính xác'
                     )
                 ),
@@ -115,7 +124,7 @@ const login = async (req, res, next) => {
         );
 
         res.status(200).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             data: {
                 accessToken: accessToken,
             },
@@ -129,13 +138,18 @@ const authentication = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; //Bear token
     if (!token)
-        return next(new AppError(401, 'fail', 'No token')), req, res, next;
+        return next(new AppError(401, STATUS_FAIL, 'No token')), req, res, next;
 
     const verify = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
     //check verify
     if (verify?.error) {
-        return next(new AppError(401, 'fail', 'JWT malformed')), req, res, next;
+        return (
+            next(new AppError(401, STATUS_FAIL, 'JWT malformed')),
+            req,
+            res,
+            next
+        );
     }
 
     const account = await Account.findById(verify.account_id);
@@ -145,7 +159,9 @@ const authentication = async (req, res, next) => {
 
         next();
     } else {
-        return next(new AppError(401, 'fail', 'Token fail')), req, res, next;
+        return (
+            next(new AppError(401, STATUS_FAIL, 'Token fail')), req, res, next
+        );
     }
 };
 

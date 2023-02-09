@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { STATUS_FAIL, STATUS_SUCCESS } from '../../common/constant.js';
 import AppError from '../../utils/error.util.js';
 
 const createOne = (Model) => async (req, res, next) => {
@@ -6,7 +6,7 @@ const createOne = (Model) => async (req, res, next) => {
         const doc = await Model.create(req.body);
 
         res.status(201).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             data: doc,
         });
     } catch (error) {
@@ -36,7 +36,11 @@ const updateOne = (Model) => async (req, res, next) => {
 
         if (!doc) {
             return next(
-                new AppError(404, 'fail', 'No document found with that id'),
+                new AppError(
+                    404,
+                    STATUS_FAIL,
+                    'No document found with that id'
+                ),
                 req,
                 res,
                 next
@@ -44,7 +48,7 @@ const updateOne = (Model) => async (req, res, next) => {
         }
 
         res.status(200).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             data: doc,
         });
     } catch (error) {
@@ -62,7 +66,11 @@ const updateAndReturnObject = (Model) => async (req, res, next) => {
 
         if (!doc) {
             return next(
-                new AppError(404, 'fail', 'No document found with that id'),
+                new AppError(
+                    404,
+                    STATUS_FAIL,
+                    'No document found with that id'
+                ),
                 req,
                 res,
                 next
@@ -83,7 +91,11 @@ const deleteOne = (Model) => async (req, res, next) => {
 
         if (!doc) {
             return next(
-                new AppError(404, 'fail', 'No document found with that id'),
+                new AppError(
+                    404,
+                    STATUS_FAIL,
+                    'No document found with that id'
+                ),
                 req,
                 res,
                 next
@@ -91,7 +103,7 @@ const deleteOne = (Model) => async (req, res, next) => {
         }
 
         res.status(200).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             data: doc._id,
         });
     } catch (error) {
@@ -105,7 +117,11 @@ const getOne = (Model) => async (req, res, next) => {
 
         if (!doc) {
             return next(
-                new AppError(404, 'fail', 'No document found with that id'),
+                new AppError(
+                    404,
+                    STATUS_FAIL,
+                    'No document found with that id'
+                ),
                 req,
                 res,
                 next
@@ -113,7 +129,7 @@ const getOne = (Model) => async (req, res, next) => {
         }
 
         res.status(200).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             data: doc,
         });
     } catch (error) {
@@ -126,7 +142,7 @@ const getAll = (Model) => async (req, res, next) => {
         const docs = await Model.find({});
 
         res.status(200).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             results: docs.length,
             data: docs,
         });

@@ -1,4 +1,4 @@
-import { RULE_ADMIN } from '../../common/constant.js';
+import { RULE_ADMIN, STATUS_FAIL } from '../../common/constant.js';
 import Shift from '../../models/shift.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
@@ -17,7 +17,7 @@ const createShift = async (req, res, next) => {
             time_end === isExist?.time_end
         ) {
             return next(
-                new AppError(400, 'fail', 'Ca làm đã tồn tại'),
+                new AppError(400, STATUS_FAIL, 'Ca làm đã tồn tại'),
                 req,
                 res,
                 next
@@ -27,7 +27,7 @@ const createShift = async (req, res, next) => {
         }
     }
     return next(
-        new AppError(403, 'fail', 'You no permission!'),
+        new AppError(403, STATUS_FAIL, 'You no permission!'),
         req,
         res,
         next
@@ -38,7 +38,7 @@ const updateShift = async (req, res, next) => {
     const { rule } = req;
     if (rule === RULE_ADMIN) return Base.updateOne(Shift)(req, res, next);
     return next(
-        new AppError(403, 'fail', 'You no permission!'),
+        new AppError(403, STATUS_FAIL, 'You no permission!'),
         req,
         res,
         next

@@ -5,6 +5,7 @@ import Profile from '../../models/profile.model.js';
 
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
+import { STATUS_FAIL, STATUS_SUCCESS } from '../../common/constant.js';
 
 const getAllAccount = Base.getAll(Account);
 const getAccount = Base.getOne(Account);
@@ -49,7 +50,7 @@ const removeAccount = async (req, res, next) => {
 
                                         if (accountDeleted.acknowledged) {
                                             res.status(200).json({
-                                                status: 'success',
+                                                status: STATUS_SUCCESS,
                                                 message: `account with phone_number = ${phone_number} deleted!`,
                                             });
                                         }
@@ -60,7 +61,7 @@ const removeAccount = async (req, res, next) => {
                             return next(
                                 new AppError(
                                     404,
-                                    'fail',
+                                    STATUS_FAIL,
                                     `profile with doctor id = ${doctor._id} not found!`
                                 )
                             );
@@ -69,7 +70,7 @@ const removeAccount = async (req, res, next) => {
                         return next(
                             new AppError(
                                 404,
-                                'fail',
+                                STATUS_FAIL,
                                 `doctor with person id = ${person._id} not found!`
                             )
                         );
@@ -78,7 +79,7 @@ const removeAccount = async (req, res, next) => {
                     return next(
                         new AppError(
                             404,
-                            'fail',
+                            STATUS_FAIL,
                             `person with account id = ${account._id} not found!`
                         )
                     );
@@ -87,7 +88,7 @@ const removeAccount = async (req, res, next) => {
                 return next(
                     new AppError(
                         401,
-                        'fail',
+                        STATUS_FAIL,
                         `type account un support deleted!`
                     )
                 );
@@ -96,13 +97,13 @@ const removeAccount = async (req, res, next) => {
             return next(
                 new AppError(
                     404,
-                    'fail',
+                    STATUS_FAIL,
                     `account with phone number ${phone_number} not found!`
                 )
             );
         }
     } else {
-        return next(new AppError(400, 'fail', 'No phone number'));
+        return next(new AppError(400, STATUS_FAIL, 'No phone number'));
     }
 };
 export default { getAccount, getAllAccount, removeAccount };
