@@ -1,4 +1,8 @@
-import { RULE_PATIENT } from '../../common/constant.js';
+import {
+    RULE_PATIENT,
+    STATUS_FAIL,
+    STATUS_SUCCESS,
+} from '../../common/constant.js';
 import Patient from '../../models/patient.model.js';
 import Person from '../../models/person.model.js';
 import AppError from '../../utils/error.util.js';
@@ -20,7 +24,7 @@ const createPatient = async (req, res, next) => {
             const { personModel, error } = await createPerson(person);
             if (error) {
                 return next(
-                    new AppError(400, 'fail', 'account id exist'),
+                    new AppError(400, STATUS_FAIL, 'account id exist'),
                     req,
                     res,
                     next
@@ -31,11 +35,15 @@ const createPatient = async (req, res, next) => {
                     blood: blood,
                 });
 
-                res.status(201).json({ status: 'success', data: patient });
+                res.status(201).json({ status: STATUS_SUCCESS, data: patient });
             }
         } else {
             return next(
-                new AppError(400, 'fail', 'Please provide enough information!'),
+                new AppError(
+                    400,
+                    STATUS_FAIL,
+                    'Please provide enough information!'
+                ),
                 req,
                 res,
                 next
@@ -43,7 +51,7 @@ const createPatient = async (req, res, next) => {
         }
     } else {
         return next(
-            new AppError(403, 'fail', 'You no permission!'),
+            new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
             res,
             next
@@ -63,7 +71,7 @@ const findPatientByToken = async (req, res, next) => {
                 return next(
                     new AppError(
                         404,
-                        'fail',
+                        STATUS_FAIL,
                         `Don't find patient with id = ${id}`
                     ),
                     req,
@@ -72,13 +80,13 @@ const findPatientByToken = async (req, res, next) => {
                 );
             }
 
-            res.status(200).json({ status: 'success', data: patient });
+            res.status(200).json({ status: STATUS_SUCCESS, data: patient });
         } catch (error) {
             next(error);
         }
     } else {
         return next(
-            new AppError(403, 'fail', 'You no permission!'),
+            new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
             res,
             next

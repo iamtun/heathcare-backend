@@ -1,4 +1,9 @@
-import { RULE_ADMIN, RULE_DOCTOR } from '../../common/constant.js';
+import {
+    RULE_ADMIN,
+    RULE_DOCTOR,
+    STATUS_FAIL,
+    STATUS_SUCCESS,
+} from '../../common/constant.js';
 import Doctor from '../../models/doctor.model.js';
 import AppError from '../../utils/error.util.js';
 import { createPerson, updatePerson } from '../../utils/person.util.js';
@@ -20,7 +25,7 @@ const createDoctor = async (req, res, next) => {
             const { personModel, error } = await createPerson(person);
             if (error) {
                 return next(
-                    new AppError(400, 'fail', 'account id exist'),
+                    new AppError(400, STATUS_FAIL, 'account id exist'),
                     req,
                     res,
                     next
@@ -30,11 +35,18 @@ const createDoctor = async (req, res, next) => {
                     person: personModel._id,
                 });
 
-                res.status(201).json({ status: 'success', data: doctorModel });
+                res.status(201).json({
+                    status: STATUS_SUCCESS,
+                    data: doctorModel,
+                });
             }
         } else {
             return next(
-                new AppError(400, 'fail', 'Please provide enough information!'),
+                new AppError(
+                    400,
+                    STATUS_FAIL,
+                    'Please provide enough information!'
+                ),
                 req,
                 res,
                 next
@@ -42,7 +54,7 @@ const createDoctor = async (req, res, next) => {
         }
     } else {
         return next(
-            new AppError(403, 'fail', 'You no permission!'),
+            new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
             res,
             next
@@ -70,14 +82,14 @@ const updateDoctorInfoById = async (req, res, next) => {
                     }
 
                     res.status(201).json({
-                        status: 'success',
+                        status: STATUS_SUCCESS,
                         data: oldPerson,
                     });
                 } else {
                     return next(
                         new AppError(
                             404,
-                            'fail',
+                            STATUS_FAIL,
                             `Don't find doctor with id = ${id}`
                         ),
                         req,
@@ -90,7 +102,11 @@ const updateDoctorInfoById = async (req, res, next) => {
             }
         } else {
             return next(
-                new AppError(400, 'fail', 'Please provide enough information!'),
+                new AppError(
+                    400,
+                    STATUS_FAIL,
+                    'Please provide enough information!'
+                ),
                 req,
                 res,
                 next
@@ -98,7 +114,7 @@ const updateDoctorInfoById = async (req, res, next) => {
         }
     } else {
         return next(
-            new AppError(403, 'fail', 'You no permission!'),
+            new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
             res,
             next
@@ -112,14 +128,18 @@ const findDoctorById = async (req, res, next) => {
         const doctor = await Doctor.findById(id).populate('person');
         if (!doctor) {
             return next(
-                new AppError(404, 'fail', `Don't find doctor with id = ${id}`),
+                new AppError(
+                    404,
+                    STATUS_FAIL,
+                    `Don't find doctor with id = ${id}`
+                ),
                 req,
                 res,
                 next
             );
         }
 
-        res.status(200).json({ status: 'success', data: doctor });
+        res.status(200).json({ status: STATUS_SUCCESS, data: doctor });
     } catch (error) {
         next(error);
     }
@@ -130,13 +150,13 @@ const getAllDoctors = async (req, res, next) => {
         const doctors = await Doctor.find().populate('person');
         if (doctors.length === 0) {
             return next(
-                new AppError(404, 'fail', `Don't find list doctor`),
+                new AppError(404, STATUS_FAIL, `Don't find list doctor`),
                 req,
                 res,
                 next
             );
         }
-        res.status(200).json({ status: 'success', data: doctors });
+        res.status(200).json({ status: STATUS_SUCCESS, data: doctors });
     } catch (error) {
         next(error);
     }
@@ -149,13 +169,13 @@ const getDoctorListWaitingAccept = async (req, res, next) => {
         );
         if (doctors.length === 0) {
             return next(
-                new AppError(404, 'fail', `Don't find list doctor`),
+                new AppError(404, STATUS_FAIL, `Don't find list doctor`),
                 req,
                 res,
                 next
             );
         }
-        res.status(200).json({ status: 'success', data: doctors });
+        res.status(200).json({ status: STATUS_SUCCESS, data: doctors });
     } catch (error) {
         next(error);
     }
@@ -167,7 +187,7 @@ const censorship = async (req, res, next) => {
         return Base.updateOne(Doctor)(req, res, next);
     } else {
         return next(
-            new AppError(403, 'fail', 'You no permission!'),
+            new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
             res,
             next

@@ -10,6 +10,10 @@ const patientSchema = new Schema(
             type: String,
             require: [true, 'Please fill your blood'],
         },
+        deleted: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,

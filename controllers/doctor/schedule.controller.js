@@ -1,4 +1,9 @@
-import { RULE_ADMIN, RULE_DOCTOR } from '../../common/constant.js';
+import {
+    RULE_ADMIN,
+    RULE_DOCTOR,
+    STATUS_FAIL,
+    STATUS_SUCCESS,
+} from '../../common/constant.js';
 import Base from '../utils/base.controller.js';
 
 import Schedule from '../../models/schedule.model.js';
@@ -34,7 +39,7 @@ const createSchedule = async (req, res, next) => {
         const isExist = await checkScheduleExist(doctor, day, time);
         if (isExist) {
             return next(
-                new AppError(400, 'fail', 'Schedule was existed!'),
+                new AppError(400, STATUS_FAIL, 'Schedule was existed!'),
                 req,
                 res,
                 next
@@ -55,12 +60,12 @@ const createSchedule = async (req, res, next) => {
 
         const schedule = await findScheduleByIdAndPopulate(_id);
         res.status(201).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             data: schedule,
         });
     } else {
         return next(
-            new AppError(403, 'fail', 'You no permission!'),
+            new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
             res,
             next
@@ -74,13 +79,13 @@ const findScheduleById = async (req, res, next) => {
 
     if (schedule) {
         res.status(200).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             data: schedule,
         });
     }
 
     return next(
-        new AppError(404, 'fail', `schedule with id = ${id} not found`),
+        new AppError(404, STATUS_FAIL, `schedule with id = ${id} not found`),
         req,
         res,
         next
@@ -98,7 +103,7 @@ const getAllScheduleByDoctorId = async (req, res, next) => {
         .populate('day');
 
     res.status(200).json({
-        status: 'success',
+        status: STATUS_SUCCESS,
         data: schedules,
     });
 };
@@ -111,7 +116,7 @@ const updateScheduleById = async (req, res, next) => {
 
         // if (isExist) {
         //     return next(
-        //         new AppError(400, 'fail', 'Schedule was existed!'),
+        //         new AppError(400, STATUS_FAIL, 'Schedule was existed!'),
         //         req,
         //         res,
         //         next
@@ -132,12 +137,12 @@ const updateScheduleById = async (req, res, next) => {
 
         const schedule = await findScheduleByIdAndPopulate(_id);
         res.status(201).json({
-            status: 'success',
+            status: STATUS_SUCCESS,
             data: schedule,
         });
     } else {
         return next(
-            new AppError(403, 'fail', 'You no permission!'),
+            new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
             res,
             next
@@ -163,14 +168,14 @@ const deleteScheduleById = async (req, res, next) => {
         }
 
         return next(
-            new AppError(400, 'fail', 'You not author of this schedule'),
+            new AppError(400, STATUS_FAIL, 'You not author of this schedule'),
             req,
             res,
             next
         );
     } else {
         return next(
-            new AppError(403, 'fail', 'You no permission!'),
+            new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
             res,
             next

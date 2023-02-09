@@ -1,13 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 
-const bmiSchema = new Schema(
+const glycemicSchema = new Schema(
     {
-        weight: {
-            type: Number,
-            require: true,
-        },
-
-        height: {
+        metric: {
             type: Number,
             require: true,
         },
@@ -20,5 +15,5 @@ const bmiSchema = new Schema(
     { timestamps: true }
 );
 
-const BMI = mongoose.model('bmi', bmiSchema);
-export default BMI;
+const Glycemic = mongoose.model('glycemics', glycemicSchema);
+export default Glycemic;

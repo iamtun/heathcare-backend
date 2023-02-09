@@ -2,7 +2,11 @@ import Profile from '../../models/profile.model.js';
 import Person from '../../models/person.model.js';
 import Doctor from '../../models/doctor.model.js';
 import AppError from '../../utils/error.util.js';
-import { RULE_DOCTOR } from '../../common/constant.js';
+import {
+    RULE_DOCTOR,
+    STATUS_FAIL,
+    STATUS_SUCCESS,
+} from '../../common/constant.js';
 
 const createProfileToDoctor = async (req, res, next) => {
     const { rule } = req;
@@ -53,14 +57,14 @@ const createProfileToDoctor = async (req, res, next) => {
                         profile['doctor']['person'] = person;
 
                         res.status(200).json({
-                            status: 'success',
+                            status: STATUS_SUCCESS,
                             data: profile,
                         });
                     }
                 }
             } catch (error) {
                 return next(
-                    new AppError(400, 'fail', error.message),
+                    new AppError(400, STATUS_FAIL, error.message),
                     req,
                     res,
                     next
@@ -68,7 +72,11 @@ const createProfileToDoctor = async (req, res, next) => {
             }
         } else {
             return next(
-                new AppError(400, 'fail', 'Please provide enough information!'),
+                new AppError(
+                    400,
+                    STATUS_FAIL,
+                    'Please provide enough information!'
+                ),
                 req,
                 res,
                 next
@@ -95,24 +103,24 @@ const findDoctorProfileByAccountId = async (req, res, next) => {
                     profile['doctor']['person'] = person;
 
                     res.status(200).json({
-                        status: 'success',
+                        status: STATUS_SUCCESS,
                         data: profile,
                     });
                 } else {
                     res.status(404).json({
-                        status: 'fail',
+                        status: STATUS_FAIL,
                         message: `no find profile with doctor id ${doctor._id}`,
                     });
                 }
             } else {
                 res.status(404).json({
-                    status: 'fail',
+                    status: STATUS_FAIL,
                     message: `no find doctor with person id: ${person._id}`,
                 });
             }
         } else {
             res.status(404).json({
-                status: 'fail',
+                status: STATUS_FAIL,
                 message: `no find person with account id: ${id}`,
             });
         }
@@ -138,18 +146,18 @@ const findDoctorProfileById = async (req, res, next) => {
                 profile['doctor']['person'] = person;
 
                 res.status(200).json({
-                    status: 'success',
+                    status: STATUS_SUCCESS,
                     data: profile,
                 });
             } else {
                 res.status(404).json({
-                    status: 'fail',
+                    status: STATUS_FAIL,
                     message: `no find profile with doctor id ${doctor._id}`,
                 });
             }
         } else {
             res.status(404).json({
-                status: 'fail',
+                status: STATUS_FAIL,
                 message: `no find doctor with person id: ${person._id}`,
             });
         }
