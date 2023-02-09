@@ -46,22 +46,9 @@ export const spCompareDateWithNow = (date) => {
 
     return false;
 };
-
 const createBMI = async (req, res, next) => {
     const { rule } = req;
-    if (rule === RULE_PATIENT) {
-        const bmis = await BMI.find({});
-        if (bmis.length > 0) {
-            const lastBMI = bmis[bmis.length - 1];
-            if (spCompareDateWithNow(lastBMI.createdAt)) {
-                return next(new AppError(400, STATUS_FAIL, 'bmi exits!'));
-            } else {
-                return spCreateBMI(req, res, next);
-            }
-        } else {
-            return spCreateBMI(req, res, next);
-        }
-    } else {
+    if (rule !== RULE_PATIENT) {
         return next(
             new AppError(403, STATUS_FAIL, 'You no permission!'),
             req,
@@ -69,6 +56,20 @@ const createBMI = async (req, res, next) => {
             next
         );
     }
+
+    const bmis = await BMI.find({});
+    const lastBMI = bmis[bmis.length - 1];
+    if (bmis.length > 0 && spCompareDateWithNow(lastBMI.createdAt)) {
+        return next(
+            new AppError(
+                400,
+                STATUS_FAIL,
+                'Bạn đã nhập chỉ số BMI cho ngày hôm nay vui lòng đợi ngày mai!'
+            )
+        );
+    }
+
+    return spCreateBMI(req, res, next);
 };
 
 const getAllBMIOfPatientById = async (req, res, next) => {
