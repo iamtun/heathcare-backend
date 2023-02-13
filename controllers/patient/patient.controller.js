@@ -24,7 +24,7 @@ const createPatient = async (req, res, next) => {
             const { personModel, error } = await createPerson(person);
             if (error) {
                 return next(
-                    new AppError(400, STATUS_FAIL, 'account id exist'),
+                    new AppError(400, STATUS_FAIL, error),
                     req,
                     res,
                     next
@@ -35,7 +35,8 @@ const createPatient = async (req, res, next) => {
                     blood: blood,
                 });
 
-                res.status(201).json({ status: STATUS_SUCCESS, data: patient });
+                const patientResp = await Patient.findById(patient._id).populate('person');
+                res.status(201).json({ status: STATUS_SUCCESS, data: patientResp });
             }
         } else {
             return next(
