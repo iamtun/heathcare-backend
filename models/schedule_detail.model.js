@@ -2,13 +2,13 @@ import mongoose, { Schema } from 'mongoose';
 
 const scheduleDetailSchema = new Schema(
     {
-        time_start: {
-            type: Date,
-            require: true,
-        },
-        time_end: {
-            type: Date,
-        },
+        // time_start: {
+        //     type: Date,
+        //     require: true,
+        // },
+        // time_end: {
+        //     type: Date,
+        // },
         content_exam: {
             type: String,
             require: true,
@@ -17,11 +17,11 @@ const scheduleDetailSchema = new Schema(
             type: String,
         },
         schedule: {
-            type: mongoose.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: 'schedules',
         },
         patient: {
-            typeof: mongoose.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: 'patients',
         },
     },
