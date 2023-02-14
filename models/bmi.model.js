@@ -20,5 +20,5 @@ const bmiSchema = new Schema(
     { timestamps: true }
 );
 
-const BMI = mongoose.model('bmi', bmiSchema);
+const BMI = mongoose.model('bmis', bmiSchema);
 export default BMI;
