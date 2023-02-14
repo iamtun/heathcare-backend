@@ -13,7 +13,8 @@ import DayRouters from './routers/day.router.js';
 import ScheduleRouters from './routers/schedule.router.js';
 import BMIRouters from './routers/bmi.router.js';
 import GlycemicRouters from './routers/glycemic.router.js';
-import ScheduleDetail from './routers/schedule_detail.router.js';
+import ScheduleDetailRouters from './routers/schedule_detail.router.js';
+import ConversationRouters from './routers/conversation.router.js';
 
 const app = express();
 
@@ -30,7 +31,8 @@ app.use('/api/v1/days', DayRouters);
 app.use('/api/v1/schedules', ScheduleRouters);
 app.use('/api/v1/bmis', BMIRouters);
 app.use('/api/v1/glycemics', GlycemicRouters);
-app.use('/api/v1/schedule-details', ScheduleDetail);
+app.use('/api/v1/schedule-details', ScheduleDetailRouters);
+app.use('/api/v1/conversations', ConversationRouters);
 
 app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');
