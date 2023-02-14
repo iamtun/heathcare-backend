@@ -11,4 +11,11 @@ router
         ScheduleDetailController.createScheduleDetail
     );
 
+router
+    .route('/:id')
+    .put(
+        AuthController.authentication,
+        ScheduleDetailController.updateResultExam
+    );
+
 export default router;
