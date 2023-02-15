@@ -13,36 +13,50 @@ const register = async (req, res, next) => {
         const { phone_number, password, rule } = req.body;
 
         if (phone_number && password) {
-            //decode password
-            const _password = await bcrypt.hash(password, 12);
-            let account;
-            if (rule) {
-                account = await Account.create({
-                    phone_number: phone_number,
-                    password: _password,
-                    rule: rule,
-                });
+            const account = await Account.find({ phone_number: phone_number });
+            if (account) {
+                return next(
+                    new AppError(
+                        400,
+                        STATUS_FAIL,
+                        'Tài khoản đã tồn tại, vui lòng chọn đăng nhập'
+                    ),
+                    req,
+                    res,
+                    next
+                );
             } else {
-                account = await Account.create({
-                    phone_number: phone_number,
-                    password: _password,
+                //decode password
+                const _password = await bcrypt.hash(password, 12);
+                let account;
+                if (rule) {
+                    account = await Account.create({
+                        phone_number: phone_number,
+                        password: _password,
+                        rule: rule,
+                    });
+                } else {
+                    account = await Account.create({
+                        phone_number: phone_number,
+                        password: _password,
+                    });
+                }
+
+                //create payload
+                const account_id = { account_id: account._id };
+
+                const accessToken = jwt.sign(
+                    account_id,
+                    process.env.ACCESS_TOKEN_SECRET
+                );
+
+                res.status(201).json({
+                    status: STATUS_SUCCESS,
+                    data: {
+                        accessToken,
+                    },
                 });
             }
-
-            //create payload
-            const account_id = { account_id: account._id };
-
-            const accessToken = jwt.sign(
-                account_id,
-                process.env.ACCESS_TOKEN_SECRET
-            );
-
-            res.status(201).json({
-                status: STATUS_SUCCESS,
-                data: {
-                    accessToken,
-                },
-            });
         } else {
             return next(
                 new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
