@@ -2,7 +2,11 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AppError from '../../utils/error.util.js';
 import Account from '../../models/account.model.js';
-import { STATUS_FAIL, STATUS_SUCCESS } from '../../common/constant.js';
+import {
+    MESSAGE_NO_ENOUGH_IN_4,
+    STATUS_FAIL,
+    STATUS_SUCCESS,
+} from '../../common/constant.js';
 
 const register = async (req, res, next) => {
     try {
@@ -41,11 +45,7 @@ const register = async (req, res, next) => {
             });
         } else {
             return next(
-                new AppError(
-                    400,
-                    STATUS_FAIL,
-                    'Vui lòng nhập đầy đủ thông tin'
-                ),
+                new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
                 req,
                 res,
                 next
@@ -67,11 +67,7 @@ const login = async (req, res, next) => {
         //check user send phone_number & password
         if (!phone_number && !password) {
             return next(
-                new AppError(
-                    400,
-                    STATUS_FAIL,
-                    'Vui lòng nhập đầy đủ thông tin'
-                ),
+                new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
                 req,
                 res,
                 next
@@ -80,7 +76,7 @@ const login = async (req, res, next) => {
 
         if (!phone_number) {
             return next(
-                new AppError(400, STATUS_FAIL, 'Vui lòng nhập số điện thoại'),
+                new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
                 req,
                 res,
                 next
@@ -89,7 +85,7 @@ const login = async (req, res, next) => {
 
         if (!password) {
             return next(
-                new AppError(400, STATUS_FAIL, 'Vui lòng nhập mật khẩu'),
+                new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
                 req,
                 res,
                 next

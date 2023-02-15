@@ -16,6 +16,7 @@ import GlycemicRouters from './routers/glycemic.router.js';
 import ScheduleDetailRouters from './routers/schedule_detail.router.js';
 import ConversationRouters from './routers/conversation.router.js';
 import MessageRouters from './routers/message.router.js';
+import RuleRouters from './routers/rule.router.js';
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use('/api/v1/glycemics', GlycemicRouters);
 app.use('/api/v1/schedule-details', ScheduleDetailRouters);
 app.use('/api/v1/conversations', ConversationRouters);
 app.use('/api/v1/messages', MessageRouters);
+app.use('/api/v1/rules', RuleRouters);
 
 app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');
