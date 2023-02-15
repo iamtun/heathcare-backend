@@ -1,4 +1,5 @@
 import {
+    MESSAGE_ERROR_NUMBER_RULE,
     MESSAGE_NO_ENOUGH_IN_4,
     MESSAGE_NO_PERMISSION,
     RULE_ADMIN,
@@ -14,7 +15,22 @@ const createRule = async (req, res, next) => {
         const { start, end, notification, type } = req.body;
 
         if (start && end && notification && type) {
-            return Base.createOne(Rule)(req, res, next);
+            const rules = await Rule.find({ type: type });
+            const maxRuleEnd = rules.map((rule) => rule.end);
+            const max = Math.max(...maxRuleEnd);
+            if (start < end) {
+                if (start > max) return Base.createOne(Rule)(req, res, next);
+                else
+                    res.status(401).json({
+                        status: STATUS_FAIL,
+                        error: 'Chỉ số trước phải lớn hơn chỉ số lớn nhất của danh sách ',
+                    });
+            } else {
+                res.status(401).json({
+                    status: STATUS_FAIL,
+                    error: MESSAGE_ERROR_NUMBER_RULE,
+                });
+            }
         } else {
             res.status(401).json({
                 status: STATUS_FAIL,
@@ -37,7 +53,14 @@ const updateRule = async (req, res, next) => {
     if (rule === RULE_ADMIN) {
         const { start, end, notification, type } = req.body;
         if (start && end && notification && type) {
-            return Base.updateOne(Rule)(req, res, next);
+            if (start < end) {
+                return Base.updateOne(Rule)(req, res, next);
+            } else {
+                res.status(401).json({
+                    status: STATUS_FAIL,
+                    error: MESSAGE_ERROR_NUMBER_RULE,
+                });
+            }
         } else {
             res.status(401).json({
                 status: STATUS_FAIL,
