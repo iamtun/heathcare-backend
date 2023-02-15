@@ -21,21 +21,31 @@ const createRule = async (req, res, next) => {
             if (start < end) {
                 if (start > max) return Base.createOne(Rule)(req, res, next);
                 else
-                    res.status(401).json({
-                        status: STATUS_FAIL,
-                        error: 'Chỉ số trước phải lớn hơn chỉ số lớn nhất của danh sách ',
-                    });
+                    return next(
+                        new AppError(
+                            401,
+                            STATUS_FAIL,
+                            'Chỉ số trước phải lớn hơn chỉ số lớn nhất của danh sách '
+                        ),
+                        req,
+                        res,
+                        next
+                    );
             } else {
-                res.status(401).json({
-                    status: STATUS_FAIL,
-                    error: MESSAGE_ERROR_NUMBER_RULE,
-                });
+                return next(
+                    new AppError(401, STATUS_FAIL, MESSAGE_ERROR_NUMBER_RULE),
+                    req,
+                    res,
+                    next
+                );
             }
         } else {
-            res.status(401).json({
-                status: STATUS_FAIL,
-                error: MESSAGE_NO_ENOUGH_IN_4,
-            });
+            return next(
+                new AppError(401, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+                req,
+                res,
+                next
+            );
         }
     } else {
         return next(
@@ -56,16 +66,20 @@ const updateRule = async (req, res, next) => {
             if (start < end) {
                 return Base.updateOne(Rule)(req, res, next);
             } else {
-                res.status(401).json({
-                    status: STATUS_FAIL,
-                    error: MESSAGE_ERROR_NUMBER_RULE,
-                });
+                return next(
+                    new AppError(401, STATUS_FAIL, MESSAGE_ERROR_NUMBER_RULE),
+                    req,
+                    res,
+                    next
+                );
             }
         } else {
-            res.status(401).json({
-                status: STATUS_FAIL,
-                error: MESSAGE_NO_ENOUGH_IN_4,
-            });
+            return next(
+                new AppError(401, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+                req,
+                res,
+                next
+            );
         }
     } else {
         return next(

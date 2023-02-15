@@ -54,10 +54,12 @@ const createScheduleDetail = async (req, res, next) => {
                     data: schedule_detail,
                 });
             } else {
-                res.status(401).json({
-                    status: STATUS_FAIL,
-                    error: MESSAGE_NO_ENOUGH_IN_4,
-                });
+                return next(
+                    new AppError(401, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+                    req,
+                    res,
+                    next
+                );
             }
         } else {
             return next(
@@ -102,10 +104,12 @@ const updateResultExam = async (req, res, next) => {
                     data: schedule_detail,
                 });
             } else {
-                res.status(401).json({
-                    status: STATUS_FAIL,
-                    error: MESSAGE_NO_ENOUGH_IN_4,
-                });
+                return next(
+                    new AppError(401, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+                    req,
+                    res,
+                    next
+                );
             }
         } else {
             return next(
