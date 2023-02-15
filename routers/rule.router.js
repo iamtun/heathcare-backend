@@ -6,6 +6,12 @@ const router = express.Router();
 
 router
     .route('/')
-    .post(AuthController.authentication, RuleController.createRule);
+    .post(AuthController.authentication, RuleController.createRule)
+    .get(RuleController.getAllRules);
+
+router
+    .route('/:id')
+    .get(RuleController.findRuleById)
+    .put(AuthController.authentication, RuleController.updateRule);
 
 export default router;
