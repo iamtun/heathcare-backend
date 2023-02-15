@@ -1,4 +1,6 @@
 import {
+    MESSAGE_NO_ENOUGH_IN_4,
+    MESSAGE_NO_PERMISSION,
     RULE_DOCTOR,
     RULE_PATIENT,
     STATUS_FAIL,
@@ -54,12 +56,12 @@ const createScheduleDetail = async (req, res, next) => {
             } else {
                 res.status(401).json({
                     status: STATUS_FAIL,
-                    error: 'Vui lòng nhập đầy đủ thông tin',
+                    error: MESSAGE_NO_ENOUGH_IN_4,
                 });
             }
         } else {
             return next(
-                new AppError(403, STATUS_FAIL, 'You no permission!'),
+                new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
                 req,
                 res,
                 next
@@ -102,12 +104,12 @@ const updateResultExam = async (req, res, next) => {
             } else {
                 res.status(401).json({
                     status: STATUS_FAIL,
-                    error: 'Vui lòng nhập đầy đủ thông tin',
+                    error: MESSAGE_NO_ENOUGH_IN_4,
                 });
             }
         } else {
             return next(
-                new AppError(403, STATUS_FAIL, 'You no permission!'),
+                new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
                 req,
                 res,
                 next

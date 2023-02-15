@@ -1,4 +1,5 @@
 import {
+    MESSAGE_NO_PERMISSION,
     RULE_ADMIN,
     RULE_DOCTOR,
     STATUS_FAIL,
@@ -65,7 +66,7 @@ const createSchedule = async (req, res, next) => {
         });
     } else {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next
@@ -142,7 +143,7 @@ const updateScheduleById = async (req, res, next) => {
         });
     } else {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next
@@ -175,7 +176,7 @@ const deleteScheduleById = async (req, res, next) => {
         );
     } else {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next

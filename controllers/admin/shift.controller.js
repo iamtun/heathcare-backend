@@ -1,4 +1,8 @@
-import { RULE_ADMIN, STATUS_FAIL } from '../../common/constant.js';
+import {
+    MESSAGE_NO_PERMISSION,
+    RULE_ADMIN,
+    STATUS_FAIL,
+} from '../../common/constant.js';
 import Shift from '../../models/shift.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
@@ -27,7 +31,7 @@ const createShift = async (req, res, next) => {
         }
     }
     return next(
-        new AppError(403, STATUS_FAIL, 'You no permission!'),
+        new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
         req,
         res,
         next
@@ -38,7 +42,7 @@ const updateShift = async (req, res, next) => {
     const { rule } = req;
     if (rule === RULE_ADMIN) return Base.updateOne(Shift)(req, res, next);
     return next(
-        new AppError(403, STATUS_FAIL, 'You no permission!'),
+        new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
         req,
         res,
         next

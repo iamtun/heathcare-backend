@@ -1,4 +1,5 @@
 import {
+    MESSAGE_NO_PERMISSION,
     RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
@@ -50,7 +51,7 @@ const createBMI = async (req, res, next) => {
     const { rule } = req;
     if (rule !== RULE_PATIENT) {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next

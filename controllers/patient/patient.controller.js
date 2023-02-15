@@ -1,4 +1,5 @@
 import {
+    MESSAGE_NO_PERMISSION,
     RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
@@ -35,8 +36,13 @@ const createPatient = async (req, res, next) => {
                     blood: blood,
                 });
 
-                const patientResp = await Patient.findById(patient._id).populate('person');
-                res.status(201).json({ status: STATUS_SUCCESS, data: patientResp });
+                const patientResp = await Patient.findById(
+                    patient._id
+                ).populate('person');
+                res.status(201).json({
+                    status: STATUS_SUCCESS,
+                    data: patientResp,
+                });
             }
         } else {
             return next(
@@ -52,7 +58,7 @@ const createPatient = async (req, res, next) => {
         }
     } else {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next
@@ -87,7 +93,7 @@ const findPatientByToken = async (req, res, next) => {
         }
     } else {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next

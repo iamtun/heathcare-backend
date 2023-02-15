@@ -1,4 +1,5 @@
 import {
+    MESSAGE_NO_PERMISSION,
     RULE_ADMIN,
     RULE_DOCTOR,
     STATUS_FAIL,
@@ -54,7 +55,7 @@ const createDoctor = async (req, res, next) => {
         }
     } else {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next
@@ -114,7 +115,7 @@ const updateDoctorInfoById = async (req, res, next) => {
         }
     } else {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next
@@ -187,7 +188,7 @@ const censorship = async (req, res, next) => {
         return Base.updateOne(Doctor)(req, res, next);
     } else {
         return next(
-            new AppError(403, STATUS_FAIL, 'You no permission!'),
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
             req,
             res,
             next
