@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const daySchema = new Schema({
     day: {
-        type: String,
+        type: Date,
         unique: true,
         required: true,
     },
