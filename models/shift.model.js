@@ -10,11 +10,11 @@ const shiftSchema = new Schema({
         require: [true, 'Please fill desc shift'],
     },
     time_start: {
-        type: String,
+        type: Date,
         require: [true, 'Please fill time_start shift'],
     },
     time_end: {
-        type: String,
+        type: Date,
         require: [true, 'Please fill time_end shift'],
     },
 });

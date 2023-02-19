@@ -2,13 +2,6 @@ import mongoose, { Schema } from 'mongoose';
 
 const scheduleDetailSchema = new Schema(
     {
-        // time_start: {
-        //     type: Date,
-        //     require: true,
-        // },
-        // time_end: {
-        //     type: Date,
-        // },
         content_exam: {
             type: String,
             require: true,
