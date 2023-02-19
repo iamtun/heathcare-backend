@@ -13,21 +13,13 @@ const calBMI = (w, h) => {
 };
 
 const spCreateBMI = async (req, res, next) => {
+    req.body.calBMI = calBMI(req.body.weight, req.body.height);
     const bmi = await Base.createAndReturnObject(BMI)(req, res, next);
     const { doc, error } = bmi;
     if (doc) {
-        const { weight, height, _id, patient, createdAt } = doc;
-        const _calBMI = calBMI(weight, height);
         res.status(201).json({
             status: STATUS_SUCCESS,
-            data: {
-                _id,
-                patient,
-                weight,
-                height,
-                calBMI: _calBMI,
-                createdAt,
-            },
+            data: doc,
         });
     } else {
         return next(new AppError(400, STATUS_FAIL, error), req, res, next);
@@ -47,6 +39,7 @@ export const spCompareDateWithNow = (date) => {
 
     return false;
 };
+
 const createBMI = async (req, res, next) => {
     const { rule } = req;
     if (rule !== RULE_PATIENT) {
@@ -58,7 +51,7 @@ const createBMI = async (req, res, next) => {
         );
     }
 
-    const bmis = await BMI.find({});
+    const bmis = await BMI.find({ patient: req.body.patient });
     const lastBMI = bmis[bmis.length - 1];
     if (bmis.length > 0 && spCompareDateWithNow(lastBMI.createdAt)) {
         return next(

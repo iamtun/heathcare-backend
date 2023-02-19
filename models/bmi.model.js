@@ -11,7 +11,10 @@ const bmiSchema = new Schema(
             type: Number,
             require: true,
         },
-
+        calBMI: {
+            type: Number,
+            require: true,
+        },
         patient: {
             type: Schema.Types.ObjectId,
             ref: 'patients',

@@ -13,7 +13,9 @@ const register = async (req, res, next) => {
         const { phone_number, password, rule } = req.body;
 
         if (phone_number && password) {
-            const account = await Account.find({ phone_number: phone_number });
+            const account = await Account.findOne({
+                phone_number: phone_number,
+            });
             if (account) {
                 return next(
                     new AppError(
