@@ -7,7 +7,7 @@ const router = express.Router();
 router
     .route('/')
     .post(AuthController.authentication, GlycemicController.createGlycemic);
-
+router.route('/last/:id').get(GlycemicController.getLastGlycemicByPatientId);
 router.route('/:id').get(GlycemicController.getAllGlycemicByPatientId);
 
 export default router;

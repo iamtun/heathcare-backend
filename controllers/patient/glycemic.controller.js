@@ -41,4 +41,24 @@ const getAllGlycemicByPatientId = async (req, res, next) => {
 
     res.status(200).json({ status: STATUS_SUCCESS, data: glycemics });
 };
-export default { createGlycemic, getAllGlycemicByPatientId };
+
+const getLastGlycemicByPatientId = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const glycemics = await Glycemic.find({ patient: id });
+        const glycemic = glycemics[glycemics.length - 1];
+
+        res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: glycemic.metric,
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
+
+export default {
+    createGlycemic,
+    getAllGlycemicByPatientId,
+    getLastGlycemicByPatientId,
+};
