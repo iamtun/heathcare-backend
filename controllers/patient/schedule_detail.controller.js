@@ -137,10 +137,14 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
         doctor: doctorId,
     });
 
-    const patient_ids = schedule_details.map((detail) => detail.doctor);
+    const patient_ids = schedule_details.map((detail) =>
+        detail.patient.toString()
+    );
+    const unique_patients_id = [...new Set(patient_ids)];
+
     res.status(200).json({
         status: STATUS_SUCCESS,
-        data: patient_ids,
+        data: unique_patients_id,
     });
 };
 
