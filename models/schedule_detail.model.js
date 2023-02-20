@@ -13,6 +13,10 @@ const scheduleDetailSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'schedules',
         },
+        doctor: {
+            type: String,
+            require: true,
+        },
         patient: {
             type: Schema.Types.ObjectId,
             ref: 'patients',

@@ -9,13 +9,19 @@ router
     .post(
         AuthController.authentication,
         ScheduleDetailController.createScheduleDetail
-    );
+    )
+    .get(ScheduleDetailController.getAll);
+
+router
+    .route('/doctor/:id')
+    .get(ScheduleDetailController.getAllPatientExamByIdDoctor);
 
 router
     .route('/:id')
     .put(
         AuthController.authentication,
         ScheduleDetailController.updateResultExam
-    );
+    )
+    .get(ScheduleDetailController.findById);
 
 export default router;
