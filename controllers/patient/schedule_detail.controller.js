@@ -136,7 +136,9 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
     const doctorId = req.params.id;
     const schedule_details = await ScheduleDetailSchema.find({
         doctor: doctorId,
-    });
+    })
+        .populate('schedule')
+        .populate('doctor');
 
     const patient_ids = schedule_details.map((detail) =>
         detail.patient.toString()
@@ -155,15 +157,50 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
     });
 };
 
+const getAllScheduleListOfDoctor = async (req, res, next) => {
+    const doctorId = req.params.id;
+    const schedule_details = await ScheduleDetailSchema.find({
+        doctor: doctorId,
+    })
+        .populate('schedule')
+        .populate('doctor');
+
+    const details = schedule_details.filter((detail) => !detail.result_exam);
+
+    const detail_list_result = await Promise.all(
+        details.map(async (detail) => {
+            const person = await Person.findById(detail.doctor.person);
+            detail['doctor']['person'] = person;
+            return detail;
+        })
+    );
+    res.status(200).json({
+        status: STATUS_SUCCESS,
+        data: detail_list_result,
+    });
+};
+
 const getAllScheduleDetailByPatientId = async (req, res, next) => {
     const patientId = req.params.id;
+
     const schedule_details = await ScheduleDetailSchema.find({
         patient: patientId,
     })
         .populate('schedule')
-        .populate('patient');
+        .populate('doctor');
+
+    const details = schedule_details.filter((detail) => !detail.result_exam);
+
+    const detail_list_result = await Promise.all(
+        details.map(async (detail) => {
+            const person = await Person.findById(detail.doctor.person);
+            detail['doctor']['person'] = person;
+            return detail;
+        })
+    );
+
     res.json({
-        data: schedule_details,
+        data: detail_list_result,
     });
 };
 
@@ -173,5 +210,6 @@ export default {
     createScheduleDetail,
     updateResultExam,
     getAllPatientExamByIdDoctor,
+    getAllScheduleListOfDoctor,
     getAllScheduleDetailByPatientId,
 };
