@@ -13,8 +13,12 @@ router
     .get(ScheduleDetailController.getAll);
 
 router
-    .route('/doctor/:id')
+    .route('/doctor/patient-list/:id')
     .get(ScheduleDetailController.getAllPatientExamByIdDoctor);
+
+router
+    .route('/doctor/schedule-list/:id')
+    .get(ScheduleDetailController.getAllScheduleListOfDoctor);
 
 router
     .route('/patient/:id')
