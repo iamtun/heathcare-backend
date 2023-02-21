@@ -143,9 +143,15 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
     );
     const unique_patients_id = [...new Set(patient_ids)];
 
+    const patient_list = await Promise.all(
+        unique_patients_id.map(async (id) => {
+            return await Patient.findById(id).populate('person');
+        })
+    );
+
     res.status(200).json({
         status: STATUS_SUCCESS,
-        data: unique_patients_id,
+        data: patient_list,
     });
 };
 
