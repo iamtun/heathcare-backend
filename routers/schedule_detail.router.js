@@ -17,6 +17,10 @@ router
     .get(ScheduleDetailController.getAllPatientExamByIdDoctor);
 
 router
+    .route('/patient/:id')
+    .get(ScheduleDetailController.getAllScheduleDetailByPatientId);
+
+router
     .route('/:id')
     .put(
         AuthController.authentication,
