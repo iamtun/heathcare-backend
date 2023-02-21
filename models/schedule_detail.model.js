@@ -15,11 +15,15 @@ const scheduleDetailSchema = new Schema(
         },
         doctor: {
             type: String,
-            require: true,
+            ref: 'doctors',
         },
         patient: {
             type: Schema.Types.ObjectId,
             ref: 'patients',
+        },
+        day_exam: {
+            type: Date,
+            require: true,
         },
     },
     {

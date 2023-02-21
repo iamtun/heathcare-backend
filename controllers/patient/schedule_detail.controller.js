@@ -20,7 +20,7 @@ const createScheduleDetail = async (req, res, next) => {
     try {
         const { rule, account_id } = req;
         if (rule === RULE_PATIENT) {
-            const { content_exam, schedule } = req.body;
+            const { content_exam, schedule, day_exam } = req.body;
 
             const person = await Person.findOne({ account: account_id });
 
@@ -30,7 +30,7 @@ const createScheduleDetail = async (req, res, next) => {
 
             req.body.patient = patient.id;
 
-            if (content_exam && schedule) {
+            if (content_exam && schedule && day_exam) {
                 const _schedule = await Schedule.findById(schedule);
                 req.body.doctor = _schedule.doctor;
 
@@ -41,16 +41,17 @@ const createScheduleDetail = async (req, res, next) => {
                     detail.doc._id
                 )
                     .populate('patient')
-                    .populate('schedule');
+                    .populate('schedule')
+                    .populate('doctor');
 
-                const day = await Day.findById(
-                    schedule_detail['schedule']['day']
-                );
+                // const day = await Day.findById(
+                //     schedule_detail['schedule']['day']
+                // );
                 const time = await Shift.findById(
                     schedule_detail['schedule']['time']
                 );
 
-                schedule_detail['schedule']['day'] = day;
+                // schedule_detail['schedule']['day'] = day;
                 schedule_detail['schedule']['time'] = time;
 
                 res.status(201).json({
@@ -148,10 +149,23 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
     });
 };
 
+const getAllScheduleDetailByPatientId = async (req, res, next) => {
+    const patientId = req.params.id;
+    const schedule_details = await ScheduleDetailSchema.find({
+        patient: patientId,
+    })
+        .populate('schedule')
+        .populate('patient');
+    res.json({
+        data: schedule_details,
+    });
+};
+
 export default {
     getAll,
     findById,
     createScheduleDetail,
     updateResultExam,
     getAllPatientExamByIdDoctor,
+    getAllScheduleDetailByPatientId,
 };
