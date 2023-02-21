@@ -12,6 +12,8 @@ import Person from '../../models/person.model.js';
 import Schedule from '../../models/schedule.model.js';
 import ScheduleDetailSchema from '../../models/schedule_detail.model.js';
 import Shift from '../../models/shift.model.js';
+import BMI from '../../models/bmi.model.js';
+import Glycemic from '../../models/glycemic.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
 
@@ -147,7 +149,17 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
 
     const patient_list = await Promise.all(
         unique_patients_id.map(async (id) => {
-            return await Patient.findById(id).populate('person');
+            const patient = await Patient.findById(id).populate('person');
+            const bmis = await BMI.find({ patient: patient.id });
+            const bmi_avg =
+                bmis.reduce((a, c) => a + c.calBMI, 0) / bmis.length;
+            const glycemics = await Glycemic.find({ patient: patient.id });
+
+            return {
+                patient,
+                bmi_avg,
+                glycemic: glycemics[glycemics.length - 1],
+            };
         })
     );
 
