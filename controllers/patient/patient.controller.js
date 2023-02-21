@@ -101,4 +101,20 @@ const findPatientByToken = async (req, res, next) => {
     }
 };
 
-export default { createPatient, findPatientByToken };
+const findPatientById = async (req, res, next) => {
+    const { id } = req.params;
+    const patient = await Patient.findById(id).populate('person');
+    if (patient) {
+        res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: patient,
+        });
+    } else {
+        res.status(404).json({
+            status: STATUS_FAIL,
+            message: `Not found patient with id ${id}`,
+        });
+    }
+};
+
+export default { createPatient, findPatientByToken, findPatientById };

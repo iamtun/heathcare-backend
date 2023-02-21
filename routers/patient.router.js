@@ -14,4 +14,5 @@ router
     )
     .get(AuthController.authentication, PatientController.findPatientByToken);
 
+router.route('/:id').get(PatientController.findPatientById);
 export default router;
