@@ -17,11 +17,14 @@ import ScheduleDetailRouters from './routers/schedule_detail.router.js';
 import ConversationRouters from './routers/conversation.router.js';
 import MessageRouters from './routers/message.router.js';
 import RuleRouters from './routers/rule.router.js';
+import NotificationRouters from './routers/notification.router.js';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api/v1/auth', AuthRouters);
@@ -37,6 +40,7 @@ app.use('/api/v1/schedule-details', ScheduleDetailRouters);
 app.use('/api/v1/conversations', ConversationRouters);
 app.use('/api/v1/messages', MessageRouters);
 app.use('/api/v1/rules', RuleRouters);
+app.use('/api/v1/notifications', NotificationRouters);
 
 app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');
