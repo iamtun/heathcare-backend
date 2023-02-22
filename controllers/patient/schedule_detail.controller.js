@@ -150,7 +150,9 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
     const patient_list = await Promise.all(
         unique_patients_id.map(async (id) => {
             const patient = await Patient.findById(id).populate('person');
+
             const bmis = await BMI.find({ patient: patient.id });
+
             const bmi_avg =
                 bmis.reduce((a, c) => a + c.calBMI, 0) / bmis.length;
             const glycemics = await Glycemic.find({ patient: patient.id });
