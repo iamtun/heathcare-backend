@@ -7,6 +7,7 @@ import {
 } from '../../common/constant.js';
 import Base from '../utils/base.controller.js';
 import Rule from '../../models/rule.model.js';
+import AppError from '../../utils/error.util.js';
 
 const createRule = async (req, res, next) => {
     const { rule } = req;
