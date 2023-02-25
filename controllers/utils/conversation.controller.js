@@ -36,4 +36,69 @@ const createConversation = async (req, res, next) => {
     }
 };
 
-export default { createConversation };
+const getAllConversation = Base.getAll(Conversation);
+
+const getConversationListByPatientId = async (req, res, next) => {
+    const { id } = req.params;
+    const conversations = await Conversation.find({});
+
+    const _conversations = conversations.filter((conversation) => {
+        return conversation.members[0].valueOf() === id;
+    });
+
+    const __conversations = await Promise.all(
+        _conversations.map(async (conversation) => {
+            const patient = await Patient.findById(
+                conversation.members[0]
+            ).populate('person');
+            const doctor = await Doctor.findById(
+                conversation.members[1]
+            ).populate('person');
+
+            return {
+                _id: conversation._id,
+                members: [patient, doctor],
+            };
+        })
+    );
+    res.status(200).json({
+        status: STATUS_SUCCESS,
+        data: __conversations,
+    });
+};
+
+const getConversationListByDoctorId = async (req, res, next) => {
+    const { id } = req.params;
+    const conversations = await Conversation.find({});
+
+    const _conversations = conversations.filter((conversation) => {
+        return conversation.members[1].valueOf() === id;
+    });
+
+    const __conversations = await Promise.all(
+        _conversations.map(async (conversation) => {
+            const patient = await Patient.findById(
+                conversation.members[0]
+            ).populate('person');
+            const doctor = await Doctor.findById(
+                conversation.members[1]
+            ).populate('person');
+
+            return {
+                _id: conversation._id,
+                members: [patient, doctor],
+            };
+        })
+    );
+    res.status(200).json({
+        status: STATUS_SUCCESS,
+        data: __conversations,
+    });
+};
+
+export default {
+    createConversation,
+    getAllConversation,
+    getConversationListByPatientId,
+    getConversationListByDoctorId,
+};

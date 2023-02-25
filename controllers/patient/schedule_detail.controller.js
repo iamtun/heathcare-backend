@@ -10,12 +10,19 @@ import Day from '../../models/day.model.js';
 import Patient from '../../models/patient.model.js';
 import Person from '../../models/person.model.js';
 import Schedule from '../../models/schedule.model.js';
+import Notification from '../../models/notification.model.js';
 import ScheduleDetailSchema from '../../models/schedule_detail.model.js';
 import Shift from '../../models/shift.model.js';
 import BMI from '../../models/bmi.model.js';
 import Glycemic from '../../models/glycemic.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
+import Doctor from '../../models/doctor.model.js';
+
+import moment from 'moment';
+import 'moment/locale/vi.js';
+import Conversation from '../../models/conversation.model.js';
+moment.locale('vi');
 
 //patient register
 const createScheduleDetail = async (req, res, next) => {
@@ -36,29 +43,69 @@ const createScheduleDetail = async (req, res, next) => {
                 const _schedule = await Schedule.findById(schedule);
                 req.body.doctor = _schedule.doctor;
 
-                const detail = await Base.createAndReturnObject(
+                const { doc, error } = await Base.createAndReturnObject(
                     ScheduleDetailSchema
                 )(req, res, next);
+
+                if (error) {
+                    return next(
+                        new AppError(
+                            401,
+                            STATUS_FAIL,
+                            'Ca khám này của bác sĩ đã có người đăng ký vui lòng chọn ca khác'
+                        ),
+                        req,
+                        res,
+                        next
+                    );
+                }
+
                 let schedule_detail = await ScheduleDetailSchema.findById(
-                    detail.doc._id
+                    doc._id
                 )
                     .populate('patient')
                     .populate('schedule')
                     .populate('doctor');
 
-                // const day = await Day.findById(
-                //     schedule_detail['schedule']['day']
-                // );
                 const time = await Shift.findById(
                     schedule_detail['schedule']['time']
                 );
 
-                // schedule_detail['schedule']['day'] = day;
                 schedule_detail['schedule']['time'] = time;
+
+                //create notification
+                const _notification = new Notification({
+                    from: patient.id,
+                    to: schedule_detail['doctor'].id,
+                    content: `Bệnh nhân ${
+                        person.username
+                    } đã đăng ký lịch khám vào lúc ${moment(day_exam).format(
+                        'llll'
+                    )}`,
+                });
+
+                const notification = await _notification.save();
+
+                const conversation = await Conversation.findOne({
+                    members: [patient.id, schedule_detail.doctor.id],
+                });
+
+                //create conversation
+                let _conversation = null;
+                if (!conversation) {
+                    const __conversation = new Conversation({
+                        members: [patient.id, schedule_detail.doctor.id],
+                    });
+                    _conversation = await __conversation.save();
+                }
 
                 res.status(201).json({
                     status: STATUS_SUCCESS,
-                    data: schedule_detail,
+                    data: {
+                        schedule_detail,
+                        notification,
+                        conversation: _conversation,
+                    },
                 });
             } else {
                 return next(
@@ -207,8 +254,10 @@ const getAllScheduleDetailByPatientId = async (req, res, next) => {
 
     const detail_list_result = await Promise.all(
         details.map(async (detail) => {
-            const person = await Person.findById(detail.doctor.person);
-            detail['doctor']['person'] = person;
+            const { doctor } = detail;
+            const _doctor = await Doctor.findById(doctor).populate('person');
+            // console.log(_doctor);
+            detail['doctor'] = _doctor;
             return detail;
         })
     );

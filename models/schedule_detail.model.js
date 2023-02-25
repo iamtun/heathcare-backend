@@ -24,6 +24,7 @@ const scheduleDetailSchema = new Schema(
         day_exam: {
             type: Date,
             require: true,
+            unique: true,
         },
     },
     {
