@@ -7,7 +7,7 @@ import {
 import BMI from '../../models/bmi.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
-
+import Rule from '../../models/rule.model.js';
 const calBMI = (w, h) => {
     return parseFloat((w / ((h * h) / 10000)).toFixed(2));
 };
@@ -16,10 +16,20 @@ const spCreateBMI = async (req, res, next) => {
     req.body.calBMI = calBMI(req.body.weight, req.body.height);
     const bmi = await Base.createAndReturnObject(BMI)(req, res, next);
     const { doc, error } = bmi;
+
+    const rules = await Rule.find({ type: 'BMI' });
+
+    const rule = rules.find(
+        (rule) => doc.calBMI >= rule.start && doc.calBMI <= rule.end
+    );
+
     if (doc) {
         res.status(201).json({
             status: STATUS_SUCCESS,
-            data: doc,
+            data: {
+                doc,
+                rule,
+            },
         });
     } else {
         return next(new AppError(400, STATUS_FAIL, error), req, res, next);
