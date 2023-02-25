@@ -4,6 +4,7 @@ import Doctor from '../../models/doctor.model.js';
 
 import Base from './base.controller.js';
 import { STATUS_SUCCESS } from '../../common/constant.js';
+import Message from '../../models/message.model.js';
 
 const createConversation = async (req, res, next) => {
     try {
@@ -55,9 +56,14 @@ const getConversationListByPatientId = async (req, res, next) => {
                 conversation.members[1]
             ).populate('person');
 
+            const last_message = await Message.findById(
+                conversation.last_message
+            );
+
             return {
                 _id: conversation._id,
                 members: [patient, doctor],
+                last_message: last_message,
             };
         })
     );
@@ -84,12 +90,18 @@ const getConversationListByDoctorId = async (req, res, next) => {
                 conversation.members[1]
             ).populate('person');
 
+            const last_message = await Message.findById(
+                conversation.last_message
+            );
+
             return {
                 _id: conversation._id,
                 members: [patient, doctor],
+                last_message: last_message,
             };
         })
     );
+
     res.status(200).json({
         status: STATUS_SUCCESS,
         data: __conversations,

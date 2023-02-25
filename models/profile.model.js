@@ -29,6 +29,10 @@ const profileSchema = new Schema({
         type: [String],
         require: [true, 'Please fill your experiences'],
     },
+    company: {
+        type: String,
+        require: true,
+    },
     doctor: {
         type: Schema.ObjectId,
         ref: 'doctors',

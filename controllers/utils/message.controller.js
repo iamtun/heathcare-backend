@@ -1,9 +1,35 @@
 import { STATUS_SUCCESS } from '../../common/constant.js';
+import Conversation from '../../models/conversation.model.js';
 import Message from '../../models/message.model.js';
 import Base from './base.controller.js';
 
 const createMessage = async (req, res, next) => {
-    return Base.createOne(Message)(req, res, next);
+    const { conversation } = req.body;
+    try {
+        const { doc, error } = await Base.createAndReturnObject(Message)(
+            req,
+            res,
+            next
+        );
+
+        console.log(doc);
+        if (doc) {
+            const _conversation = await Conversation.findById(conversation);
+            _conversation.last_message = doc._id;
+            const __conversation = await _conversation.save();
+
+            return res.status(201).json({
+                status: STATUS_SUCCESS,
+                data: doc,
+            });
+        }
+
+        if (error) {
+            next(error);
+        }
+    } catch (error) {
+        next(error);
+    }
 };
 
 const getAllMessageByConversationId = async (req, res, next) => {
