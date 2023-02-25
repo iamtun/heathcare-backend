@@ -9,8 +9,8 @@ const daySchema = new Schema({
     day_number: {
         type: Number,
         unique: true,
-        min: [2, 'Must be at least 2, got {VALUE}'],
-        max: 8,
+        min: [0, 'Must be at least 0, got {VALUE}'],
+        max: 6,
         required: true,
     },
 });

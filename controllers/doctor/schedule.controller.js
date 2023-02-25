@@ -93,7 +93,29 @@ const findScheduleById = async (req, res, next) => {
     );
 };
 
-const getAllSchedule = Base.getAll(Schedule);
+const getAllSchedule = async (req, res, next) => {
+    const schedules = await Schedule.find({})
+        .populate('day')
+        .populate('time')
+        .populate('doctor');
+
+    const schedule_list = await Promise.all(
+        schedules.map(async (schedule) => {
+            let doctor = schedule['doctor'];
+            const person = await Person.findById(doctor.person);
+            doctor['person'] = person;
+
+            schedule['doctor'] = doctor;
+
+            return schedule;
+        })
+    );
+
+    res.status(200).json({
+        status: STATUS_SUCCESS,
+        data: schedule_list,
+    });
+};
 
 const getAllScheduleByDoctorId = async (req, res, next) => {
     const { doctorId } = req.params;
