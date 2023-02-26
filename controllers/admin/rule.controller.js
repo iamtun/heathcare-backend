@@ -20,18 +20,19 @@ const createRule = async (req, res, next) => {
             const maxRuleEnd = rules.map((rule) => rule.end);
             const max = Math.max(...maxRuleEnd);
             if (start < end) {
-                if (start > max) return Base.createOne(Rule)(req, res, next);
-                else
-                    return next(
-                        new AppError(
-                            401,
-                            STATUS_FAIL,
-                            'Chỉ số trước phải lớn hơn chỉ số lớn nhất của danh sách '
-                        ),
-                        req,
-                        res,
-                        next
-                    );
+                return Base.createOne(Rule)(req, res, next);
+                // if (start > max)
+                // else
+                //     return next(
+                //         new AppError(
+                //             401,
+                //             STATUS_FAIL,
+                //             'Chỉ số trước phải lớn hơn chỉ số lớn nhất của danh sách '
+                //         ),
+                //         req,
+                //         res,
+                //         next
+                //     );
             } else {
                 return next(
                     new AppError(401, STATUS_FAIL, MESSAGE_ERROR_NUMBER_RULE),

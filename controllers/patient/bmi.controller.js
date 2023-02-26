@@ -20,7 +20,10 @@ const spCreateBMI = async (req, res, next) => {
     const rules = await Rule.find({ type: 'BMI' });
 
     const rule = rules.find(
-        (rule) => doc.calBMI >= rule.start && doc.calBMI <= rule.end
+        (rule) =>
+            doc.calBMI >= rule.start &&
+            doc.calBMI <= rule.end &&
+            (doc.gender ? doc.gender === rule.gender : true)
     );
 
     if (doc) {

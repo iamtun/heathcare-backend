@@ -15,6 +15,10 @@ const bmiSchema = new Schema(
             type: Number,
             require: true,
         },
+        gender: {
+            type: Boolean,
+            require: true,
+        },
         patient: {
             type: Schema.Types.ObjectId,
             ref: 'patients',

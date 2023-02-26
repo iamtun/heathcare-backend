@@ -14,6 +14,9 @@ const ruleSchema = new Schema(
             type: String,
             require: [true, 'Vui lòng nhập thông báo để hiển thị'],
         },
+        gender: {
+            type: Boolean,
+        },
         type: {
             type: String,
             require: [
