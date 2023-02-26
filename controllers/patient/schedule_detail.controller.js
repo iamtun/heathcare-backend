@@ -40,6 +40,31 @@ const createScheduleDetail = async (req, res, next) => {
             req.body.patient = patient.id;
 
             if (content_exam && schedule && day_exam) {
+                const schedule_details = await ScheduleDetailSchema.find({});
+
+                //handle filter schedule detail equal day & month
+                const details_filter = schedule_details.filter((schedule) => {
+                    return (
+                        schedule.day_exam.getDate() ===
+                            new Date(day_exam).getDate() &&
+                        schedule.day_exam.getMonth() ===
+                            new Date(day_exam).getMonth()
+                    );
+                });
+
+                if (details_filter.length > 1) {
+                    return next(
+                        new AppError(
+                            401,
+                            STATUS_FAIL,
+                            'Mỗi ngày bạn chỉ được đăng ký tối đa một ca khám!'
+                        ),
+                        req,
+                        res,
+                        next
+                    );
+                }
+
                 const _schedule = await Schedule.findById(schedule);
                 req.body.doctor = _schedule.doctor;
 
