@@ -8,6 +8,8 @@ import BMI from '../../models/bmi.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
 import Rule from '../../models/rule.model.js';
+import Patient from '../../models/patient.model.js';
+
 const calBMI = (w, h) => {
     return parseFloat((w / ((h * h) / 10000)).toFixed(2));
 };
@@ -19,10 +21,17 @@ const spCreateBMI = async (req, res, next) => {
 
     const rules = await Rule.find({ type: 'BMI' });
 
+    const bmis = await BMI.find({ patient: req.body.patient });
+    const _avgBMI = bmis.reduce((accumulator, currentValue) => {
+        return accumulator + calBMI(currentValue.weight, currentValue.height);
+    }, 0);
+
+    const __avgBMI = parseFloat((_avgBMI / bmis.length).toFixed(2));
+
     const rule = rules.find(
         (rule) =>
-            doc.calBMI >= rule.start &&
-            doc.calBMI <= rule.end &&
+            __avgBMI >= rule.start &&
+            __avgBMI <= rule.end &&
             (doc.gender ? doc.gender === rule.gender : true)
     );
 
@@ -30,6 +39,7 @@ const spCreateBMI = async (req, res, next) => {
         res.status(201).json({
             status: STATUS_SUCCESS,
             data: {
+                avgBMI: __avgBMI,
                 doc,
                 rule,
             },
@@ -81,16 +91,32 @@ const createBMI = async (req, res, next) => {
 
 const getAllBMIOfPatientById = async (req, res, next) => {
     const { id } = req.params;
+
+    const patient = await Patient.findById(id).populate('person');
+
     const bmis = await BMI.find({ patient: id });
     const _avgBMI = bmis.reduce((accumulator, currentValue) => {
         return accumulator + calBMI(currentValue.weight, currentValue.height);
     }, 0);
 
+    const __avgBMI = parseFloat((_avgBMI / bmis.length).toFixed(2));
+    const rules = await Rule.find({ type: 'BMI' });
+
+    const rule = rules.find(
+        (rule) =>
+            __avgBMI >= rule.start &&
+            __avgBMI <= rule.end &&
+            (patient.person.gender
+                ? patient.person.gender === rule.gender
+                : true)
+    );
+
     res.status(200).json({
         status: STATUS_SUCCESS,
         data: {
-            avgBMI: parseFloat((_avgBMI / bmis.length).toFixed(2)),
+            avgBMI: __avgBMI,
             bmis,
+            rule,
         },
     });
 };
