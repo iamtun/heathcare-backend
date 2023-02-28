@@ -395,7 +395,7 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
         } else {
             res.status(400).json({
                 status: STATUS_FAIL,
-                message: `schedule_detail with id = ${req.params.id} not found`,
+                message: `Không tìm thấy lịch đăng ký với id = ${req.params.id} `,
             });
         }
     } else {
@@ -433,14 +433,14 @@ const deleteScheduleDetail = async (req, res, next) => {
 
         const doc = await ScheduleDetailSchema.findByIdAndDelete(id);
 
-        res.status(200).json({
+        return res.status(200).json({
             status: STATUS_SUCCESS,
             data: {
                 schedule_detail_id: doc._id,
                 notification,
             },
         });
-    } else {
+    } else if (schedule_detail.doctor._id.toString() === from) {
         //create notification
         const person = await Person.findById(schedule_detail['doctor'].person);
         const _notification = new Notification({
@@ -457,7 +457,7 @@ const deleteScheduleDetail = async (req, res, next) => {
 
         const doc = await ScheduleDetailSchema.findByIdAndDelete(id);
 
-        res.status(200).json({
+        return res.status(200).json({
             status: STATUS_SUCCESS,
             data: {
                 schedule_detail_id: doc._id,
@@ -465,6 +465,11 @@ const deleteScheduleDetail = async (req, res, next) => {
             },
         });
     }
+
+    return res.status(400).json({
+        status: STATUS_FAIL,
+        message: `Không tìm thấy lịch đăng ký với id = ${req.params.id} `,
+    });
 };
 
 export default {
