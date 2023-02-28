@@ -13,6 +13,10 @@ router
     .get(ScheduleDetailController.getAll);
 
 router
+    .route('/patient/:id')
+    .get(ScheduleDetailController.getAllScheduleDetailByPatientId);
+
+router
     .route('/doctor/patient-list/:id')
     .get(ScheduleDetailController.getAllPatientExamByIdDoctor);
 
@@ -21,8 +25,11 @@ router
     .get(ScheduleDetailController.getAllScheduleListOfDoctor);
 
 router
-    .route('/patient/:id')
-    .get(ScheduleDetailController.getAllScheduleDetailByPatientId);
+    .route('/doctor/accept/:id')
+    .put(
+        AuthController.authentication,
+        ScheduleDetailController.acceptScheduleDetailRegister
+    );
 
 router
     .route('/:id')
@@ -30,6 +37,7 @@ router
         AuthController.authentication,
         ScheduleDetailController.updateResultExam
     )
-    .get(ScheduleDetailController.findById);
+    .get(ScheduleDetailController.findById)
+    .delete(ScheduleDetailController.deleteScheduleDetail);
 
 export default router;

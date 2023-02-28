@@ -14,7 +14,7 @@ const scheduleDetailSchema = new Schema(
             ref: 'schedules',
         },
         doctor: {
-            type: String,
+            type: Schema.Types.ObjectId,
             ref: 'doctors',
         },
         patient: {
@@ -25,6 +25,10 @@ const scheduleDetailSchema = new Schema(
             type: Date,
             require: true,
             unique: true,
+        },
+        status: {
+            type: Boolean,
+            default: false,
         },
     },
     {
