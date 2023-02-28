@@ -206,6 +206,80 @@ const updateResultExam = async (req, res, next) => {
 const findById = Base.getOne(ScheduleDetailSchema);
 const getAll = Base.getAll(ScheduleDetailSchema);
 
+const handleBMIStatus = (gender, bmi_avg) => {
+    switch (gender) {
+        case true:
+            {
+                if (bmi_avg < 20) {
+                    return 1;
+                } else if (bmi_avg < 25) {
+                    return 0;
+                } else if (bmi_avg < 30) {
+                    return 1;
+                } else if (bmi_avg > 30) {
+                    return 2;
+                } else {
+                    return -1;
+                }
+            }
+            break;
+        case false:
+            {
+                if (bmi_avg < 18) {
+                    return 1;
+                } else if (bmi_avg < 23) {
+                    return 0;
+                } else if (bmi_avg < 30) {
+                    return 1;
+                } else if (bmi_avg > 30) {
+                    return 2;
+                } else {
+                    return -1;
+                }
+            }
+            break;
+    }
+};
+
+const handleGlycemicStatus = (glycemic) => {
+    const { metric } = glycemic;
+    if (metric && metric < 70) return 1;
+    else if (metric && metric < 130) return 0;
+    else if (metric && metric < 180) return 1;
+    else if (metric && metric > 180) return 2;
+    else return -1;
+};
+
+const handleTwoMetric = (bmi, glycemic) => {
+    if (bmi === 0 && glycemic === 0) return { code: 0, status: 'Bình Thường' };
+    else if (bmi === 0 && glycemic === 1)
+        return {
+            code: 1,
+            status: 'Tình trạng đường huyết của bạn không được tốt',
+        };
+    else if (bmi === 0 && glycemic === 2)
+        return {
+            code: 2,
+            status: 'Tình trạng đường huyết của bạn đang ở mức báo động',
+        };
+    else if (bmi === 1 && glycemic === 0)
+        return { code: 1, status: 'Chỉ số  sức khỏe của bạn không được tốt' };
+    else if (bmi === 2 && glycemic === 0)
+        return {
+            code: 2,
+            status: 'Chỉ số sức khỏe của bạn đang ở mức báo động',
+        };
+    else if (bmi === 1 && glycemic === 1)
+        return { code: 1, status: 'Cả 2 chỉ số sức khỏe không được tốt' };
+    else if (bmi === 2 && glycemic === 2)
+        return { code: 2, status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động' };
+    else if (bmi === -1 || glycemic === -1)
+        return {
+            code: -1,
+            status: 'Vui lòng cập nhật các chỉ số  sức khỏe: BMI & GLYCEMIC',
+        };
+};
+
 const getAllPatientExamByIdDoctor = async (req, res, next) => {
     const doctorId = req.params.id;
     const schedule_details = await ScheduleDetailSchema.find({
@@ -227,12 +301,24 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
 
             const bmi_avg =
                 bmis.reduce((a, c) => a + c.calBMI, 0) / bmis.length;
+
             const glycemics = await Glycemic.find({ patient: patient.id });
+            const glycemic = glycemics[glycemics.length - 1];
+
+            const status = {
+                bmi: handleBMIStatus(patient.person.gender, bmi_avg),
+                glycemic: handleGlycemicStatus(glycemic),
+                message: handleTwoMetric(
+                    handleBMIStatus(patient.person.gender, bmi_avg),
+                    handleGlycemicStatus(glycemic)
+                ),
+            };
 
             return {
                 patient,
                 bmi_avg,
-                glycemic: glycemics[glycemics.length - 1],
+                glycemic: glycemic,
+                status: status,
             };
         })
     );
