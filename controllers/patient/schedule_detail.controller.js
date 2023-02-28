@@ -387,10 +387,17 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
             { new: true }
         );
 
-        res.status(201).json({
-            status: STATUS_SUCCESS,
-            data: schedule_detail,
-        });
+        if (schedule_detail) {
+            res.status(201).json({
+                status: STATUS_SUCCESS,
+                data: schedule_detail,
+            });
+        } else {
+            res.status(400).json({
+                status: STATUS_FAIL,
+                message: `schedule_detail with id = ${req.params.id} not found`,
+            });
+        }
     } else {
         return next(
             new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
