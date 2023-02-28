@@ -101,12 +101,12 @@ const createScheduleDetail = async (req, res, next) => {
                 //create notification
                 const _notification = new Notification({
                     from: patient.id,
-                    to: schedule_detail['doctor'].id,
+                    to: schedule_detail['doctor']._id,
                     content: `Bệnh nhân ${
                         person.username
                     } đã đăng ký lịch khám vào lúc ${moment(day_exam).format(
                         'llll'
-                    )}`,
+                    )}. Vui lòng tiến hành xác nhận hoặc hủy (nếu bận)`,
                 });
 
                 const notification = await _notification.save();
@@ -292,6 +292,88 @@ const getAllScheduleDetailByPatientId = async (req, res, next) => {
     });
 };
 
+const acceptScheduleDetailRegister = async (req, res, next) => {
+    const { rule } = req;
+    if (rule === RULE_DOCTOR) {
+        const schedule_detail = await ScheduleDetailSchema.findByIdAndUpdate(
+            { _id: req.params.id },
+            { status: true },
+            { new: true }
+        );
+
+        res.status(201).json({
+            status: STATUS_SUCCESS,
+            data: schedule_detail,
+        });
+    } else {
+        return next(
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
+            req,
+            res,
+            next
+        );
+    }
+};
+
+const deleteScheduleDetail = async (req, res, next) => {
+    const { reason, from } = req.body;
+    const { id } = req.params;
+
+    const schedule_detail = await ScheduleDetailSchema.findById(id)
+        .populate('patient')
+        .populate('doctor');
+
+    if (schedule_detail.patient._id.toString() === from) {
+        //create notification
+        const person = await Person.findById(schedule_detail['patient'].person);
+        const _notification = new Notification({
+            from: schedule_detail['patient']._id,
+            to: schedule_detail['doctor']._id,
+            content: `Bệnh nhân ${
+                person.username
+            } đã hủy lịch khám vào lúc ${moment(
+                schedule_detail.day_exam
+            ).format('llll')}. Vì lý do ${reason}`,
+        });
+
+        const notification = await _notification.save();
+
+        const doc = await ScheduleDetailSchema.findByIdAndDelete(id);
+
+        res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: {
+                schedule_detail_id: doc._id,
+                notification,
+            },
+        });
+    } else {
+        //create notification
+        const person = await Person.findById(schedule_detail['doctor'].person);
+        const _notification = new Notification({
+            from: schedule_detail['doctor']._id,
+            to: schedule_detail['patient']._id,
+            content: `Bác sĩ ${
+                person.username
+            } đã hủy lịch khám vào lúc ${moment(
+                schedule_detail.day_exam
+            ).format('llll')}. Vì lý do ${reason}`,
+        });
+
+        const notification = await _notification.save();
+
+        const doc = await ScheduleDetailSchema.findByIdAndDelete(id);
+
+        res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: {
+                schedule_detail_id: doc._id,
+                notification,
+            },
+        });
+    }
+};
+
 export default {
     getAll,
     findById,
@@ -300,4 +382,6 @@ export default {
     getAllPatientExamByIdDoctor,
     getAllScheduleListOfDoctor,
     getAllScheduleDetailByPatientId,
+    acceptScheduleDetailRegister,
+    deleteScheduleDetail,
 };

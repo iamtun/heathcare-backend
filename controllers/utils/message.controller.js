@@ -5,6 +5,7 @@ import Base from './base.controller.js';
 
 const createMessage = async (req, res, next) => {
     const { conversation } = req.body;
+
     try {
         const { doc, error } = await Base.createAndReturnObject(Message)(
             req,
@@ -12,7 +13,7 @@ const createMessage = async (req, res, next) => {
             next
         );
 
-        console.log(doc);
+        // console.log('data req ->', conversation);
         if (doc) {
             const _conversation = await Conversation.findById(conversation);
             _conversation.last_message = doc._id;
