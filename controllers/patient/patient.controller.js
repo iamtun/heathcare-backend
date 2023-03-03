@@ -1,4 +1,5 @@
 import {
+    MESSAGE_NO_ENOUGH_IN_4,
     MESSAGE_NO_PERMISSION,
     RULE_PATIENT,
     STATUS_FAIL,
@@ -7,7 +8,7 @@ import {
 import Patient from '../../models/patient.model.js';
 import Person from '../../models/person.model.js';
 import AppError from '../../utils/error.util.js';
-import { createPerson } from '../../utils/person.util.js';
+import { createPerson, updatePerson } from '../../utils/person.util.js';
 
 const createPatient = async (req, res, next) => {
     const { rule, account_id, file } = req;
@@ -117,4 +118,87 @@ const findPatientById = async (req, res, next) => {
     }
 };
 
-export default { createPatient, findPatientByToken, findPatientById };
+const updatePatientInfoById = async (req, res, next) => {
+    const { rule, file } = req;
+    const { id } = req.params;
+    if (rule === RULE_PATIENT) {
+        const { username, dob, address, gender, blood } = req.body;
+        if ((username || dob || address || gender || file || blood) && id) {
+            try {
+                const patientModel = await Patient.findById(id);
+
+                const newPerson = {
+                    username,
+                    dob,
+                    address,
+                    gender,
+                    avatar: file ? file.path : '',
+                };
+
+                if (patientModel) {
+                    const { person } = patientModel;
+
+                    const { oldPerson, error } = await updatePerson(
+                        newPerson,
+                        person
+                    );
+                    if (error) {
+                        return next(error);
+                    }
+
+                    if (blood) {
+                        const patient = await Patient.findByIdAndUpdate(
+                            id,
+                            { blood: blood },
+                            { new: true }
+                        ).populate('person');
+
+                        return res.status(201).json({
+                            status: STATUS_SUCCESS,
+                            data: patient,
+                        });
+                    }
+
+                    return res.status(201).json({
+                        status: STATUS_SUCCESS,
+                        data: oldPerson,
+                    });
+                } else {
+                    return next(
+                        new AppError(
+                            404,
+                            STATUS_FAIL,
+                            `Don't find patient with id = ${id}`
+                        ),
+                        req,
+                        res,
+                        next
+                    );
+                }
+            } catch (error) {
+                next(error);
+            }
+        } else {
+            return next(
+                new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+                req,
+                res,
+                next
+            );
+        }
+    } else {
+        return next(
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
+            req,
+            res,
+            next
+        );
+    }
+};
+
+export default {
+    createPatient,
+    findPatientByToken,
+    findPatientById,
+    updatePatientInfoById,
+};

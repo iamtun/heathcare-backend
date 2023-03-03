@@ -12,8 +12,7 @@ router
         AuthController.authentication,
         UploadCloud.uploadCloud.single('avatar'),
         DoctorController.createDoctor
-    )
-    .put(AuthController.authentication, DoctorController.updateDoctorInfoById);
+    );
 
 router
     .route('/waiting-accept')
@@ -30,8 +29,18 @@ router
 router.route('/profile/:id').get(ProfileToDoctor.findDoctorProfileById);
 
 router
+    .route('/remind/:id')
+    .post(
+        AuthController.authentication,
+        DoctorController.createRemindForPatientById
+    );
+router
     .route('/:id')
     .get(DoctorController.findDoctorById)
-    .put(AuthController.authentication, DoctorController.censorship);
+    .put(
+        AuthController.authentication,
+        UploadCloud.uploadCloud.single('avatar'),
+        DoctorController.updateDoctorInfoById
+    );
 
 export default router;

@@ -1,7 +1,9 @@
 import {
+    MESSAGE_NO_ENOUGH_IN_4,
     MESSAGE_NO_PERMISSION,
     RULE_ADMIN,
     RULE_DOCTOR,
+    RULE_DOCTOR_REMIND,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
@@ -9,6 +11,9 @@ import Doctor from '../../models/doctor.model.js';
 import AppError from '../../utils/error.util.js';
 import { createPerson, updatePerson } from '../../utils/person.util.js';
 import Base from '../utils/base.controller.js';
+import Conversation from '../../models/conversation.model.js';
+import Message from '../../models/message.model.js';
+import Notification from '../../models/notification.model.js';
 
 const createDoctor = async (req, res, next) => {
     const { rule, account_id, file } = req;
@@ -43,11 +48,7 @@ const createDoctor = async (req, res, next) => {
             }
         } else {
             return next(
-                new AppError(
-                    400,
-                    STATUS_FAIL,
-                    'Please provide enough information!'
-                ),
+                new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
                 req,
                 res,
                 next
@@ -64,13 +65,20 @@ const createDoctor = async (req, res, next) => {
 };
 
 const updateDoctorInfoById = async (req, res, next) => {
-    const { rule } = req;
+    const { rule, file } = req;
+    const { id } = req.params;
     if (rule === RULE_DOCTOR) {
-        const { username, dob, address, gender, doctor_id } = req.body;
-        if ((username || dob || address || gender) && doctor_id) {
+        const { username, dob, address, gender } = req.body;
+        if ((username || dob || address || gender) && id) {
             try {
-                const doctorModel = await Doctor.findById(doctor_id);
-                const newPerson = { username, dob, address, gender };
+                const doctorModel = await Doctor.findById(id);
+                const newPerson = {
+                    username,
+                    dob,
+                    address,
+                    gender,
+                    avatar: file ? file.path : '',
+                };
                 if (doctorModel) {
                     const { person } = doctorModel;
 
@@ -103,11 +111,7 @@ const updateDoctorInfoById = async (req, res, next) => {
             }
         } else {
             return next(
-                new AppError(
-                    400,
-                    STATUS_FAIL,
-                    'Please provide enough information!'
-                ),
+                new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
                 req,
                 res,
                 next
@@ -182,10 +186,75 @@ const getDoctorListWaitingAccept = async (req, res, next) => {
     }
 };
 
-const censorship = async (req, res, next) => {
+const createRemindForPatientById = async (req, res, next) => {
     const { rule } = req;
-    if (rule === RULE_ADMIN) {
-        return Base.updateOne(Doctor)(req, res, next);
+    if (rule === RULE_DOCTOR) {
+        const { id } = req.params;
+        const { from, content } = req.body;
+
+        try {
+            if (id && from && content) {
+                const conversation = await Conversation.find({
+                    members: [id, from],
+                });
+
+                if (conversation) {
+                    //create message
+                    const message = new Message({
+                        conversation: conversation._id,
+                        senderId: from,
+                        content: `Nhắc nhở: ${content}`,
+                    });
+
+                    const _message = await message.save();
+
+                    //update last message
+                    const _conversation = await Conversation.findByIdAndUpdate(
+                        conversation._id,
+                        { last_message: _message._id },
+                        { new: true }
+                    );
+
+                    //create notification
+                    const notification = new Notification({
+                        from: from,
+                        to: id,
+                        content: `Bác sĩ nhắc nhở bạn: ${content}`,
+                        rule: RULE_DOCTOR_REMIND,
+                    });
+
+                    const _notification = await notification.save();
+
+                    res.status(201).json({
+                        status: STATUS_SUCCESS,
+                        data: {
+                            message: _message,
+                            notification: _notification,
+                        },
+                    });
+                } else {
+                    return next(
+                        new AppError(
+                            404,
+                            STATUS_FAIL,
+                            `Don't find conversation with member = [${id}, ${from}]`
+                        ),
+                        req,
+                        res,
+                        next
+                    );
+                }
+            } else {
+                return next(
+                    new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+                    req,
+                    res,
+                    next
+                );
+            }
+        } catch (error) {
+            next(error);
+        }
     } else {
         return next(
             new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
@@ -202,5 +271,5 @@ export default {
     getAllDoctors,
     getDoctorListWaitingAccept,
     updateDoctorInfoById,
-    censorship,
+    createRemindForPatientById,
 };

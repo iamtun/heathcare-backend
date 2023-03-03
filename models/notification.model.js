@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import { RULE_INFORMATION } from '../common/constant.js';
 
 const notificationSchema = new Schema(
     {
@@ -17,6 +18,11 @@ const notificationSchema = new Schema(
         hasSeen: {
             type: Boolean,
             default: false,
+        },
+        rule: {
+            type: String,
+            default: RULE_INFORMATION,
+            require: true,
         },
     },
     {

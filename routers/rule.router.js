@@ -14,4 +14,9 @@ router
     .get(RuleController.findRuleById)
     .put(AuthController.authentication, RuleController.updateRule);
 
+router.route(
+    '/doctor/:id',
+    AuthController.authentication,
+    RuleController.censorship
+);
 export default router;
