@@ -9,3 +9,11 @@ export const MESSAGE_NO_PERMISSION =
     'Bạn không có quyền truy cập vào đường dẫn này';
 export const MESSAGE_NO_ENOUGH_IN_4 = 'Vui lòng nhập đầy đủ thông tin';
 export const MESSAGE_ERROR_NUMBER_RULE = 'Chỉ số sau phải lớn hơn chỉ số trước';
+
+export const RULE_NOTIFICATION_REGISTER_SCHEDULE =
+    'RULE_NOTIFICATION_REGISTER_SCHEDULE';
+export const RULE_NOTIFICATION_CANCEL_SCHEDULE =
+    'RULE_NOTIFICATION_CANCEL_SCHEDULE';
+export const RULE_DOCTOR_REMIND = 'RULE_DOCTOR_REMIND'; // bác sĩ nhắc nhở
+export const RULE_SYSTEM = 'RULE_SYSTEM';
+export const RULE_INFORMATION = 'RULE_INFORMATION';

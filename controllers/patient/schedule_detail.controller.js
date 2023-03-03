@@ -2,6 +2,8 @@ import {
     MESSAGE_NO_ENOUGH_IN_4,
     MESSAGE_NO_PERMISSION,
     RULE_DOCTOR,
+    RULE_NOTIFICATION_CANCEL_SCHEDULE,
+    RULE_NOTIFICATION_REGISTER_SCHEDULE,
     RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
@@ -107,6 +109,7 @@ const createScheduleDetail = async (req, res, next) => {
                     } đã đăng ký lịch khám vào lúc ${moment(day_exam).format(
                         'llll'
                     )}. Vui lòng tiến hành xác nhận hoặc hủy (nếu bận)`,
+                    rule: RULE_NOTIFICATION_REGISTER_SCHEDULE,
                 });
 
                 const notification = await _notification.save();
@@ -387,10 +390,25 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
             { new: true }
         );
 
+        //create notification
+        const _notification = new Notification({
+            from: schedule_detail['doctor']._id,
+            to: schedule_detail['patient']._id,
+            content: `Bác sĩ đã xác nhận lịch khám vào lúc ${moment(
+                schedule_detail['day_exam']
+            ).format('llll')}. Bạn vui lòng chuẩn bị trước giờ hẹn 5 phút!`,
+            rule: RULE_NOTIFICATION_REGISTER_SCHEDULE,
+        });
+
+        const notification = await _notification.save();
+
         if (schedule_detail) {
             res.status(201).json({
                 status: STATUS_SUCCESS,
-                data: schedule_detail,
+                data: {
+                    schedule_detail,
+                    notification,
+                },
             });
         } else {
             res.status(400).json({
@@ -427,6 +445,7 @@ const deleteScheduleDetail = async (req, res, next) => {
             } đã hủy lịch khám vào lúc ${moment(
                 schedule_detail.day_exam
             ).format('llll')}. Vì lý do ${reason}`,
+            rule: RULE_NOTIFICATION_CANCEL_SCHEDULE,
         });
 
         const notification = await _notification.save();
@@ -451,6 +470,7 @@ const deleteScheduleDetail = async (req, res, next) => {
             } đã hủy lịch khám vào lúc ${moment(
                 schedule_detail.day_exam
             ).format('llll')}. Vì lý do ${reason}`,
+            rule: RULE_NOTIFICATION_CANCEL_SCHEDULE,
         });
 
         const notification = await _notification.save();
