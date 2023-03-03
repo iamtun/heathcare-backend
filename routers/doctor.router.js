@@ -29,6 +29,12 @@ router
 router.route('/profile/:id').get(ProfileToDoctor.findDoctorProfileById);
 
 router
+    .route('/remind/:id')
+    .post(
+        AuthController.authentication,
+        DoctorController.createRemindForPatientById
+    );
+router
     .route('/:id')
     .get(DoctorController.findDoctorById)
     .put(
