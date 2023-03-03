@@ -64,13 +64,20 @@ const createDoctor = async (req, res, next) => {
 };
 
 const updateDoctorInfoById = async (req, res, next) => {
-    const { rule } = req;
+    const { rule, file } = req;
+    const { id } = req.params;
     if (rule === RULE_DOCTOR) {
-        const { username, dob, address, gender, doctor_id } = req.body;
-        if ((username || dob || address || gender) && doctor_id) {
+        const { username, dob, address, gender } = req.body;
+        if ((username || dob || address || gender) && id) {
             try {
-                const doctorModel = await Doctor.findById(doctor_id);
-                const newPerson = { username, dob, address, gender };
+                const doctorModel = await Doctor.findById(id);
+                const newPerson = {
+                    username,
+                    dob,
+                    address,
+                    gender,
+                    avatar: file ? file.path : '',
+                };
                 if (doctorModel) {
                     const { person } = doctorModel;
 
@@ -182,25 +189,10 @@ const getDoctorListWaitingAccept = async (req, res, next) => {
     }
 };
 
-const censorship = async (req, res, next) => {
-    const { rule } = req;
-    if (rule === RULE_ADMIN) {
-        return Base.updateOne(Doctor)(req, res, next);
-    } else {
-        return next(
-            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
-            req,
-            res,
-            next
-        );
-    }
-};
-
 export default {
     createDoctor,
     findDoctorById,
     getAllDoctors,
     getDoctorListWaitingAccept,
     updateDoctorInfoById,
-    censorship,
 };

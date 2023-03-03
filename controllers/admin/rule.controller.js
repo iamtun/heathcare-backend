@@ -95,4 +95,23 @@ const updateRule = async (req, res, next) => {
 const getAllRules = Base.getAll(Rule);
 const findRuleById = Base.getOne(Rule);
 
-export default { createRule, getAllRules, findRuleById, updateRule };
+const censorship = async (req, res, next) => {
+    const { rule } = req;
+    if (rule === RULE_ADMIN) {
+        return Base.updateOne(Doctor)(req, res, next);
+    } else {
+        return next(
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
+            req,
+            res,
+            next
+        );
+    }
+};
+export default {
+    createRule,
+    getAllRules,
+    findRuleById,
+    updateRule,
+    censorship,
+};
