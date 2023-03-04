@@ -244,7 +244,7 @@ const handleBMIStatus = (gender, bmi_avg) => {
     }
 };
 
-const handleGlycemicStatus = (glycemic) => {
+const handleGlycemicStatus = (glycemic = { metric: null }) => {
     const { metric } = glycemic;
     if (metric && metric < 70) return 1;
     else if (metric && metric < 130) return 0;
