@@ -94,11 +94,16 @@ const createScheduleDetail = async (req, res, next) => {
                     .populate('schedule')
                     .populate('doctor');
 
+                const _person = await Person.findById(
+                    schedule_detail['doctor']['person']
+                );
+
                 const time = await Shift.findById(
                     schedule_detail['schedule']['time']
                 );
 
                 schedule_detail['schedule']['time'] = time;
+                schedule_detail['doctor']['person'] = _person;
 
                 //create notification
                 const _notification = new Notification({
