@@ -393,7 +393,9 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
             { _id: req.params.id },
             { status: true },
             { new: true }
-        );
+        )
+            .populate('schedule')
+            .populate('doctor');
 
         //create notification
         const _notification = new Notification({
