@@ -4,9 +4,13 @@ import AppError from '../../utils/error.util.js';
 import Account from '../../models/account.model.js';
 import {
     MESSAGE_NO_ENOUGH_IN_4,
+    RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
+import Person from '../../models/person.model.js';
+import Patient from '../../models/patient.model.js';
+import Doctor from '../../models/doctor.model.js';
 
 const register = async (req, res, next) => {
     try {
@@ -44,11 +48,31 @@ const register = async (req, res, next) => {
                     });
                 }
 
-                //create payload
-                const account_id = { account_id: account._id };
+                const person = await Person.findOne({ account: account._id });
+                let user_info = null;
 
+                const patient = await Patient.findOne({
+                    person: person._id,
+                }).populate('person');
+
+                if (patient) {
+                    user_info = { patient };
+                } else {
+                    const doctor = await Doctor.findOne({
+                        person: person._id,
+                    }).populate('person');
+                    user_info = { doctor };
+                }
+
+                //create payload
+                const token = {
+                    account_id: account.id,
+                    ...user_info,
+                };
+
+                //create token
                 const accessToken = jwt.sign(
-                    account_id,
+                    token,
                     process.env.ACCESS_TOKEN_SECRET
                 );
 
@@ -127,13 +151,30 @@ const login = async (req, res, next) => {
             );
         }
 
+        const person = await Person.findOne({ account: account._id });
+        let user_info = null;
+
+        const patient = await Patient.findOne({
+            person: person._id,
+        }).populate('person');
+
+        if (patient) {
+            user_info = { patient };
+        } else {
+            const doctor = await Doctor.findOne({
+                person: person._id,
+            }).populate('person');
+            user_info = { doctor };
+        }
+
         //create payload
-        const account_id = { account_id: account.id };
+        const token = {
+            account_id: account.id,
+            ...user_info,
+        };
+
         //create token
-        const accessToken = jwt.sign(
-            account_id,
-            process.env.ACCESS_TOKEN_SECRET
-        );
+        const accessToken = jwt.sign(token, process.env.ACCESS_TOKEN_SECRET);
 
         res.status(200).json({
             status: STATUS_SUCCESS,
