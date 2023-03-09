@@ -56,12 +56,18 @@ const register = async (req, res, next) => {
                 }).populate('person');
 
                 if (patient) {
-                    user_info = { patient };
+                    user_info = {
+                        user_id: patient._id,
+                        username: patient['person']['username'],
+                    };
                 } else {
                     const doctor = await Doctor.findOne({
                         person: person._id,
                     }).populate('person');
-                    user_info = { doctor };
+                    user_info = {
+                        user_id: doctor._id,
+                        username: doctor['person']['username'],
+                    };
                 }
 
                 //create payload
@@ -159,12 +165,18 @@ const login = async (req, res, next) => {
         }).populate('person');
 
         if (patient) {
-            user_info = { patient };
+            user_info = {
+                user_id: patient._id,
+                username: patient['person']['username'],
+            };
         } else {
             const doctor = await Doctor.findOne({
                 person: person._id,
             }).populate('person');
-            user_info = { doctor };
+            user_info = {
+                user_id: doctor._id,
+                username: doctor['person']['username'],
+            };
         }
 
         //create payload
