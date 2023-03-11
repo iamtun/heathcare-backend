@@ -299,35 +299,53 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
     const patient_ids = schedule_details.map((detail) =>
         detail.patient.toString()
     );
+
+    const patient_status = schedule_details.map((detail) => {
+        return {
+            patient_id: detail.patient.toString(),
+            status: detail.status,
+        };
+    });
+
     const unique_patients_id = [...new Set(patient_ids)];
 
     const patient_list = await Promise.all(
         unique_patients_id.map(async (id) => {
-            const patient = await Patient.findById(id).populate('person');
+            const patient_schedule_detail = patient_status.filter(
+                (patient) => patient.patient_id === id
+            );
+            const patient_status_false = patient_status.filter(
+                (patient) =>
+                    patient.patient_id === id && patient.status === false
+            );
 
-            const bmis = await BMI.find({ patient: patient.id });
+            if (patient_schedule_detail.length > patient_status_false.length) {
+                const patient = await Patient.findById(id).populate('person');
 
-            const bmi_avg =
-                bmis.reduce((a, c) => a + c.calBMI, 0) / bmis.length;
+                const bmis = await BMI.find({ patient: patient.id });
 
-            const glycemics = await Glycemic.find({ patient: patient.id });
-            const glycemic = glycemics[glycemics.length - 1];
+                const bmi_avg =
+                    bmis.reduce((a, c) => a + c.calBMI, 0) / bmis.length;
 
-            const status = {
-                bmi: handleBMIStatus(patient.person.gender, bmi_avg),
-                glycemic: handleGlycemicStatus(glycemic),
-                message: handleTwoMetric(
-                    handleBMIStatus(patient.person.gender, bmi_avg),
-                    handleGlycemicStatus(glycemic)
-                ),
-            };
+                const glycemics = await Glycemic.find({ patient: patient.id });
+                const glycemic = glycemics[glycemics.length - 1];
 
-            return {
-                patient,
-                bmi_avg,
-                glycemic: glycemic,
-                status: status,
-            };
+                const status = {
+                    bmi: handleBMIStatus(patient.person.gender, bmi_avg),
+                    glycemic: handleGlycemicStatus(glycemic),
+                    message: handleTwoMetric(
+                        handleBMIStatus(patient.person.gender, bmi_avg),
+                        handleGlycemicStatus(glycemic)
+                    ),
+                };
+
+                return {
+                    patient,
+                    bmi_avg,
+                    glycemic: glycemic,
+                    status: status,
+                };
+            }
         })
     );
 

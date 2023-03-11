@@ -50,7 +50,7 @@ const getLastGlycemicByPatientId = async (req, res, next) => {
 
         res.status(200).json({
             status: STATUS_SUCCESS,
-            data: glycemic.metric,
+            data: glycemic?.metric ? glycemic.metric : 0,
         });
     } catch (error) {
         return next(error);
