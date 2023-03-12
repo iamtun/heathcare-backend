@@ -5,6 +5,7 @@ import {
     STATUS_SUCCESS,
 } from '../../common/constant.js';
 import Glycemic from '../../models/glycemic.model.js';
+import Rule from '../../models/rule.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
 import { spCompareDateWithNow } from './bmi.controller.js';
@@ -39,7 +40,19 @@ const getAllGlycemicByPatientId = async (req, res, next) => {
     const { id } = req.params;
     const glycemics = await Glycemic.find({ patient: id });
 
-    res.status(200).json({ status: STATUS_SUCCESS, data: glycemics });
+    const rules = await Rule.find({ type: 'GLYCEMIC' });
+    const _glycemics = glycemics.map((gly) => {
+        const rule = rules.find(
+            (rule) => gly.metric >= rule.start && gly.metric <= rule.end
+        );
+        // console.log(rule);
+        return {
+            ...gly._doc,
+            notification: rule.notification,
+        };
+    });
+
+    res.status(200).json({ status: STATUS_SUCCESS, data: _glycemics });
 };
 
 const getLastGlycemicByPatientId = async (req, res, next) => {

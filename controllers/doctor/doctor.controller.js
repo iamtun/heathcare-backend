@@ -194,7 +194,7 @@ const createRemindForPatientById = async (req, res, next) => {
 
         try {
             if (id && from && content) {
-                const conversation = await Conversation.find({
+                const conversation = await Conversation.findOne({
                     members: [id, from],
                 });
 
@@ -210,7 +210,7 @@ const createRemindForPatientById = async (req, res, next) => {
 
                     //update last message
                     const _conversation = await Conversation.findByIdAndUpdate(
-                        conversation._id,
+                        conversation.id,
                         { last_message: _message._id },
                         { new: true }
                     );
