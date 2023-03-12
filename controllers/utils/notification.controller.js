@@ -24,7 +24,12 @@ const createNotification = async (req, res, next) => {
 
 const findNotificationsByReceiverId = async (req, res, next) => {
     const { id } = req.params;
-    const notifications = await Notification.find({ to: id });
+    const notifications = await Notification.find({
+        to: id,
+        hasSeen: false,
+    }).sort({
+        createdAt: -1,
+    });
     res.status(200).json({
         status: STATUS_SUCCESS,
         data: notifications,

@@ -48,32 +48,9 @@ const register = async (req, res, next) => {
                     });
                 }
 
-                const person = await Person.findOne({ account: account._id });
-                let user_info = null;
-
-                const patient = await Patient.findOne({
-                    person: person._id,
-                }).populate('person');
-
-                if (patient) {
-                    user_info = {
-                        user_id: patient._id,
-                        username: patient['person']['username'],
-                    };
-                } else {
-                    const doctor = await Doctor.findOne({
-                        person: person._id,
-                    }).populate('person');
-                    user_info = {
-                        user_id: doctor._id,
-                        username: doctor['person']['username'],
-                    };
-                }
-
                 //create payload
                 const token = {
                     account_id: account.id,
-                    ...user_info,
                 };
 
                 //create token
