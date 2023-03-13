@@ -319,7 +319,11 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                     patient.patient_id === id && patient.status === false
             );
 
-            if (patient_schedule_detail.length > patient_status_false.length) {
+            if (
+                patient_schedule_detail.length === patient_status_false.length
+            ) {
+                return null;
+            } else {
                 const patient = await Patient.findById(id).populate('person');
 
                 const bmis = await BMI.find({ patient: patient.id });
@@ -351,7 +355,7 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
 
     res.status(200).json({
         status: STATUS_SUCCESS,
-        data: patient_list,
+        data: patient_list.filter((patient) => patient !== null),
     });
 };
 
