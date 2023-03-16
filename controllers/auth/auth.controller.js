@@ -1,16 +1,15 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AppError from '../../utils/error.util.js';
-import Account from '../../models/account.model.js';
+import Account from '../../models/auth/account.model.js';
 import {
     MESSAGE_NO_ENOUGH_IN_4,
-    RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
 import Person from '../../models/person.model.js';
-import Patient from '../../models/patient.model.js';
-import Doctor from '../../models/doctor.model.js';
+import Patient from '../../models/patient/patient.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 
 const register = async (req, res, next) => {
     try {

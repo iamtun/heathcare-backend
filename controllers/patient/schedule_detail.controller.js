@@ -9,17 +9,17 @@ import {
     STATUS_SUCCESS,
 } from '../../common/constant.js';
 import Day from '../../models/day.model.js';
-import Patient from '../../models/patient.model.js';
+import Patient from '../../models/patient/patient.model.js';
 import Person from '../../models/person.model.js';
 import Schedule from '../../models/schedule.model.js';
 import Notification from '../../models/notification.model.js';
 import ScheduleDetailSchema from '../../models/schedule_detail.model.js';
 import Shift from '../../models/shift.model.js';
-import BMI from '../../models/bmi.model.js';
-import Glycemic from '../../models/glycemic.model.js';
+import BMI from '../../models/patient/bmi.model.js';
+import Glycemic from '../../models/patient/glycemic.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
-import Doctor from '../../models/doctor.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 
 import moment from 'moment';
 import 'moment/locale/vi.js';

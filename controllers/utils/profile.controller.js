@@ -1,6 +1,6 @@
-import Profile from '../../models/profile.model.js';
+import Profile from '../../models/doctor/profile.model.js';
 import Person from '../../models/person.model.js';
-import Doctor from '../../models/doctor.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 import AppError from '../../utils/error.util.js';
 import {
     RULE_DOCTOR,

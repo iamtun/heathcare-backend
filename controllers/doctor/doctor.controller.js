@@ -7,7 +7,7 @@ import {
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
-import Doctor from '../../models/doctor.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 import AppError from '../../utils/error.util.js';
 import { createPerson, updatePerson } from '../../utils/person.util.js';
 import Base from '../utils/base.controller.js';
