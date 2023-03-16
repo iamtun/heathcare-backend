@@ -176,33 +176,42 @@ const login = async (req, res, next) => {
 };
 
 const authentication = async (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; //Bear token
-    if (!token)
-        return next(new AppError(401, STATUS_FAIL, 'No token')), req, res, next;
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]; //Bear token
+        if (!token)
+            return (
+                next(new AppError(401, STATUS_FAIL, 'No token')), req, res, next
+            );
 
-    const verify = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const verify = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    //check verify
-    if (verify?.error) {
-        return (
-            next(new AppError(401, STATUS_FAIL, 'JWT malformed')),
-            req,
-            res,
-            next
-        );
-    }
+        //check verify
+        if (verify?.error) {
+            return (
+                next(new AppError(401, STATUS_FAIL, 'JWT malformed')),
+                req,
+                res,
+                next
+            );
+        }
 
-    const account = await Account.findById(verify.account_id);
-    if (account) {
-        req.rule = account.rule;
-        req.account_id = account._id;
+        const account = await Account.findById(verify.account_id);
+        if (account) {
+            req.rule = account.rule;
+            req.account_id = account._id;
 
-        next();
-    } else {
-        return (
-            next(new AppError(401, STATUS_FAIL, 'Token fail')), req, res, next
-        );
+            next();
+        } else {
+            return (
+                next(new AppError(401, STATUS_FAIL, 'Token fail')),
+                req,
+                res,
+                next
+            );
+        }
+    } catch (error) {
+        console.error('err in auth -> ', error);
     }
 };
 
