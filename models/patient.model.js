@@ -10,6 +10,11 @@ const patientSchema = new Schema(
             type: String,
             require: [true, 'Please fill your blood'],
         },
+        anamnesis: {
+            type: Number,
+            default: 0,
+            require: true,
+        },
         deleted: {
             type: Boolean,
             default: false,

@@ -11,7 +11,7 @@ const bmiSchema = new Schema(
             type: Number,
             require: true,
         },
-        calBMI: {
+        cal_bmi: {
             type: Number,
             require: true,
         },

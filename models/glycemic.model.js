@@ -10,11 +10,10 @@ const glycemicSchema = new Schema(
         case: {
             type: Number,
             require: true,
-            default: 1,
             min: 1,
             max: 4,
-            // 1. Đường huyết lúc đói
-            // 2. Đường huyết sau ăn
+            // 1. Đường huyết lúc đói(trước ăn sáng)
+            // 2. Đường huyết sau ăn(sau ăn sáng)
             // 3. Đường huyết lúc đi ngủ
             // 4. Xét nghiệm Hemoglobin A1c (HbA1c)
         },

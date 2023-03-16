@@ -29,7 +29,7 @@ const profileSchema = new Schema({
         type: [String],
         require: [true, 'Please fill your experiences'],
     },
-    company: {
+    work_place: {
         type: String,
         require: true,
     },

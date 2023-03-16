@@ -15,7 +15,7 @@ const calBMI = (w, h) => {
 };
 
 const spCreateBMI = async (req, res, next) => {
-    req.body.calBMI = calBMI(req.body.weight, req.body.height);
+    req.body.cal_bmi = calBMI(req.body.weight, req.body.height);
     const bmi = await Base.createAndReturnObject(BMI)(req, res, next);
     const { doc, error } = bmi;
 
