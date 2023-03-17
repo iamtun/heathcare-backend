@@ -169,7 +169,7 @@ const getAllDoctors = async (req, res, next) => {
 
 const getDoctorListWaitingAccept = async (req, res, next) => {
     try {
-        const doctors = await Doctor.find({ isAccepted: false }).populate(
+        const doctors = await Doctor.find({ is_accepted: false }).populate(
             'person'
         );
         if (doctors.length === 0) {

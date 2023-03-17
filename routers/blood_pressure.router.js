@@ -9,7 +9,8 @@ router
     .post(
         AuthController.authentication,
         BloodPressureController.createBloodPressureMetric
-    );
+    )
+    .get(BloodPressureController.getAll);
 
 router
     .route('/:id')

@@ -50,4 +50,10 @@ const getAllBloodPressuresByPatientId = async (req, res, next) => {
         data: blood_pressures,
     });
 };
-export default { createBloodPressureMetric, getAllBloodPressuresByPatientId };
+
+const getAll = BaseController.getAll(BloodPressure);
+export default {
+    createBloodPressureMetric,
+    getAllBloodPressuresByPatientId,
+    getAll,
+};
