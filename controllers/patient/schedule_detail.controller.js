@@ -594,9 +594,7 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                 const patient = await Patient.findById(id).populate('person');
 
                 const bmis = await BMI.find({ patient: patient.id });
-                const bmi_avg =
-                    bmis.reduce((a, c) => a + c.calBMI, 0) / bmis.length;
-
+                const last_bmi = bmis[bmis.length - 1];
                 const glycemics = await Glycemic.find({ patient: patient.id });
                 const glycemic = glycemics[glycemics.length - 1];
 
@@ -607,12 +605,18 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                     blood_pressures[blood_pressures.length - 1];
 
                 const status = {
-                    bmi: handleBMIStatus(patient.person.gender, bmi_avg),
+                    bmi: handleBMIStatus(
+                        patient.person.gender,
+                        last_bmi.cal_bmi
+                    ),
                     glycemic: handleGlycemicStatus(glycemic),
                     blood_pressure:
                         handleBloodPressureStatus(last_blood_pressures),
                     message: handleThreeMetric(
-                        handleBMIStatus(patient.person.gender, bmi_avg),
+                        handleBMIStatus(
+                            patient.person.gender,
+                            last_bmi.cal_bmi
+                        ),
                         handleGlycemicStatus(glycemic),
                         handleBloodPressureStatus(last_blood_pressures)
                     ),
@@ -622,6 +626,7 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                     patient,
                     bmis,
                     glycemics,
+                    blood_pressures,
                     status: status,
                 };
             }
