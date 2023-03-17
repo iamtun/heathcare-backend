@@ -7,7 +7,7 @@ import {
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
-import Doctor from '../../models/doctor.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 import AppError from '../../utils/error.util.js';
 import { createPerson, updatePerson } from '../../utils/person.util.js';
 import Base from '../utils/base.controller.js';
@@ -169,7 +169,7 @@ const getAllDoctors = async (req, res, next) => {
 
 const getDoctorListWaitingAccept = async (req, res, next) => {
     try {
-        const doctors = await Doctor.find({ isAccepted: false }).populate(
+        const doctors = await Doctor.find({ is_accepted: false }).populate(
             'person'
         );
         if (doctors.length === 0) {

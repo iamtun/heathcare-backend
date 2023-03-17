@@ -6,7 +6,7 @@ const doctorSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'persons',
         },
-        isAccepted: {
+        is_accepted: {
             type: Boolean,
             default: false,
         },

@@ -1,6 +1,6 @@
 import Conversation from '../../models/conversation.model.js';
-import Patient from '../../models/patient.model.js';
-import Doctor from '../../models/doctor.model.js';
+import Patient from '../../models/patient/patient.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 
 import Base from './base.controller.js';
 import { STATUS_SUCCESS } from '../../common/constant.js';

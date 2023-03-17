@@ -2,6 +2,7 @@ import {
     MESSAGE_NO_ENOUGH_IN_4,
     MESSAGE_NO_PERMISSION,
     RULE_DOCTOR,
+    RULE_DOCTOR_REMIND,
     RULE_NOTIFICATION_CANCEL_SCHEDULE,
     RULE_NOTIFICATION_REGISTER_SCHEDULE,
     RULE_PATIENT,
@@ -9,21 +10,23 @@ import {
     STATUS_SUCCESS,
 } from '../../common/constant.js';
 import Day from '../../models/day.model.js';
-import Patient from '../../models/patient.model.js';
+import Patient from '../../models/patient/patient.model.js';
 import Person from '../../models/person.model.js';
 import Schedule from '../../models/schedule.model.js';
 import Notification from '../../models/notification.model.js';
 import ScheduleDetailSchema from '../../models/schedule_detail.model.js';
 import Shift from '../../models/shift.model.js';
-import BMI from '../../models/bmi.model.js';
-import Glycemic from '../../models/glycemic.model.js';
+import BMI from '../../models/patient/bmi.model.js';
+import Glycemic from '../../models/patient/glycemic.model.js';
+import BloodPressure from '../../models/patient/blood_pressures.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
-import Doctor from '../../models/doctor.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 
 import moment from 'moment';
 import 'moment/locale/vi.js';
 import Conversation from '../../models/conversation.model.js';
+import Message from '../../models/message.model.js';
 moment.locale('vi');
 
 //patient register
@@ -164,14 +167,25 @@ const createScheduleDetail = async (req, res, next) => {
 const updateResultExam = async (req, res, next) => {
     try {
         const { rule } = req;
+        const { id } = req.params;
         if (rule === RULE_DOCTOR) {
-            const { result_exam } = req.body;
+            const { result_exam, anamnesis } = req.body;
             if (result_exam) {
-                const detailUpdated = await Base.updateAndReturnObject(
-                    ScheduleDetailSchema
-                )(req, res, next);
+                const detailUpdated =
+                    await ScheduleDetailSchema.findByIdAndUpdate(
+                        id,
+                        { result_exam: result_exam },
+                        { new: true }
+                    );
+                const patient_id = detailUpdated.patient;
+
+                const patientUpdated = await Patient.findByIdAndUpdate(
+                    patient_id,
+                    { anamnesis: anamnesis },
+                    { new: true }
+                );
                 let schedule_detail = await ScheduleDetailSchema.findById(
-                    detailUpdated.doc._id
+                    detailUpdated._id
                 )
                     .populate('patient')
                     .populate('schedule');
@@ -186,10 +200,58 @@ const updateResultExam = async (req, res, next) => {
                 schedule_detail['schedule']['day'] = day;
                 schedule_detail['schedule']['time'] = time;
 
-                res.status(201).json({
-                    status: STATUS_SUCCESS,
-                    data: schedule_detail,
+                const doctor_id = detailUpdated.doctor;
+
+                const conversation = await Conversation.findOne({
+                    members: [patient_id, doctor_id],
                 });
+                if (conversation) {
+                    //create message
+                    const message = new Message({
+                        conversation: conversation._id,
+                        senderId: doctor_id,
+                        content: `Kết quả khám của bạn ${result_exam} -> Tình trạng sức khỏe: ${
+                            anamnesis === 0
+                                ? 'Bình Thường'
+                                : anamnesis === 1
+                                ? 'Tiểu đường típ 1'
+                                : 'Tiểu đường típ 2'
+                        }`,
+                    });
+
+                    const _message = await message.save();
+
+                    //update last message
+                    const _conversation = await Conversation.findByIdAndUpdate(
+                        conversation.id,
+                        { last_message: _message._id },
+                        { new: true }
+                    );
+
+                    //create notification
+                    const notification = new Notification({
+                        from: doctor_id,
+                        to: patient_id,
+                        content: `Kết quả khám của bạn ${result_exam} -> Tình trạng sức khỏe: ${
+                            anamnesis === 0
+                                ? 'Bình Thường'
+                                : anamnesis === 1
+                                ? 'Tiểu đường típ 1'
+                                : 'Tiểu đường típ 2'
+                        }`,
+                        rule: RULE_DOCTOR_REMIND,
+                    });
+
+                    const _notification = await notification.save();
+                    res.status(201).json({
+                        status: STATUS_SUCCESS,
+                        data: {
+                            schedule_detail,
+                            notification: _notification,
+                            message: _message,
+                        },
+                    });
+                }
             } else {
                 return next(
                     new AppError(401, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
@@ -214,6 +276,11 @@ const updateResultExam = async (req, res, next) => {
 const findById = Base.getOne(ScheduleDetailSchema);
 const getAll = Base.getAll(ScheduleDetailSchema);
 
+/**
+ * 0: bình thường
+ * 1: cảnh báo
+ * 2: nguy hiểm
+ */
 const handleBMIStatus = (gender, bmi_avg) => {
     switch (gender) {
         case true:
@@ -258,34 +325,234 @@ const handleGlycemicStatus = (glycemic = { metric: null }) => {
     else return -1;
 };
 
-const handleTwoMetric = (bmi, glycemic) => {
-    if (bmi === 0 && glycemic === 0) return { code: 0, status: 'Bình Thường' };
-    else if (bmi === 0 && glycemic === 1)
-        return {
-            code: 1,
-            status: 'Tình trạng đường huyết của bạn không được tốt',
-        };
-    else if (bmi === 0 && glycemic === 2)
-        return {
-            code: 2,
-            status: 'Tình trạng đường huyết của bạn đang ở mức báo động',
-        };
-    else if (bmi === 1 && glycemic === 0)
-        return { code: 1, status: 'Chỉ số  sức khỏe của bạn không được tốt' };
-    else if (bmi === 2 && glycemic === 0)
-        return {
-            code: 2,
-            status: 'Chỉ số sức khỏe của bạn đang ở mức báo động',
-        };
-    else if (bmi === 1 && glycemic === 1)
-        return { code: 1, status: 'Cả 2 chỉ số sức khỏe không được tốt' };
-    else if (bmi === 2 && glycemic === 2)
-        return { code: 2, status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động' };
-    else if (bmi === -1 || glycemic === -1)
-        return {
-            code: -1,
-            status: 'Vui lòng cập nhật các chỉ số  sức khỏe: BMI & GLYCEMIC',
-        };
+/**
+ * -1: chưa nhập
+ * 0: bình thường
+ * 1: tiền cao huyết áp
+ * 2: cao huyết áp(giai đoạn 1)
+ * 3: cao huyết áp(giai đoạn 2)
+ * 4: tăng huyết áp khẩn cấp(báo động)
+ */
+
+const handleBloodPressureStatus = (blood = null) => {
+    if (blood === null) return -1;
+    if (blood.systolic < 120 && blood.diastole < 80) return 0;
+    else if (
+        blood.systolic >= 120 &&
+        blood.systolic <= 129 &&
+        blood.diastole < 80
+    )
+        return 1;
+    else if (
+        blood.systolic >= 130 &&
+        blood.systolic <= 139 &&
+        blood.diastole >= 80 &&
+        blood.diastole < 90
+    )
+        return 2;
+    else if (blood.systolic > 140 && blood.diastole > 90) return 3;
+    else if (blood.systolic > 180 && blood.diastole > 120) return 4;
+};
+
+const handleThreeMetric = (bmi, glycemic, blood) => {
+    if (bmi === 0 && glycemic === 0 && blood === 0)
+        return { code: 0, status: 'Bình Thường' };
+
+    switch (blood) {
+        case 0:
+            {
+                if (bmi === 0 && glycemic === 1)
+                    return {
+                        code: 1,
+                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                    };
+                if (bmi === 0 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 1 && glycemic === 0)
+                    return {
+                        code: 1,
+                        status: 'Chỉ số  sức khỏe của bạn không được tốt và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 2 && glycemic === 0)
+                    return {
+                        code: 2,
+                        status: 'Chỉ số sức khỏe của bạn đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 1 && glycemic === 1)
+                    return {
+                        code: 1,
+                        status: 'Cả 2 chỉ số sức khỏe không được tốt và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 2 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === -1 || glycemic === -1)
+                    return {
+                        code: -1,
+                        status: 'Vui lòng cập nhật các chỉ số  sức khỏe còn thiếu: BMI hoặc GLYCEMIC ',
+                    };
+            }
+            break;
+        case 1:
+            {
+                if (bmi === 0 && glycemic === 1)
+                    return {
+                        code: 1,
+                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                    };
+                if (bmi === 0 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 1 && glycemic === 0)
+                    return {
+                        code: 1,
+                        status: 'Chỉ số  sức khỏe của bạn không được tốt và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 2 && glycemic === 0)
+                    return {
+                        code: 2,
+                        status: 'Chỉ số sức khỏe của bạn đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 1 && glycemic === 1)
+                    return {
+                        code: 1,
+                        status: 'Cả 2 chỉ số sức khỏe không được tốt và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 2 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === -1 || glycemic === -1)
+                    return {
+                        code: -1,
+                        status: 'Bạn đang trong giai đoạn tiền huyết áp Vui lòng cập nhật các chỉ số  sức khỏe còn thiếu: BMI hoặc GLYCEMIC',
+                    };
+            }
+            break;
+        case 2:
+            {
+                if (bmi === 0 && glycemic === 1)
+                    return {
+                        code: 1,
+                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 1',
+                    };
+                if (bmi === 0 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 1',
+                    };
+                if (bmi === 1 && glycemic === 0)
+                    return {
+                        code: 1,
+                        status: 'Chỉ số  sức khỏe của bạn không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 1',
+                    };
+                if (bmi === 2 && glycemic === 0)
+                    return {
+                        code: 2,
+                        status: 'Chỉ số sức khỏe của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 1',
+                    };
+                if (bmi === 1 && glycemic === 1)
+                    return {
+                        code: 1,
+                        status: 'Cả 2 chỉ số sức khỏe không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 1',
+                    };
+                if (bmi === 2 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 1',
+                    };
+                if (bmi === -1 || glycemic === -1)
+                    return {
+                        code: -1,
+                        status: 'Vui lòng cập nhật các chỉ số  sức khỏe: BMI & GLYCEMIC và đang trong giai đoạn cao huyết áp giai đoạn 1',
+                    };
+            }
+            break;
+        case 3:
+            {
+                if (bmi === 0 && glycemic === 1)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+                if (bmi === 0 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+                if (bmi === 1 && glycemic === 0)
+                    return {
+                        code: 2,
+                        status: 'Chỉ số  sức khỏe của bạn không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+                if (bmi === 2 && glycemic === 0)
+                    return {
+                        code: 2,
+                        status: 'Chỉ số sức khỏe của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+                if (bmi === 1 && glycemic === 1)
+                    return {
+                        code: 2,
+                        status: 'Cả 2 chỉ số sức khỏe không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+                if (bmi === 2 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+                if (bmi === -1 || glycemic === -1)
+                    return {
+                        code: -1,
+                        status: 'Vui lòng cập nhật các chỉ số  sức khỏe: BMI & GLYCEMIC và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+            }
+            break;
+        case 4: {
+            if (bmi === 0 && glycemic === 1)
+                return {
+                    code: 2,
+                    status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                };
+            if (bmi === 0 && glycemic === 2)
+                return {
+                    code: 2,
+                    status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                };
+            if (bmi === 1 && glycemic === 0)
+                return {
+                    code: 2,
+                    status: 'Chỉ số  sức khỏe của bạn không được tốt và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                };
+            if (bmi === 2 && glycemic === 0)
+                return {
+                    code: 2,
+                    status: 'Chỉ số sức khỏe của bạn đang ở mức báo động và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                };
+            if (bmi === 1 && glycemic === 1)
+                return {
+                    code: 2,
+                    status: 'Cả 2 chỉ số sức khỏe không được tốt và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                };
+            if (bmi === 2 && glycemic === 2)
+                return {
+                    code: 2,
+                    status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                };
+            if (bmi === -1 || glycemic === -1)
+                return {
+                    code: -1,
+                    status: 'Vui lòng cập nhật các chỉ số  sức khỏe: BMI & GLYCEMIC và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                };
+        }
+    }
 };
 
 const getAllPatientExamByIdDoctor = async (req, res, next) => {
@@ -327,26 +594,34 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                 const patient = await Patient.findById(id).populate('person');
 
                 const bmis = await BMI.find({ patient: patient.id });
-
                 const bmi_avg =
                     bmis.reduce((a, c) => a + c.calBMI, 0) / bmis.length;
 
                 const glycemics = await Glycemic.find({ patient: patient.id });
                 const glycemic = glycemics[glycemics.length - 1];
 
+                const blood_pressures = await BloodPressure.find({
+                    patient: patient.id,
+                });
+                const last_blood_pressures =
+                    blood_pressures[blood_pressures.length - 1];
+
                 const status = {
                     bmi: handleBMIStatus(patient.person.gender, bmi_avg),
                     glycemic: handleGlycemicStatus(glycemic),
-                    message: handleTwoMetric(
+                    blood_pressure:
+                        handleBloodPressureStatus(last_blood_pressures),
+                    message: handleThreeMetric(
                         handleBMIStatus(patient.person.gender, bmi_avg),
-                        handleGlycemicStatus(glycemic)
+                        handleGlycemicStatus(glycemic),
+                        handleBloodPressureStatus(last_blood_pressures)
                     ),
                 };
 
                 return {
                     patient,
-                    bmi_avg,
-                    glycemic: glycemic,
+                    bmis,
+                    glycemics,
                     status: status,
                 };
             }

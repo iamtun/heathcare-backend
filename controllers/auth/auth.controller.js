@@ -1,16 +1,15 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AppError from '../../utils/error.util.js';
-import Account from '../../models/account.model.js';
+import Account from '../../models/auth/account.model.js';
 import {
     MESSAGE_NO_ENOUGH_IN_4,
-    RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
 import Person from '../../models/person.model.js';
-import Patient from '../../models/patient.model.js';
-import Doctor from '../../models/doctor.model.js';
+import Patient from '../../models/patient/patient.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 
 const register = async (req, res, next) => {
     try {
@@ -177,33 +176,42 @@ const login = async (req, res, next) => {
 };
 
 const authentication = async (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; //Bear token
-    if (!token)
-        return next(new AppError(401, STATUS_FAIL, 'No token')), req, res, next;
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]; //Bear token
+        if (!token)
+            return (
+                next(new AppError(401, STATUS_FAIL, 'No token')), req, res, next
+            );
 
-    const verify = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const verify = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    //check verify
-    if (verify?.error) {
-        return (
-            next(new AppError(401, STATUS_FAIL, 'JWT malformed')),
-            req,
-            res,
-            next
-        );
-    }
+        //check verify
+        if (verify?.error) {
+            return (
+                next(new AppError(401, STATUS_FAIL, 'JWT malformed')),
+                req,
+                res,
+                next
+            );
+        }
 
-    const account = await Account.findById(verify.account_id);
-    if (account) {
-        req.rule = account.rule;
-        req.account_id = account._id;
+        const account = await Account.findById(verify.account_id);
+        if (account) {
+            req.rule = account.rule;
+            req.account_id = account._id;
 
-        next();
-    } else {
-        return (
-            next(new AppError(401, STATUS_FAIL, 'Token fail')), req, res, next
-        );
+            next();
+        } else {
+            return (
+                next(new AppError(401, STATUS_FAIL, 'Token fail')),
+                req,
+                res,
+                next
+            );
+        }
+    } catch (error) {
+        console.error('err in auth -> ', error);
     }
 };
 

@@ -9,7 +9,7 @@ import Base from '../utils/base.controller.js';
 
 import Schedule from '../../models/schedule.model.js';
 import Person from '../../models/person.model.js';
-import Doctor from '../../models/doctor.model.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 import AppError from '../../utils/error.util.js';
 
 const findScheduleByIdAndPopulate = async (id) => {

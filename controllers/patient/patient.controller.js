@@ -5,7 +5,7 @@ import {
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
-import Patient from '../../models/patient.model.js';
+import Patient from '../../models/patient/patient.model.js';
 import Person from '../../models/person.model.js';
 import AppError from '../../utils/error.util.js';
 import { createPerson, updatePerson } from '../../utils/person.util.js';
@@ -13,7 +13,7 @@ import { createPerson, updatePerson } from '../../utils/person.util.js';
 const createPatient = async (req, res, next) => {
     const { rule, account_id, file } = req;
     if (rule === RULE_PATIENT) {
-        const { username, dob, address, gender, blood } = req.body;
+        const { username, dob, address, gender, blood, anamnesis } = req.body;
         if (username && dob && address && gender && blood && account_id) {
             const person = {
                 username,
@@ -35,6 +35,7 @@ const createPatient = async (req, res, next) => {
                 const patient = await Patient.create({
                     person: personModel._id,
                     blood: blood,
+                    anamnesis: anamnesis,
                 });
 
                 const patientResp = await Patient.findById(

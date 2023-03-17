@@ -18,7 +18,7 @@ import ConversationRouters from './routers/conversation.router.js';
 import MessageRouters from './routers/message.router.js';
 import RuleRouters from './routers/rule.router.js';
 import NotificationRouters from './routers/notification.router.js';
-
+import BloodPressuresRouters from './routers/blood_pressure.router.js';
 const app = express();
 
 app.use(cors());
@@ -39,6 +39,7 @@ app.use('/api/v1/conversations', ConversationRouters);
 app.use('/api/v1/messages', MessageRouters);
 app.use('/api/v1/rules', RuleRouters);
 app.use('/api/v1/notifications', NotificationRouters);
+app.use('/api/v1/blood-pressures', BloodPressuresRouters);
 
 app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');

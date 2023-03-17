@@ -17,6 +17,16 @@ const ruleSchema = new Schema(
         gender: {
             type: Boolean,
         },
+        case: {
+            type: Number,
+            require: true,
+            min: 1,
+            max: 4,
+            // 1. Đường huyết lúc đói(trước ăn sáng)
+            // 2. Đường huyết sau ăn(sau ăn sáng)
+            // 3. Đường huyết lúc đi ngủ
+            // 4. Xét nghiệm Hemoglobin A1c (HbA1c)
+        },
         type: {
             type: String,
             require: [

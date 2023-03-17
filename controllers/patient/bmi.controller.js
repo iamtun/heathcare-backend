@@ -4,18 +4,18 @@ import {
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
-import BMI from '../../models/bmi.model.js';
+import BMI from '../../models/patient/bmi.model.js';
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
 import Rule from '../../models/rule.model.js';
-import Patient from '../../models/patient.model.js';
+import Patient from '../../models/patient/patient.model.js';
 
 const calBMI = (w, h) => {
     return parseFloat((w / ((h * h) / 10000)).toFixed(2));
 };
 
 const spCreateBMI = async (req, res, next) => {
-    req.body.calBMI = calBMI(req.body.weight, req.body.height);
+    req.body.cal_bmi = calBMI(req.body.weight, req.body.height);
     const bmi = await Base.createAndReturnObject(BMI)(req, res, next);
     const { doc, error } = bmi;
 
