@@ -16,13 +16,41 @@ const createRule = async (req, res, next) => {
         const { start, end, notification, type, gender } = req.body;
 
         if (start && end && notification && type) {
-            const rules = await Rule.find({ type: type });
+            let rules = [];
+            if (type === 'BMI') {
+                console.log(typeof gender);
+                if (typeof gender === 'undefined')
+                    return next(
+                        new AppError(
+                            401,
+                            STATUS_FAIL,
+                            'Bạn cần chọn giới tính đối với rule là BMI'
+                        ),
+                        req,
+                        res,
+                        next
+                    );
+                rules = await Rule.find({ type: type, gender: gender });
+            } else {
+                rules = await Rule.find({ type: type });
+            }
             const maxRuleEnd = rules.map((rule) => rule.end);
             const max = Math.max(...maxRuleEnd);
+            if (max > start) {
+                return next(
+                    new AppError(
+                        401,
+                        STATUS_FAIL,
+                        'Chỉ số trước phải lớn hơn chỉ số lớn nhất của danh sách '
+                    ),
+                    req,
+                    res,
+                    next
+                );
+            }
             if (start < end) {
                 if (type === 'BMI') {
-                    if (gender) return Base.createOne(Rule)(req, res, next);
-                    else
+                    if (typeof gender === 'undefined')
                         return next(
                             new AppError(
                                 401,
@@ -33,21 +61,22 @@ const createRule = async (req, res, next) => {
                             res,
                             next
                         );
+                    if (start > 30)
+                        return next(
+                            new AppError(
+                                401,
+                                STATUS_FAIL,
+                                'Giá trị lớn nhất của BMI là 30'
+                            ),
+                            req,
+                            res,
+                            next
+                        );
+
+                    return Base.createOne(Rule)(req, res, next);
                 }
 
                 return Base.createOne(Rule)(req, res, next);
-                // if (start if(case) > max)
-                // else
-                //     return next(
-                //         new AppError(
-                //             401,
-                //             STATUS_FAIL,
-                //             'Chỉ số trước phải lớn hơn chỉ số lớn nhất của danh sách '
-                //         ),
-                //         req,
-                //         res,
-                //         next
-                //     );
             } else {
                 return next(
                     new AppError(401, STATUS_FAIL, MESSAGE_ERROR_NUMBER_RULE),
