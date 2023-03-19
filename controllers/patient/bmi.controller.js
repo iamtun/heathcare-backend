@@ -41,7 +41,10 @@ const spCreateBMI = async (req, res, next) => {
             data: {
                 avgBMI: __avgBMI,
                 doc,
-                rule,
+                rule: rule ?? {
+                    notification:
+                        'Thông báo cho chỉ số này hiện tại đang cập nhật',
+                },
             },
         });
     } else {
@@ -116,7 +119,9 @@ const getAllBMIOfPatientById = async (req, res, next) => {
         data: {
             avgBMI: __avgBMI,
             bmis,
-            rule,
+            rule: rule ?? {
+                notification: 'Thông báo cho chỉ số này hiện tại đang cập nhật',
+            },
         },
     });
 };

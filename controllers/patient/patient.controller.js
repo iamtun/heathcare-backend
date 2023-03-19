@@ -5,11 +5,15 @@ import {
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
+import BloodPressure from '../../models/patient/blood_pressures.model.js';
+import BMI from '../../models/patient/bmi.model.js';
+import Glycemic from '../../models/patient/glycemic.model.js';
 import Patient from '../../models/patient/patient.model.js';
 import Person from '../../models/person.model.js';
 import AppError from '../../utils/error.util.js';
 import { createPerson, updatePerson } from '../../utils/person.util.js';
 
+import scheduleDetailController from './schedule_detail.controller.js';
 const createPatient = async (req, res, next) => {
     const { rule, account_id, file } = req;
     if (rule === RULE_PATIENT) {
@@ -88,8 +92,43 @@ const findPatientByToken = async (req, res, next) => {
                     next
                 );
             }
+            const bmis = await BMI.find({ patient: patient.id });
+            const last_bmi = bmis[bmis.length - 1];
+            const glycemics = await Glycemic.find({ patient: patient.id });
+            const glycemic = glycemics[glycemics.length - 1];
 
-            res.status(200).json({ status: STATUS_SUCCESS, data: patient });
+            const blood_pressures = await BloodPressure.find({
+                patient: patient.id,
+            });
+            const last_blood_pressures =
+                blood_pressures[blood_pressures.length - 1];
+
+            const status = {
+                bmi: scheduleDetailController.handleBMIStatus(
+                    patient.person.gender,
+                    last_bmi.cal_bmi
+                ),
+                glycemic:
+                    scheduleDetailController.handleGlycemicStatus(glycemic),
+                blood_pressure:
+                    scheduleDetailController.handleBloodPressureStatus(
+                        last_blood_pressures
+                    ),
+                message: scheduleDetailController.handleThreeMetric(
+                    scheduleDetailController.handleBMIStatus(
+                        patient.person.gender,
+                        last_bmi.cal_bmi
+                    ),
+                    scheduleDetailController.handleGlycemicStatus(glycemic),
+                    scheduleDetailController.handleBloodPressureStatus(
+                        last_blood_pressures
+                    )
+                ),
+            };
+
+            return res
+                .status(200)
+                .json({ status: STATUS_SUCCESS, data: { patient, status } });
         } catch (error) {
             next(error);
         }

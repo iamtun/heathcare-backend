@@ -316,13 +316,36 @@ const handleBMIStatus = (gender, bmi_avg) => {
     }
 };
 
-const handleGlycemicStatus = (glycemic = { metric: null }) => {
+const handleGlycemicStatus = (glycemic = { metric: null, case: 0 }) => {
     const { metric } = glycemic;
-    if (metric && metric < 70) return 1;
-    else if (metric && metric < 130) return 0;
-    else if (metric && metric < 180) return 1;
-    else if (metric && metric > 180) return 2;
-    else return -1;
+    if (glycemic.case) {
+        switch (glycemic.case) {
+            case 1:
+                {
+                    if (metric && metric < 90) return 1;
+                    else if (metric && metric <= 130) return 0;
+                    else if (metric > 130) return 2;
+                    else return -1;
+                }
+                break;
+            case 2:
+                {
+                    if (metric && metric < 70) return 1;
+                    else if (metric && metric < 180) return 0;
+                    else if (metric && metric > 180) return 2;
+                    else return -1;
+                }
+                break;
+            case 3: {
+                if (metric && metric < 110) return 1;
+                else if (metric && metric < 150) return 0;
+                else if (metric && metric > 150) return 2;
+                else return -1;
+            }
+        }
+    }
+
+    return -1;
 };
 
 /**
@@ -353,8 +376,9 @@ const handleBloodPressureStatus = (blood = null) => {
 };
 
 const handleThreeMetric = (bmi, glycemic, blood) => {
-    if (bmi === 0 && glycemic === 0 && blood === 0)
+    if (bmi === 0 && glycemic === 0 && blood === 0) {
         return { code: 0, status: 'Bình Thường' };
+    }
 
     switch (blood) {
         case 0:
@@ -810,4 +834,8 @@ export default {
     getAllScheduleDetailByPatientId,
     acceptScheduleDetailRegister,
     deleteScheduleDetail,
+    handleBMIStatus,
+    handleBloodPressureStatus,
+    handleGlycemicStatus,
+    handleThreeMetric,
 };
