@@ -134,42 +134,65 @@ const login = async (req, res, next) => {
         }
 
         const person = await Person.findOne({ account: account._id });
-        let user_info = null;
 
-        const patient = await Patient.findOne({
-            person: person._id,
-        }).populate('person');
-
-        if (patient) {
-            user_info = {
-                user_id: patient._id,
-                username: patient['person']['username'],
-            };
-        } else {
-            const doctor = await Doctor.findOne({
+        if (person) {
+            let user_info = null;
+            const patient = await Patient.findOne({
                 person: person._id,
             }).populate('person');
-            user_info = {
-                user_id: doctor._id,
-                username: doctor['person']['username'],
+
+            if (patient) {
+                user_info = {
+                    user_id: patient._id,
+                    username: patient['person']['username'],
+                };
+            } else {
+                const doctor = await Doctor.findOne({
+                    person: person._id,
+                }).populate('person');
+                user_info = {
+                    user_id: doctor._id,
+                    username: doctor['person']['username'],
+                };
+            }
+
+            //create payload
+            const token = {
+                account_id: account.id,
+                ...user_info,
             };
+
+            //create token
+            const accessToken = jwt.sign(
+                token,
+                process.env.ACCESS_TOKEN_SECRET
+            );
+
+            res.status(200).json({
+                status: STATUS_SUCCESS,
+                data: {
+                    accessToken: accessToken,
+                },
+            });
+        } else {
+            //create payload
+            const token = {
+                account_id: account.id,
+            };
+
+            //create token
+            const accessToken = jwt.sign(
+                token,
+                process.env.ACCESS_TOKEN_SECRET
+            );
+
+            res.status(201).json({
+                status: STATUS_SUCCESS,
+                data: {
+                    accessToken,
+                },
+            });
         }
-
-        //create payload
-        const token = {
-            account_id: account.id,
-            ...user_info,
-        };
-
-        //create token
-        const accessToken = jwt.sign(token, process.env.ACCESS_TOKEN_SECRET);
-
-        res.status(200).json({
-            status: STATUS_SUCCESS,
-            data: {
-                accessToken: accessToken,
-            },
-        });
     } catch (error) {
         next(error);
     }

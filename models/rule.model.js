@@ -31,7 +31,7 @@ const ruleSchema = new Schema(
             type: String,
             require: [
                 true,
-                'Vui lòng nhập kiểu để có thể phân biệt, VD: BMI | GLYCEMIC',
+                'Vui lòng nhập kiểu để có thể phân biệt, VD: BMI | GLYCEMIC | BLOOD',
             ],
         },
     },

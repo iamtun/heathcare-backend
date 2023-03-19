@@ -22,26 +22,24 @@ const createGlycemic = async (req, res, next) => {
         );
     }
 
-    // get glycemic in date
-    // const __glycemic = glycemics.map((item) => {
-    //     const date1 = new Date(item.createdAt);
-    //     const date2 = new Date();
-    //     if (moment(date1).format('l') === moment(date2).format('l')) {
-    //         return item;
-    //     }
-    // });
+    const now = new Date();
+    const glycemics = await Glycemic.find({
+        patient: req.body.patient,
+        case: req.body.case,
+    });
+    const _glycemics = glycemics.filter(
+        (item) => moment(now).format('l') === moment(item.createdAt).format('l')
+    );
 
-    // console.log(__glycemic);
-    // const lastGlycemic = glycemics[glycemics.length - 1];
-    // if (glycemics.length > 0 && spCompareDateWithNow(lastGlycemic.createdAt)) {
-    //     return next(
-    //         new AppError(
-    //             400,
-    //             STATUS_FAIL,
-    //             'Bạn đã nhập chỉ số đường huyết cho ngày hôm nay vui lòng đợi ngày mai!'
-    //         )
-    //     );
-    // }
+    if (_glycemics.length > 0) {
+        return next(
+            new AppError(
+                400,
+                STATUS_FAIL,
+                'Bạn đã nhập chỉ số đường huyết cho trường hợp này ngày hôm nay vui lòng đợi ngày mai!'
+            )
+        );
+    }
 
     return Base.createOne(Glycemic)(req, res, next);
 };
@@ -70,10 +68,19 @@ const getLastGlycemicByPatientId = async (req, res, next) => {
         const { id } = req.params;
         const glycemics = await Glycemic.find({ patient: id });
         const glycemic = glycemics[glycemics.length - 1];
+        const last_glycemic_date = new Date(glycemic.createdAt);
 
+        const __glycemic = glycemics.map((item) => {
+            if (
+                moment(last_glycemic_date).format('l') ===
+                moment(item.createdAt).format('l')
+            ) {
+                return item;
+            }
+        });
         res.status(200).json({
             status: STATUS_SUCCESS,
-            data: glycemic?.metric ? glycemic.metric : 0,
+            data: __glycemic.filter((item) => item != null),
         });
     } catch (error) {
         return next(error);

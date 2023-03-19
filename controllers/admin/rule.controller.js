@@ -13,15 +13,30 @@ const createRule = async (req, res, next) => {
     const { rule } = req;
 
     if (rule === RULE_ADMIN) {
-        const { start, end, notification, type } = req.body;
+        const { start, end, notification, type, gender } = req.body;
 
         if (start && end && notification && type) {
             const rules = await Rule.find({ type: type });
             const maxRuleEnd = rules.map((rule) => rule.end);
             const max = Math.max(...maxRuleEnd);
             if (start < end) {
+                if (type === 'BMI') {
+                    if (gender) return Base.createOne(Rule)(req, res, next);
+                    else
+                        return next(
+                            new AppError(
+                                401,
+                                STATUS_FAIL,
+                                'Bạn cần chọn giới tính đối với rule là BMI'
+                            ),
+                            req,
+                            res,
+                            next
+                        );
+                }
+
                 return Base.createOne(Rule)(req, res, next);
-                // if (start > max)
+                // if (start if(case) > max)
                 // else
                 //     return next(
                 //         new AppError(
