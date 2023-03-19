@@ -33,7 +33,7 @@ const createBloodPressureMetric = async (req, res, next) => {
             new AppError(
                 400,
                 STATUS_FAIL,
-                'Bạn đã nhập chỉ số BMI cho ngày hôm nay vui lòng đợi ngày mai!'
+                'Bạn đã nhập chỉ số huyết áp cho ngày hôm nay vui lòng đợi ngày mai!'
             )
         );
     }

@@ -210,7 +210,7 @@ const updateResultExam = async (req, res, next) => {
                     const message = new Message({
                         conversation: conversation._id,
                         senderId: doctor_id,
-                        content: `Kết quả khám của bạn ${result_exam} -> Tình trạng sức khỏe: ${
+                        content: `Kết quả khám của bạn ${result_exam} \nTình trạng sức khỏe: ${
                             anamnesis === 0
                                 ? 'Bình Thường'
                                 : anamnesis === 1
@@ -232,7 +232,7 @@ const updateResultExam = async (req, res, next) => {
                     const notification = new Notification({
                         from: doctor_id,
                         to: patient_id,
-                        content: `Kết quả khám của bạn ${result_exam} -> Tình trạng sức khỏe: ${
+                        content: `Kết quả khám của bạn ${result_exam} \nTình trạng sức khỏe: ${
                             anamnesis === 0
                                 ? 'Bình Thường'
                                 : anamnesis === 1
@@ -344,14 +344,12 @@ const handleBloodPressureStatus = (blood = null) => {
     )
         return 1;
     else if (
-        blood.systolic >= 130 &&
-        blood.systolic <= 139 &&
-        blood.diastole >= 80 &&
-        blood.diastole < 90
+        (blood.systolic >= 130 && blood.systolic <= 139) ||
+        (blood.diastole >= 80 && blood.diastole < 90)
     )
         return 2;
-    else if (blood.systolic > 140 && blood.diastole > 90) return 3;
-    else if (blood.systolic > 180 && blood.diastole > 120) return 4;
+    else if (blood.systolic > 140 || blood.diastole > 90) return 3;
+    else if (blood.systolic > 180 || blood.diastole > 120) return 4;
 };
 
 const handleThreeMetric = (bmi, glycemic, blood) => {
@@ -604,6 +602,7 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                 const last_blood_pressures =
                     blood_pressures[blood_pressures.length - 1];
 
+                console.log('blood ->', last_blood_pressures);
                 const status = {
                     bmi: handleBMIStatus(
                         patient.person.gender,
