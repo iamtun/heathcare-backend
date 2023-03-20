@@ -282,38 +282,41 @@ const getAll = Base.getAll(ScheduleDetailSchema);
  * 2: nguy hiểm
  */
 const handleBMIStatus = (gender, bmi_avg) => {
-    switch (gender) {
-        case true:
-            {
-                if (bmi_avg < 20) {
-                    return 1;
-                } else if (bmi_avg < 25) {
-                    return 0;
-                } else if (bmi_avg < 30) {
-                    return 1;
-                } else if (bmi_avg > 30) {
-                    return 2;
-                } else {
-                    return -1;
+    if (bmi_avg) {
+        switch (gender) {
+            case true:
+                {
+                    if (bmi_avg < 20) {
+                        return 1;
+                    } else if (bmi_avg < 25) {
+                        return 0;
+                    } else if (bmi_avg < 30) {
+                        return 1;
+                    } else if (bmi_avg > 30) {
+                        return 2;
+                    } else {
+                        return -1;
+                    }
                 }
-            }
-            break;
-        case false:
-            {
-                if (bmi_avg < 18) {
-                    return 1;
-                } else if (bmi_avg < 23) {
-                    return 0;
-                } else if (bmi_avg < 30) {
-                    return 1;
-                } else if (bmi_avg > 30) {
-                    return 2;
-                } else {
-                    return -1;
+                break;
+            case false:
+                {
+                    if (bmi_avg < 18) {
+                        return 1;
+                    } else if (bmi_avg < 23) {
+                        return 0;
+                    } else if (bmi_avg < 30) {
+                        return 1;
+                    } else if (bmi_avg > 30) {
+                        return 2;
+                    } else {
+                        return -1;
+                    }
                 }
-            }
-            break;
+                break;
+        }
     }
+    return -1;
 };
 
 const handleGlycemicStatus = (glycemic = { metric: null, case: 0 }) => {
@@ -378,6 +381,10 @@ const handleBloodPressureStatus = (blood = null) => {
 const handleThreeMetric = (bmi, glycemic, blood) => {
     if (bmi === 0 && glycemic === 0 && blood === 0) {
         return { code: 0, status: 'Bình Thường' };
+    }
+
+    if (blood === -1) {
+        return { code: 0, status: 'Bạn chưa nhập đầy đủ thông tin' };
     }
 
     switch (blood) {
