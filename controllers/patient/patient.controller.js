@@ -106,7 +106,7 @@ const findPatientByToken = async (req, res, next) => {
             const status = {
                 bmi: scheduleDetailController.handleBMIStatus(
                     patient.person.gender,
-                    last_bmi.cal_bmi
+                    last_bmi?.cal_bmi ?? false
                 ),
                 glycemic:
                     scheduleDetailController.handleGlycemicStatus(glycemic),
@@ -117,7 +117,7 @@ const findPatientByToken = async (req, res, next) => {
                 message: scheduleDetailController.handleThreeMetric(
                     scheduleDetailController.handleBMIStatus(
                         patient.person.gender,
-                        last_bmi.cal_bmi
+                        last_bmi?.cal_bmi ?? false
                     ),
                     scheduleDetailController.handleGlycemicStatus(glycemic),
                     scheduleDetailController.handleBloodPressureStatus(

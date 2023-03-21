@@ -8,6 +8,7 @@ import {
 import Base from '../utils/base.controller.js';
 import Rule from '../../models/rule.model.js';
 import AppError from '../../utils/error.util.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 
 const createRule = async (req, res, next) => {
     const { rule } = req;
