@@ -20,6 +20,10 @@ const doctorSchema = new Schema(
             max: 5,
             default: 5,
         },
+        work_type: {
+            type: String,
+            require: true,
+        },
     },
     { timestamps: true }
 );

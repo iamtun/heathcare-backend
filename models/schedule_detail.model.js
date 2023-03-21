@@ -8,6 +8,7 @@ const scheduleDetailSchema = new Schema(
         },
         result_exam: {
             type: String,
+            default: null,
         },
         schedule: {
             type: Schema.Types.ObjectId,

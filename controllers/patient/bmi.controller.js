@@ -1,5 +1,6 @@
 import {
     MESSAGE_NO_PERMISSION,
+    RULE_DOCTOR_REMIND,
     RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
@@ -9,6 +10,7 @@ import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
 import Rule from '../../models/rule.model.js';
 import Patient from '../../models/patient/patient.model.js';
+import Notification from '../../models/notification.model.js';
 
 const calBMI = (w, h) => {
     return parseFloat((w / ((h * h) / 10000)).toFixed(2));
@@ -36,6 +38,37 @@ const spCreateBMI = async (req, res, next) => {
     );
 
     if (doc) {
+        const patient = await Patient.findOne({
+            _id: doc['patient'].toString(),
+        }).populate('person');
+
+        const notifications = [];
+        if (patient?.doctor_blood_id) {
+            const notification = new Notification({
+                from: patient.id,
+                to: patient.doctor_blood_id._id,
+                content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số BMI: Chiều cao ${req.body.height} - Cân nặng ${req.body.height} - Chỉ số BMI ${doc.cal_bmi}`,
+                rule: RULE_DOCTOR_REMIND,
+            });
+
+            const _notification = await notification.save();
+
+            notifications.push(_notification);
+        }
+
+        if (patient?.doctor_glycemic_id) {
+            const notification = new Notification({
+                from: patient.id,
+                to: patient.doctor_glycemic_id._id,
+                content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số BMI: Chiều cao ${req.body.height} - Cân nặng ${req.body.height} - Chỉ số BMI ${doc.cal_bmi}`,
+                rule: RULE_DOCTOR_REMIND,
+            });
+
+            const _notification = await notification.save();
+
+            notifications.push(_notification);
+        }
+
         res.status(201).json({
             status: STATUS_SUCCESS,
             data: {
@@ -45,6 +78,7 @@ const spCreateBMI = async (req, res, next) => {
                     notification:
                         'Thông báo cho chỉ số này hiện tại đang cập nhật',
                 },
+                notifications,
             },
         });
     } else {

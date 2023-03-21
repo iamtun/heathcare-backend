@@ -13,6 +13,10 @@ router
     .get(ScheduleDetailController.getAll);
 
 router
+    .route('/patient/:id/results')
+    .get(ScheduleDetailController.getAllResultExamByPatientId);
+
+router
     .route('/patient/:id')
     .get(ScheduleDetailController.getAllScheduleDetailByPatientId);
 

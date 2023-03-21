@@ -12,6 +12,7 @@ import Patient from '../../models/patient/patient.model.js';
 import Person from '../../models/person.model.js';
 import AppError from '../../utils/error.util.js';
 import { createPerson, updatePerson } from '../../utils/person.util.js';
+import baseController from '../utils/base.controller.js';
 
 import scheduleDetailController from './schedule_detail.controller.js';
 const createPatient = async (req, res, next) => {

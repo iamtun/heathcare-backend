@@ -18,8 +18,8 @@ import Notification from '../../models/notification.model.js';
 const createDoctor = async (req, res, next) => {
     const { rule, account_id, file } = req;
     if (rule === RULE_DOCTOR) {
-        const { username, dob, address, gender } = req.body;
-        if (username && dob && address && gender && account_id) {
+        const { username, dob, address, gender, work_type } = req.body;
+        if (username && dob && address && gender && account_id && work_type) {
             const person = {
                 username,
                 dob,
@@ -39,6 +39,7 @@ const createDoctor = async (req, res, next) => {
             } else {
                 const doctorModel = await Doctor.create({
                     person: personModel._id,
+                    work_type: work_type,
                 });
 
                 res.status(201).json({
