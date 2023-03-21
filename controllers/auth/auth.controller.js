@@ -50,6 +50,7 @@ const register = async (req, res, next) => {
                 //create payload
                 const token = {
                     account_id: account.id,
+                    rule: account.rule,
                 };
 
                 //create token
@@ -159,6 +160,7 @@ const login = async (req, res, next) => {
             //create payload
             const token = {
                 account_id: account.id,
+                rule: account.rule,
                 ...user_info,
             };
 
@@ -178,6 +180,7 @@ const login = async (req, res, next) => {
             //create payload
             const token = {
                 account_id: account.id,
+                rule: account.rule,
             };
 
             //create token
