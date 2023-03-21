@@ -1,13 +1,17 @@
 import moment from 'moment';
 import {
     MESSAGE_NO_PERMISSION,
+    RULE_DOCTOR_REMIND,
     RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
+import Notification from '../../models/notification.model.js';
 import Glycemic from '../../models/patient/glycemic.model.js';
+import Patient from '../../models/patient/patient.model.js';
 import Rule from '../../models/rule.model.js';
 import AppError from '../../utils/error.util.js';
+import baseController from '../utils/base.controller.js';
 import Base from '../utils/base.controller.js';
 import { spCompareDateWithNow } from './bmi.controller.js';
 
@@ -40,8 +44,54 @@ const createGlycemic = async (req, res, next) => {
             )
         );
     }
+    const { doc, error } = await baseController.createAndReturnObject(Glycemic)(
+        req,
+        res,
+        next
+    );
+    if (error) {
+        return next(error);
+    }
 
-    return Base.createOne(Glycemic)(req, res, next);
+    if (doc) {
+        try {
+            const patient = await Patient.findOne({
+                _id: doc['patient'].toString(),
+            }).populate('person');
+
+            const notifications = [];
+            if (patient?.doctor_glycemic_id) {
+                const notification = new Notification({
+                    from: patient.id,
+                    to: patient.doctor_glycemic_id._id,
+                    content: `Bệnh nhân ${
+                        patient['person']['username']
+                    } vừa cập nhật chỉ số Đường huyết ${
+                        doc.case === 1
+                            ? 'Trước khi ăn'
+                            : doc.case === 2
+                            ? 'Sau khi ăn'
+                            : 'Trước khi ngủ'
+                    } : ${doc.metric}`,
+                    rule: RULE_DOCTOR_REMIND,
+                });
+
+                const _notification = await notification.save();
+
+                notifications.push(_notification);
+            }
+
+            return res.status(201).json({
+                status: STATUS_SUCCESS,
+                data: {
+                    doc,
+                    notifications,
+                },
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
 };
 
 const getAllGlycemicByPatientId = async (req, res, next) => {
