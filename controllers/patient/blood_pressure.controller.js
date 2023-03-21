@@ -1,10 +1,13 @@
 import {
     MESSAGE_NO_PERMISSION,
+    RULE_DOCTOR_REMIND,
     RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
+import Notification from '../../models/notification.model.js';
 import BloodPressure from '../../models/patient/blood_pressures.model.js';
+import Patient from '../../models/patient/patient.model.js';
 import AppError from '../../utils/error.util.js';
 import BaseController from '../utils/base.controller.js';
 import { spCompareDateWithNow } from './bmi.controller.js';
@@ -38,7 +41,44 @@ const createBloodPressureMetric = async (req, res, next) => {
         );
     }
 
-    return BaseController.createOne(BloodPressure)(req, res, next);
+    const { doc, error } = await BaseController.createAndReturnObject(
+        BloodPressure
+    )(req, res, next);
+
+    if (error) {
+        return next(error);
+    }
+    if (doc) {
+        try {
+            const patient = await Patient.findOne({
+                _id: doc['patient'].toString(),
+            }).populate('person');
+
+            const notifications = [];
+            if (patient?.doctor_blood_id) {
+                const notification = new Notification({
+                    from: patient.id,
+                    to: patient.doctor_blood_id._id,
+                    content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số  huyết áp: Tâm Thu: ${doc.systolic} - Tâm trương: ${doc.diastole}`,
+                    rule: RULE_DOCTOR_REMIND,
+                });
+
+                const _notification = await notification.save();
+
+                notifications.push(_notification);
+            }
+
+            return res.status(201).json({
+                status: STATUS_SUCCESS,
+                data: {
+                    doc,
+                    notifications,
+                },
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
 };
 
 const getAllBloodPressuresByPatientId = async (req, res, next) => {

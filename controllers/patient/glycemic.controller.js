@@ -72,7 +72,7 @@ const createGlycemic = async (req, res, next) => {
                             : doc.case === 2
                             ? 'Sau khi ăn'
                             : 'Trước khi ngủ'
-                    } : ${doc.metric}`,
+                    } : ${doc.metric} mg/dl`,
                     rule: RULE_DOCTOR_REMIND,
                 });
 
