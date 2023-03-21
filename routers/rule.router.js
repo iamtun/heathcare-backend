@@ -10,13 +10,12 @@ router
     .get(RuleController.getAllRules);
 
 router
+    .route('/doctor/:id')
+    .put(AuthController.authentication, RuleController.censorship);
+
+router
     .route('/:id')
     .get(RuleController.findRuleById)
     .put(AuthController.authentication, RuleController.updateRule);
 
-router.route(
-    '/doctor/:id',
-    AuthController.authentication,
-    RuleController.censorship
-);
 export default router;
