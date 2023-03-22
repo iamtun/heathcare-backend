@@ -5,8 +5,12 @@ import Base from './base.controller.js';
 
 const createMessage = async (req, res, next) => {
     const { conversation } = req.body;
+    const { files } = req;
 
     try {
+        const images = files.map((file) => file.path);
+
+        req.body.images = images;
         const { doc, error } = await Base.createAndReturnObject(Message)(
             req,
             res,
