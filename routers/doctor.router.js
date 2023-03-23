@@ -34,6 +34,17 @@ router
         AuthController.authentication,
         DoctorController.createRemindForPatientById
     );
+
+router
+    .route('/cancel/patient/:id')
+    .put(
+        AuthController.authentication,
+        DoctorController.cancelScheduleWithPatientId
+    );
+
+router
+    .route('/move/patient/:id')
+    .put(AuthController.authentication, DoctorController.moveDoctorExamPatient);
 router
     .route('/:id')
     .get(DoctorController.findDoctorById)

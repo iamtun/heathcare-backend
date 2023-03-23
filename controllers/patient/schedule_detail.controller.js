@@ -27,6 +27,7 @@ import moment from 'moment';
 import 'moment/locale/vi.js';
 import Conversation from '../../models/conversation.model.js';
 import Message from '../../models/message.model.js';
+import doctorController from '../doctor/doctor.controller.js';
 moment.locale('vi');
 
 //patient register
@@ -795,24 +796,56 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
             .populate('schedule')
             .populate('doctor');
 
-        //create notification
-        const _notification = new Notification({
-            from: schedule_detail['doctor']._id,
-            to: schedule_detail['patient']._id,
-            content: `Bác sĩ đã xác nhận lịch khám vào lúc ${moment(
-                schedule_detail['day_exam']
-            ).format('llll')}. Bạn vui lòng chuẩn bị trước giờ hẹn 5 phút!`,
-            rule: RULE_NOTIFICATION_REGISTER_SCHEDULE,
-        });
-
-        const notification = await _notification.save();
-
         if (schedule_detail) {
+            //create notification
+            const _notification = new Notification({
+                from: schedule_detail['doctor']._id,
+                to: schedule_detail['patient']._id,
+                content: `Bác sĩ đã xác nhận lịch khám vào lúc ${moment(
+                    schedule_detail['day_exam']
+                ).format('llll')}. Bạn vui lòng chuẩn bị trước giờ hẹn 5 phút!`,
+                rule: RULE_NOTIFICATION_REGISTER_SCHEDULE,
+            });
+
+            const notification = await _notification.save();
+
+            const _conversation = await Conversation.findOne({
+                members: [
+                    schedule_detail['patient']._id,
+                    schedule_detail['doctor']._id,
+                ],
+            });
+
+            if (!_conversation) {
+                const { conversation, message } =
+                    await doctorController.createConversationAndMessage(
+                        schedule_detail['patient']._id,
+                        schedule_detail['doctor']._id,
+                        `Chào bạn, bạn có đặt lịch khám bệnh với tôi vào lúc ! ${moment(
+                            schedule_detail['day_exam']
+                        ).format(
+                            'llll'
+                        )}. Bạn vui lòng chuẩn bị trước giờ hẹn 5 phút!`
+                    );
+
+                return res.status(201).json({
+                    status: 'success',
+                    data: {
+                        schedule_detail,
+                        notification,
+                        message,
+                        conversation,
+                    },
+                });
+            }
+
             res.status(201).json({
                 status: STATUS_SUCCESS,
                 data: {
                     schedule_detail,
                     notification,
+                    message: null,
+                    conversation: null,
                 },
             });
         } else {
