@@ -740,14 +740,14 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
     const doctorId = req.params.id;
     const schedule_details = await ScheduleDetailSchema.find({
         doctor: doctorId,
+        status: false,
+        result_exam: { $ne: null },
     })
         .populate('schedule')
         .populate('doctor');
 
-    const details = schedule_details.filter((detail) => !detail.result_exam);
-
     const detail_list_result = await Promise.all(
-        details.map(async (detail) => {
+        schedule_details.map(async (detail) => {
             const person = await Person.findById(detail.doctor.person);
             detail['doctor']['person'] = person;
             return detail;
