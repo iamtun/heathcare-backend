@@ -4,6 +4,7 @@ import {
     RULE_ADMIN,
     RULE_DOCTOR,
     RULE_DOCTOR_REMIND,
+    RULE_SYSTEM,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
@@ -14,6 +15,8 @@ import Base from '../utils/base.controller.js';
 import Conversation from '../../models/conversation.model.js';
 import Message from '../../models/message.model.js';
 import Notification from '../../models/notification.model.js';
+import Patient from '../../models/patient/patient.model.js';
+import mongoose from 'mongoose';
 
 const createDoctor = async (req, res, next) => {
     const { rule, account_id, file } = req;
@@ -266,6 +269,254 @@ const createRemindForPatientById = async (req, res, next) => {
     }
 };
 
+const cancelScheduleWithPatientId = async (req, res, next) => {
+    const { rule } = req;
+    const { id } = req.params;
+    const { work_type, doctor_id } = req.body;
+
+    if (id !== null && work_type !== null && doctor_id) {
+        if (rule === RULE_DOCTOR) {
+            if (work_type === 'blood') {
+                const patient = await Patient.findByIdAndUpdate(
+                    id,
+                    {
+                        doctor_blood_id: null,
+                    },
+                    { new: true }
+                );
+
+                const notification = new Notification({
+                    from: doctor_id,
+                    to: id,
+                    content: `Bác sĩ chịu trách nhiệm về  huyết áp đã dừng theo dõi sức khỏe của bạn`,
+                    rule: RULE_SYSTEM,
+                });
+
+                const _notification = await notification.save();
+
+                if (patient) {
+                    return res.status(201).json({
+                        status: 'success',
+                        data: {
+                            patient,
+                            notification: _notification,
+                        },
+                    });
+                }
+            }
+
+            if (work_type === 'glycemic') {
+                const patient = await Patient.findByIdAndUpdate(
+                    id,
+                    {
+                        doctor_glycemic_id: null,
+                    },
+                    { new: true }
+                ).populate('person');
+
+                const notification = new Notification({
+                    from: doctor_id,
+                    to: id,
+                    content: `Bác sĩ chịu trách nhiệm về  đường huyết đã dừng theo dõi sức khỏe của bạn`,
+                    rule: RULE_SYSTEM,
+                });
+
+                const _notification = await notification.save();
+
+                if (patient) {
+                    return res.status(201).json({
+                        status: 'success',
+                        data: {
+                            patient,
+                            notification: _notification,
+                        },
+                    });
+                }
+            }
+        }
+        return next(
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
+            req,
+            res,
+            next
+        );
+    }
+
+    return next(
+        new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+        req,
+        res,
+        next
+    );
+};
+
+const createConversationAndMessage = async (patientId, doctorId, content) => {
+    try {
+        const _conversation = await Conversation.create({
+            members: [patientId, doctorId],
+        });
+
+        const message = await Message.create({
+            conversation: _conversation._id,
+            senderId: doctorId,
+            content: content,
+        });
+
+        const __conversation = await Conversation.findByIdAndUpdate(
+            _conversation._id,
+            {
+                last_message: new mongoose.Types.ObjectId(message.id),
+            },
+            { new: true }
+        );
+
+        return {
+            message: message,
+            conversation: __conversation,
+        };
+    } catch (error) {
+        return {
+            message: null,
+            conversation: null,
+        };
+    }
+};
+
+const moveDoctorExamPatient = async (req, res, next) => {
+    const { rule } = req;
+    const { id } = req.params;
+    const { work_type, doctor_id, reason } = req.body;
+
+    if (id !== null && work_type !== null && doctor_id && reason) {
+        if (rule === RULE_DOCTOR) {
+            if (work_type === 'blood') {
+                const patient = await Patient.findByIdAndUpdate(
+                    id,
+                    {
+                        doctor_blood_id: new mongoose.Types.ObjectId(
+                            `${doctor_id}`
+                        ),
+                    },
+                    { new: true }
+                );
+
+                if (patient) {
+                    const notification = new Notification({
+                        from: doctor_id,
+                        to: id,
+                        content: `Bác sĩ chịu trách nhiệm về  huyết áp đã chuyển bạn cho một bác sĩ khác. Lý do: ${reason}`,
+                        rule: RULE_SYSTEM,
+                    });
+
+                    const _notification = await notification.save();
+
+                    const _conversation = await Conversation.findOne({
+                        members: [id, doctor_id],
+                    });
+
+                    if (!_conversation) {
+                        const { conversation, message } =
+                            await createConversationAndMessage(
+                                id,
+                                doctor_id,
+                                'Chào bạn, từ hôm nay tôi sẽ chịu trách nhiệm về việc theo dõi huyết áp và đưa ra lời khuyên cho bạn!'
+                            );
+
+                        return res.status(201).json({
+                            status: 'success',
+                            data: {
+                                patient,
+                                notification: _notification,
+                                message,
+                                conversation,
+                            },
+                        });
+                    }
+
+                    return res.status(201).json({
+                        status: 'success',
+                        data: {
+                            patient,
+                            notification: _notification,
+                            message: null,
+                            conversation: null,
+                        },
+                    });
+                }
+            }
+
+            if (work_type === 'glycemic') {
+                const patient = await Patient.findByIdAndUpdate(
+                    id,
+                    {
+                        doctor_glycemic_id: new mongoose.Types.ObjectId(
+                            `${doctor_id}`
+                        ),
+                    },
+                    { new: true }
+                ).populate('person');
+
+                if (patient) {
+                    const notification = new Notification({
+                        from: doctor_id,
+                        to: id,
+                        content: `Bác sĩ chịu trách nhiệm về  đường huyết đã chuyển bạn cho bác sĩ khác. Lý do: ${reason}`,
+                        rule: RULE_SYSTEM,
+                    });
+
+                    const _notification = await notification.save();
+
+                    const _conversation = await Conversation.findOne({
+                        members: [id, doctor_id],
+                    });
+
+                    if (!_conversation) {
+                        const { conversation, message } =
+                            await createConversationAndMessage(
+                                id,
+                                doctor_id,
+                                'Chào bạn, từ hôm nay tôi sẽ chịu trách nhiệm về việc theo dõi đường huyết và đưa ra lời khuyên cho bạn!'
+                            );
+
+                        return res.status(201).json({
+                            status: 'success',
+                            data: {
+                                patient,
+                                notification: _notification,
+                                message,
+                                conversation,
+                            },
+                        });
+                    }
+
+                    return res.status(201).json({
+                        status: 'success',
+                        data: {
+                            patient,
+                            notification: _notification,
+                            message: null,
+                            conversation: null,
+                        },
+                    });
+                }
+            }
+        }
+        return next(
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
+            req,
+            res,
+            next
+        );
+    }
+
+    return next(
+        new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+        req,
+        res,
+        next
+    );
+};
+
 export default {
     createDoctor,
     findDoctorById,
@@ -273,4 +524,7 @@ export default {
     getDoctorListWaitingAccept,
     updateDoctorInfoById,
     createRemindForPatientById,
+    cancelScheduleWithPatientId,
+    moveDoctorExamPatient,
+    createConversationAndMessage,
 };
