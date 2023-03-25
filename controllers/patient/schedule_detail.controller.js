@@ -741,7 +741,6 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
     const schedule_details = await ScheduleDetailSchema.find({
         doctor: doctorId,
         status: false,
-        result_exam: { $ne: null },
     })
         .populate('schedule')
         .populate('doctor');
