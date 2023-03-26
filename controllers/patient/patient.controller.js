@@ -5,6 +5,7 @@ import {
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
+import Doctor from '../../models/doctor/doctor.model.js';
 import BloodPressure from '../../models/patient/blood_pressures.model.js';
 import BMI from '../../models/patient/bmi.model.js';
 import Glycemic from '../../models/patient/glycemic.model.js';
@@ -93,6 +94,7 @@ const findPatientByToken = async (req, res, next) => {
                     next
                 );
             }
+
             const bmis = await BMI.find({ patient: patient.id });
             const last_bmi = bmis[bmis.length - 1];
             const glycemics = await Glycemic.find({ patient: patient.id });
@@ -127,9 +129,32 @@ const findPatientByToken = async (req, res, next) => {
                 ),
             };
 
-            return res
-                .status(200)
-                .json({ status: STATUS_SUCCESS, data: { patient, status } });
+            if (patient?.doctor_blood_id) {
+                const doctor_blood = await Doctor.findById(
+                    patient.doctor_blood_id
+                ).populate('person');
+                patient['doctor_blood_id'] = doctor_blood;
+            }
+
+            if (patient?.doctor_glycemic_id) {
+                const doctor_glycemic = await Doctor.findById(
+                    patient.doctor_glycemic_id
+                ).populate('person');
+                patient['doctor_glycemic_id'] = doctor_glycemic;
+            }
+
+            return res.status(200).json({
+                status: STATUS_SUCCESS,
+                data: {
+                    patient,
+                    status,
+                    metrics: {
+                        glycemic,
+                        last_blood_pressures,
+                        last_bmi,
+                    },
+                },
+            });
         } catch (error) {
             next(error);
         }
