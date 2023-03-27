@@ -704,7 +704,7 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                 const status = {
                     bmi: handleBMIStatus(
                         patient.person.gender,
-                        last_bmi.cal_bmi
+                        last_bmi?.cal_bmi ?? null
                     ),
                     glycemic: handleGlycemicStatus(glycemic),
                     blood_pressure:
@@ -712,7 +712,7 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                     message: handleThreeMetric(
                         handleBMIStatus(
                             patient.person.gender,
-                            last_bmi.cal_bmi
+                            last_bmi?.cal_bmi ?? null
                         ),
                         handleGlycemicStatus(glycemic),
                         handleBloodPressureStatus(last_blood_pressures)
