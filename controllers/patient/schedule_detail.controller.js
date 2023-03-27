@@ -452,7 +452,7 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
     }
 
     if (blood === -1) {
-        return { code: 0, status: 'Bạn chưa nhập đầy đủ thông tin' };
+        return { code: -1, status: 'Bạn chưa nhập đầy đủ thông tin' };
     }
 
     switch (blood) {
