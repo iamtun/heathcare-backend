@@ -59,7 +59,7 @@ const createGlycemic = async (req, res, next) => {
                 _id: doc['patient'].toString(),
             }).populate('person');
 
-            const notifications = [];
+            let notification = null;
             if (patient?.doctor_glycemic_id) {
                 const notification = new Notification({
                     from: patient.id,
@@ -78,14 +78,14 @@ const createGlycemic = async (req, res, next) => {
 
                 const _notification = await notification.save();
 
-                notifications.push(_notification);
+                notification = _notification;
             }
 
             return res.status(201).json({
                 status: STATUS_SUCCESS,
                 data: {
                     doc,
-                    notifications,
+                    notification,
                 },
             });
         } catch (error) {
