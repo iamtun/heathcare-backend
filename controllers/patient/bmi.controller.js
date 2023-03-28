@@ -47,7 +47,7 @@ const spCreateBMI = async (req, res, next) => {
             const notification = new Notification({
                 from: patient.id,
                 to: patient.doctor_blood_id._id,
-                content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số BMI: Chiều cao ${req.body.height} - Cân nặng ${req.body.height} - Chỉ số BMI ${doc.cal_bmi}`,
+                content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số BMI: Chiều cao ${req.body.height} - Cân nặng ${req.body.weight} - Chỉ số BMI ${doc.cal_bmi}`,
                 rule: RULE_DOCTOR_REMIND,
             });
 
@@ -60,7 +60,7 @@ const spCreateBMI = async (req, res, next) => {
             const notification = new Notification({
                 from: patient.id,
                 to: patient.doctor_glycemic_id._id,
-                content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số BMI: Chiều cao ${req.body.height} - Cân nặng ${req.body.height} - Chỉ số BMI ${doc.cal_bmi}`,
+                content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số BMI: Chiều cao ${req.body.height} - Cân nặng ${req.body.weight} - Chỉ số BMI ${doc.cal_bmi}`,
                 rule: RULE_DOCTOR_REMIND,
             });
 
