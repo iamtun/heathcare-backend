@@ -2,6 +2,8 @@ import {
     MESSAGE_NO_PERMISSION,
     RULE_DOCTOR_REMIND,
     RULE_PATIENT,
+    RULE_SOS,
+    RULE_WARNING,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
@@ -11,6 +13,11 @@ import Base from '../utils/base.controller.js';
 import Rule from '../../models/rule.model.js';
 import Patient from '../../models/patient/patient.model.js';
 import Notification from '../../models/notification.model.js';
+import conversationController from '../utils/conversation.controller.js';
+import {
+    handleBloodPressureStatus,
+    handleBMIStatus,
+} from './schedule_detail.controller.js';
 
 const calBMI = (w, h) => {
     return parseFloat((w / ((h * h) / 10000)).toFixed(2));
@@ -44,11 +51,24 @@ const spCreateBMI = async (req, res, next) => {
 
         const notifications = [];
         if (patient?.doctor_blood_id) {
+            const conversation_id =
+                await conversationController.findConversationBy2Id(
+                    patient.id,
+                    patient.doctor_blood_id._id
+                );
+            const number = handleBloodPressureStatus(doc);
+
             const notification = new Notification({
+                conversation_id,
                 from: patient.id,
                 to: patient.doctor_blood_id._id,
                 content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số BMI: Chiều cao ${req.body.height} - Cân nặng ${req.body.weight} - Chỉ số BMI ${doc.cal_bmi}`,
-                rule: RULE_DOCTOR_REMIND,
+                rule:
+                    number === 0
+                        ? RULE_DOCTOR_REMIND
+                        : number === 1
+                        ? RULE_WARNING
+                        : RULE_SOS,
             });
 
             const _notification = await notification.save();
@@ -57,11 +77,25 @@ const spCreateBMI = async (req, res, next) => {
         }
 
         if (patient?.doctor_glycemic_id) {
+            const conversation_id =
+                await conversationController.findConversationBy2Id(
+                    patient.id,
+                    patient.doctor_glycemic_id._id
+                );
+
+            const number = handleBMIStatus(patient.person.gender, doc.cal_bmi);
+
             const notification = new Notification({
+                conversation_id,
                 from: patient.id,
                 to: patient.doctor_glycemic_id._id,
                 content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số BMI: Chiều cao ${req.body.height} - Cân nặng ${req.body.weight} - Chỉ số BMI ${doc.cal_bmi}`,
-                rule: RULE_DOCTOR_REMIND,
+                rule:
+                    number === 0
+                        ? RULE_DOCTOR_REMIND
+                        : number === 1
+                        ? RULE_WARNING
+                        : RULE_SOS,
             });
 
             const _notification = await notification.save();

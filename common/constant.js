@@ -17,3 +17,6 @@ export const RULE_NOTIFICATION_CANCEL_SCHEDULE =
 export const RULE_DOCTOR_REMIND = 'RULE_DOCTOR_REMIND'; // bác sĩ nhắc nhở
 export const RULE_SYSTEM = 'RULE_SYSTEM';
 export const RULE_INFORMATION = 'RULE_INFORMATION';
+
+export const RULE_WARNING = 'RULE_WARNING';
+export const RULE_SOS = 'RULE_SOS';

@@ -24,6 +24,9 @@ const notificationSchema = new Schema(
             default: RULE_INFORMATION,
             require: true,
         },
+        conversation_id: {
+            type: String,
+        },
     },
     {
         timestamps: true,
