@@ -6,6 +6,13 @@ import Base from './base.controller.js';
 import { STATUS_SUCCESS } from '../../common/constant.js';
 import Message from '../../models/message.model.js';
 
+const findConversationBy2Id = async (patient_id, doctor_id) => {
+    const conversation = await Conversation.findOne({
+        members: [patient_id, doctor_id],
+    });
+    return conversation._id;
+};
+
 const createConversation = async (req, res, next) => {
     try {
         const { doc } = await Base.createAndReturnObject(Conversation)(
@@ -113,4 +120,5 @@ export default {
     getAllConversation,
     getConversationListByPatientId,
     getConversationListByDoctorId,
+    findConversationBy2Id,
 };

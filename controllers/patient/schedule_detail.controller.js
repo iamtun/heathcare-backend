@@ -349,7 +349,7 @@ const getAll = Base.getAll(ScheduleDetailSchema);
  * 1: cảnh báo
  * 2: nguy hiểm
  */
-const handleBMIStatus = (gender, bmi_avg) => {
+export const handleBMIStatus = (gender, bmi_avg) => {
     if (bmi_avg) {
         switch (gender) {
             case true:
@@ -387,7 +387,7 @@ const handleBMIStatus = (gender, bmi_avg) => {
     return -1;
 };
 
-const handleGlycemicStatus = (glycemic = { metric: null, case: 0 }) => {
+export const handleGlycemicStatus = (glycemic = { metric: null, case: 0 }) => {
     const { metric } = glycemic;
     if (glycemic.case) {
         switch (glycemic.case) {
@@ -428,7 +428,7 @@ const handleGlycemicStatus = (glycemic = { metric: null, case: 0 }) => {
  * 4: tăng huyết áp khẩn cấp(báo động)
  */
 
-const handleBloodPressureStatus = (blood = null) => {
+export const handleBloodPressureStatus = (blood = null) => {
     if (blood === null) return -1;
     if (blood.systolic < 120 && blood.diastole < 80) return 0;
     else if (

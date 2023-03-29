@@ -2,6 +2,8 @@ import {
     MESSAGE_NO_PERMISSION,
     RULE_DOCTOR_REMIND,
     RULE_PATIENT,
+    RULE_SOS,
+    RULE_WARNING,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
@@ -10,7 +12,9 @@ import BloodPressure from '../../models/patient/blood_pressures.model.js';
 import Patient from '../../models/patient/patient.model.js';
 import AppError from '../../utils/error.util.js';
 import BaseController from '../utils/base.controller.js';
+import conversationController from '../utils/conversation.controller.js';
 import { spCompareDateWithNow } from './bmi.controller.js';
+import { handleBloodPressureStatus } from './schedule_detail.controller.js';
 
 const createBloodPressureMetric = async (req, res, next) => {
     const { rule } = req;
@@ -56,16 +60,30 @@ const createBloodPressureMetric = async (req, res, next) => {
 
             let notification = null;
             if (patient?.doctor_blood_id) {
-                const notification = new Notification({
+                const conversation_id =
+                    await conversationController.findConversationBy2Id(
+                        patient.id,
+                        patient.doctor_glycemic_id._id
+                    );
+
+                const number = handleBloodPressureStatus(doc);
+
+                const _notification = new Notification({
+                    conversation_id,
                     from: patient.id,
                     to: patient.doctor_blood_id._id,
                     content: `Bệnh nhân ${patient['person']['username']} vừa cập nhật chỉ số  huyết áp: Tâm Thu: ${doc.systolic} - Tâm trương: ${doc.diastole}`,
-                    rule: RULE_DOCTOR_REMIND,
+                    rule:
+                        number === 0
+                            ? RULE_DOCTOR_REMIND
+                            : number > 0 && number < 4
+                            ? RULE_WARNING
+                            : RULE_SOS,
                 });
 
-                const _notification = await notification.save();
+                const __notification = await _notification.save();
 
-                notification = _notification;
+                notification = __notification;
             }
 
             return res.status(201).json({
