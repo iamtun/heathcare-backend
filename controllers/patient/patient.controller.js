@@ -217,7 +217,10 @@ const updatePatientInfoById = async (req, res, next) => {
                             id,
                             { blood: blood },
                             { new: true }
-                        ).populate('person');
+                        )
+                            .populate('person')
+                            .populate('doctor_blood_id')
+                            .populate('doctor_glycemic_id');
 
                         return res.status(201).json({
                             status: STATUS_SUCCESS,

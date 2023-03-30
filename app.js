@@ -19,6 +19,9 @@ import MessageRouters from './routers/message.router.js';
 import RuleRouters from './routers/rule.router.js';
 import NotificationRouters from './routers/notification.router.js';
 import BloodPressuresRouters from './routers/blood_pressure.router.js';
+import PostRouters from './routers/post.router.js';
+import CommentRouters from './routers/comment.router.js';
+
 const app = express();
 
 app.use(cors());
@@ -40,6 +43,8 @@ app.use('/api/v1/messages', MessageRouters);
 app.use('/api/v1/rules', RuleRouters);
 app.use('/api/v1/notifications', NotificationRouters);
 app.use('/api/v1/blood-pressures', BloodPressuresRouters);
+app.use('/api/v1/posts', PostRouters);
+app.use('/api/v1/comments', CommentRouters);
 
 app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');

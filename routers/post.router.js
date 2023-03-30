@@ -1,0 +1,13 @@
+import express from 'express';
+import UploadCloud from '../configs/cloudinary.config.js';
+import PostController from '../controllers/post/post.controller.js';
+const router = express.Router();
+
+router
+    .route('/')
+    .post(
+        UploadCloud.uploadCloud.array('image', 5),
+        PostController.createNewPost
+    )
+    .get(PostController.getAllPost);
+export default router;
