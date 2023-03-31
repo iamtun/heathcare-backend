@@ -2,6 +2,10 @@ import mongoose, { Schema } from 'mongoose';
 
 const postSchema = new Schema(
     {
+        title: {
+            type: String,
+            require: [true, 'Vui lòng nhập tiêu đề'],
+        },
         content: {
             type: String,
             require: [true, 'Vui lòng nhập nội dung'],
