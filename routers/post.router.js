@@ -11,5 +11,7 @@ router
     )
     .get(PostController.getAllPost);
 
+router.route('/:id/like').post(PostController.likePost);
+router.route('/:id/dislike').post(PostController.dislikePost);
 router.route('/:id').get(PostController.getPostById);
 export default router;
