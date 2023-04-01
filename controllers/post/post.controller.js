@@ -3,6 +3,7 @@ import Doctor from '../../models/doctor/doctor.model.js';
 import Patient from '../../models/patient/patient.model.js';
 import Person from '../../models/person.model.js';
 import Post from '../../models/post/post.model.js';
+import AppError from '../../utils/error.util.js';
 import BaseController from '../utils/base.controller.js';
 
 const createNewPost = async (req, res, next) => {
@@ -54,4 +55,31 @@ const getAllPost = async (req, res, next) => {
     });
 };
 
-export default { createNewPost, getAllPost };
+const getPostById = async (req, res, next) => {
+    const { id } = req.params;
+
+    const post = await Post.findById(id).populate('author');
+    if (post) {
+        let author = post['author'];
+        const person = await Person.findById(author.person);
+        post['author']['person'] = person;
+        return res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: post,
+        });
+    }
+
+    return next(
+        AppError(404, STATUS_FAIL, `Không tìm thấy bài viết với id = ${id}`),
+        req,
+        res,
+        next
+    );
+};
+
+// const likePost = async (req, res, next) => {
+//     const { id } = req.params;
+//     const { user_id } = req.body;
+// };
+
+export default { createNewPost, getAllPost, getPostById };

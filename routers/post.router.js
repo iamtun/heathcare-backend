@@ -10,4 +10,6 @@ router
         PostController.createNewPost
     )
     .get(PostController.getAllPost);
+
+router.route('/:id').get(PostController.getPostById);
 export default router;
