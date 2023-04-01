@@ -20,6 +20,9 @@ const postSchema = new Schema(
             },
         ],
         author: { type: Schema.Types.ObjectId, ref: 'doctors', require: true },
+        likes: {
+            type: [String],
+        },
     },
     { timestamps: true }
 );
