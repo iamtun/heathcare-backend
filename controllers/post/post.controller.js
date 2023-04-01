@@ -77,9 +77,85 @@ const getPostById = async (req, res, next) => {
     );
 };
 
-// const likePost = async (req, res, next) => {
-//     const { id } = req.params;
-//     const { user_id } = req.body;
-// };
+const likePost = async (req, res, next) => {
+    const { id } = req.params;
+    const { user_id } = req.body;
 
-export default { createNewPost, getAllPost, getPostById };
+    try {
+        const post = await Post.findById(id).populate('author');
+        if (post) {
+            let author = post['author'];
+            const person = await Person.findById(author.person);
+            post['author']['person'] = person;
+
+            if (!post['likes'].includes(user_id)) post['likes'].push(user_id);
+
+            const _post = await post.save();
+
+            return res.status(200).json({
+                status: STATUS_SUCCESS,
+                data: _post,
+            });
+        }
+
+        return next(
+            AppError(
+                404,
+                STATUS_FAIL,
+                `Không tìm thấy bài viết với id = ${id}`
+            ),
+            req,
+            res,
+            next
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
+const dislikePost = async (req, res, next) => {
+    const { id } = req.params;
+    const { user_id } = req.body;
+
+    try {
+        const post = await Post.findById(id).populate('author');
+        if (post) {
+            let author = post['author'];
+            const person = await Person.findById(author.person);
+            post['author']['person'] = person;
+
+            if (post['likes'].includes(user_id)) {
+                const index = post['likes'].findIndex((id) => id === user_id);
+                if (index > -1) post['likes'].splice(index, 1);
+            }
+
+            const _post = await post.save();
+
+            return res.status(200).json({
+                status: STATUS_SUCCESS,
+                data: _post,
+            });
+        }
+
+        return next(
+            AppError(
+                404,
+                STATUS_FAIL,
+                `Không tìm thấy bài viết với id = ${id}`
+            ),
+            req,
+            res,
+            next
+        );
+    } catch (error) {
+        return next(error);
+    }
+};
+
+export default {
+    createNewPost,
+    getAllPost,
+    getPostById,
+    likePost,
+    dislikePost,
+};
