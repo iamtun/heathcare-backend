@@ -466,27 +466,27 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
                 if (bmi === 0 && glycemic === 2)
                     return {
                         code: 2,
-                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động',
                     };
                 if (bmi === 1 && glycemic === 0)
                     return {
                         code: 1,
-                        status: 'Chỉ số  sức khỏe của bạn không được tốt và đang trong giai đoạn tiền huyết áp',
+                        status: 'Chỉ số  sức khỏe của bạn không được tốt',
                     };
                 if (bmi === 2 && glycemic === 0)
                     return {
                         code: 2,
-                        status: 'Chỉ số sức khỏe của bạn đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                        status: 'Chỉ số sức khỏe của bạn đang ở mức báo động',
                     };
                 if (bmi === 1 && glycemic === 1)
                     return {
                         code: 1,
-                        status: 'Cả 2 chỉ số sức khỏe không được tốt và đang trong giai đoạn tiền huyết áp',
+                        status: 'Cả 2 chỉ số sức khỏe không được tốt ',
                     };
                 if (bmi === 2 && glycemic === 2)
                     return {
                         code: 2,
-                        status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                        status: 'Cả 2 chỉ số sức khỏe đang ở mức báo động',
                     };
                 if (bmi === -1 || glycemic === -1)
                     return {
@@ -497,10 +497,15 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
             break;
         case 1:
             {
+                if (bmi === 0 && glycemic === 0)
+                    return {
+                        code: 1,
+                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn tiền huyết áp',
+                    };
                 if (bmi === 0 && glycemic === 1)
                     return {
                         code: 1,
-                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn tiền huyết áp',
                     };
                 if (bmi === 0 && glycemic === 2)
                     return {
@@ -536,9 +541,14 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
             break;
         case 2:
             {
+                if (bmi === 0 && glycemic === 0)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 1',
+                    };
                 if (bmi === 0 && glycemic === 1)
                     return {
-                        code: 1,
+                        code: 2,
                         status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 1',
                     };
                 if (bmi === 0 && glycemic === 2)
@@ -575,6 +585,12 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
             break;
         case 3:
             {
+                if (bmi === 0 && glycemic === 0)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+
                 if (bmi === 0 && glycemic === 1)
                     return {
                         code: 2,
@@ -613,10 +629,15 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
             }
             break;
         case 4: {
+            if (bmi === 0 && glycemic === 0)
+                return {
+                    code: 2,
+                    status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai tăng huyết áp khẩn cấp',
+                };
             if (bmi === 0 && glycemic === 1)
                 return {
                     code: 2,
-                    status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn tăng huyết áp khẩn cấp',
+                    status: 'Tình trạng đường huyết của bạn không được tốt và đang trong giai đoạn ',
                 };
             if (bmi === 0 && glycemic === 2)
                 return {
