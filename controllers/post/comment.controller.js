@@ -1,6 +1,7 @@
 import { STATUS_FAIL, STATUS_SUCCESS } from '../../common/constant.js';
 import Doctor from '../../models/doctor/doctor.model.js';
 import Patient from '../../models/patient/patient.model.js';
+import Person from '../../models/person.model.js';
 import Comment from '../../models/post/comment.model.js';
 import Post from '../../models/post/post.model.js';
 import AppError from '../../utils/error.util.js';
@@ -36,12 +37,23 @@ const createComment = async (req, res, next) => {
                         const __comment = await Comment.findById(
                             doc._id
                         ).populate('patient_id');
+
+                        const comment_person_info = await Person.findById(
+                            __comment['patient_id']['person']
+                        );
+                        __comment['patient_id']['person'] = comment_person_info;
                         _comment = __comment;
                     }
                     if (doc.doctor_id) {
                         const __comment = await Comment.findById(
                             doc._id
                         ).populate('doctor_id');
+
+                        const comment_person_info = await Person.findById(
+                            __comment['doctor_id']['person']
+                        );
+
+                        __comment['doctor_id']['person'] = comment_person_info;
                         _comment = __comment;
                     }
                     return res.status(201).json({
