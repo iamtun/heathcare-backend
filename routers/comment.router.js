@@ -9,4 +9,6 @@ router
         UploadCloud.uploadCloud.array('image', 5),
         CommentController.createComment
     );
+
+router.route('/:id').get(CommentController.getCommentListByPostId);
 export default router;

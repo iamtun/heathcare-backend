@@ -12,7 +12,7 @@ const createComment = async (req, res, next) => {
     req.body.images = images;
     req.body.post_id = id;
     const post = await Post.findById(id);
-    console.log(id);
+
     if (post) {
         try {
             const { doc, error } = await BaseController.createAndReturnObject(
@@ -49,7 +49,11 @@ const createComment = async (req, res, next) => {
                 }
             }
             return next(
-                new AppError(400, STATUS_FAIL, 'Tạo bình luận thất bại'),
+                new AppError(
+                    400,
+                    STATUS_FAIL,
+                    `Tạo bình luận thất bại - > ${JSON.stringify(error)}`
+                ),
                 req,
                 res,
                 next
@@ -77,4 +81,15 @@ const createComment = async (req, res, next) => {
     }
 };
 
-export default { createComment };
+const getCommentListByPostId = async (req, res, next) => {
+    const { id } = req.params;
+
+    const comments = await Comment.find({ post_id: id })
+        .populate('doctor_id')
+        .populate('patient_id');
+
+    res.status(200).json({
+        data: comments,
+    });
+};
+export default { createComment, getCommentListByPostId };

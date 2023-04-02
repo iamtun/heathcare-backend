@@ -16,7 +16,7 @@ const createNewPost = async (req, res, next) => {
 };
 
 const getAllPost = async (req, res, next) => {
-    const posts = await Post.find({}).populate('author').populate('comments');
+    const posts = await Post.find({}).populate('author');
 
     const post_list = await Promise.all(
         posts.map(async (post) => {
@@ -26,25 +26,25 @@ const getAllPost = async (req, res, next) => {
 
             post['author'] = author;
 
-            post['comments'] = await Promise.all(
-                post['comments'].map(async (comment) => {
-                    if (comment?.patient_id) {
-                        const patient = await Patient.findById(
-                            comment.patient_id
-                        ).populate('person');
-                        comment['patient_id'] = patient;
-                    }
+            // post['comments'] = await Promise.all(
+            //     post['comments'].map(async (comment) => {
+            //         if (comment?.patient_id) {
+            //             const patient = await Patient.findById(
+            //                 comment.patient_id
+            //             ).populate('person');
+            //             comment['patient_id'] = patient;
+            //         }
 
-                    if (comment?.doctor_id) {
-                        const doctor = await Doctor.findById(
-                            comment.doctor_id
-                        ).populate('person');
-                        comment['doctor_id'] = doctor;
-                    }
+            //         if (comment?.doctor_id) {
+            //             const doctor = await Doctor.findById(
+            //                 comment.doctor_id
+            //             ).populate('person');
+            //             comment['doctor_id'] = doctor;
+            //         }
 
-                    return comment;
-                })
-            );
+            //         return comment;
+            //     })
+            // );
             return post;
         })
     );
@@ -156,10 +156,25 @@ const dislikePost = async (req, res, next) => {
     }
 };
 
+const getPostListByDoctor = async (req, res, next) => {
+    const { id } = req.params;
+
+    try {
+        const posts = await Post.find({ author: id });
+        return res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: posts,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     createNewPost,
     getAllPost,
     getPostById,
     likePost,
     dislikePost,
+    getPostListByDoctor,
 };
