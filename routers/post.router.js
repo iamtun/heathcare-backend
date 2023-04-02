@@ -10,7 +10,7 @@ router
         PostController.createNewPost
     )
     .get(PostController.getAllPost);
-
+router.route('/doctor/:id').get(PostController.getPostListByDoctor);
 router.route('/:id/like').post(PostController.likePost);
 router.route('/:id/dislike').post(PostController.dislikePost);
 router.route('/:id').get(PostController.getPostById);
