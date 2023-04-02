@@ -1,4 +1,6 @@
 import { STATUS_FAIL, STATUS_SUCCESS } from '../../common/constant.js';
+import Doctor from '../../models/doctor/doctor.model.js';
+import Patient from '../../models/patient/patient.model.js';
 import Comment from '../../models/post/comment.model.js';
 import Post from '../../models/post/post.model.js';
 import AppError from '../../utils/error.util.js';
@@ -88,8 +90,27 @@ const getCommentListByPostId = async (req, res, next) => {
         .populate('doctor_id')
         .populate('patient_id');
 
+    const _comments = await Promise.all(
+        comments.map(async (comment) => {
+            if (comment?.patient_id) {
+                const patient = await Patient.findById(
+                    comment.patient_id
+                ).populate('person');
+                comment['patient_id'] = patient;
+            }
+
+            if (comment?.doctor_id) {
+                const doctor = await Doctor.findById(
+                    comment.doctor_id
+                ).populate('person');
+                comment['doctor_id'] = doctor;
+            }
+
+            return comment;
+        })
+    );
     res.status(200).json({
-        data: comments,
+        data: _comments,
     });
 };
 export default { createComment, getCommentListByPostId };
