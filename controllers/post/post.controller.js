@@ -70,7 +70,11 @@ const getPostById = async (req, res, next) => {
     }
 
     return next(
-        AppError(404, STATUS_FAIL, `Không tìm thấy bài viết với id = ${id}`),
+        new AppError(
+            404,
+            STATUS_FAIL,
+            `Không tìm thấy bài viết với id = ${id}`
+        ),
         req,
         res,
         next
@@ -99,7 +103,7 @@ const likePost = async (req, res, next) => {
         }
 
         return next(
-            AppError(
+            new AppError(
                 404,
                 STATUS_FAIL,
                 `Không tìm thấy bài viết với id = ${id}`
@@ -138,7 +142,7 @@ const dislikePost = async (req, res, next) => {
         }
 
         return next(
-            AppError(
+            new AppError(
                 404,
                 STATUS_FAIL,
                 `Không tìm thấy bài viết với id = ${id}`

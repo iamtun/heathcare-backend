@@ -11,53 +11,65 @@ const createComment = async (req, res, next) => {
     const images = files.map((file) => file.path);
     req.body.images = images;
     req.body.post_id = id;
+    const post = await Post.findById(id);
+    console.log(id);
+    if (post) {
+        try {
+            const { doc, error } = await BaseController.createAndReturnObject(
+                Comment
+            )(req, res, next);
 
-    try {
-        const { doc, error } = await BaseController.createAndReturnObject(
-            Comment
-        )(req, res, next);
+            if (doc) {
+                const comments = post.comments;
+                comments.push(doc._id);
+                const postUpdated = await Post.findByIdAndUpdate(
+                    id,
+                    { comments: comments },
+                    { new: true }
+                );
 
-        if (doc) {
-            const post = await Post.findById(id);
-            const comments = post.comments;
-            comments.push(doc._id);
-            const postUpdated = await Post.findByIdAndUpdate(
-                id,
-                { comments: comments },
-                { new: true }
-            );
-
-            if (postUpdated) {
-                let _comment = null;
-                if (doc.patient_id) {
-                    const __comment = await Comment.findById(doc._id).populate(
-                        'patient_id'
-                    );
-                    _comment = __comment;
+                if (postUpdated) {
+                    let _comment = null;
+                    if (doc.patient_id) {
+                        const __comment = await Comment.findById(
+                            doc._id
+                        ).populate('patient_id');
+                        _comment = __comment;
+                    }
+                    if (doc.doctor_id) {
+                        const __comment = await Comment.findById(
+                            doc._id
+                        ).populate('doctor_id');
+                        _comment = __comment;
+                    }
+                    return res.status(201).json({
+                        status: STATUS_SUCCESS,
+                        data: _comment,
+                    });
                 }
-                if (doc.doctor_id) {
-                    const __comment = await Comment.findById(doc._id).populate(
-                        'doctor_id'
-                    );
-                    _comment = __comment;
-                }
-                return res.status(201).json({
-                    status: STATUS_SUCCESS,
-                    data: _comment,
-                });
             }
+            return next(
+                new AppError(400, STATUS_FAIL, 'Tạo bình luận thất bại'),
+                req,
+                res,
+                next
+            );
+        } catch (error) {
+            console.error('error in create comment', error);
+            return next(
+                new AppError(401, STATUS_FAIL, 'Tạo bình luận thất bại'),
+                req,
+                res,
+                next
+            );
         }
-
+    } else {
         return next(
-            AppError(400, STATUS_FAIL, 'Tạo bình luận thất bại'),
-            req,
-            res,
-            next
-        );
-    } catch (error) {
-        console.error('error in create comment', error);
-        return next(
-            AppError(401, STATUS_FAIL, 'Tạo bình luận thất bại'),
+            new AppError(
+                404,
+                STATUS_FAIL,
+                `Không tìm thấy bài viết với id = ${id}`
+            ),
             req,
             res,
             next
