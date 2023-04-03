@@ -160,10 +160,21 @@ const getPostListByDoctor = async (req, res, next) => {
     const { id } = req.params;
 
     try {
-        const posts = await Post.find({ author: id });
+        const posts = await Post.find({ author: id }).populate('author');
+
+        const post_list = await Promise.all(
+            posts.map(async (post) => {
+                let author = post['author'];
+                const person = await Person.findById(author.person);
+                author['person'] = person;
+
+                post['author'] = author;
+                return post;
+            })
+        );
         return res.status(200).json({
             status: STATUS_SUCCESS,
-            data: posts,
+            data: await post_list,
         });
     } catch (error) {
         next(error);
