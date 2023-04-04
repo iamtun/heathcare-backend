@@ -20,6 +20,11 @@ const createNewPost = async (req, res, next) => {
 
     if (doc) {
         const post = await Post.findById(doc._id).populate('author');
+        let author = post['author'];
+        const person = await Person.findById(author.person);
+        author['person'] = person;
+
+        post['author'] = author;
         return res.status(201).json({
             status: STATUS_SUCCESS,
             data: post,
