@@ -12,7 +12,21 @@ const createNewPost = async (req, res, next) => {
     const images = files.map((file) => file.path);
     req.body.images = images;
     // req.body.comments = [];
-    return BaseController.createOne(Post)(req, res, next);
+    const { doc, error } = await BaseController.createAndReturnObject(Post)(
+        req,
+        res,
+        next
+    );
+
+    if (doc) {
+        const post = await Post.findById(doc._id).populate('author');
+        return res.status(201).json({
+            status: STATUS_SUCCESS,
+            data: post,
+        });
+    }
+
+    return next(error);
 };
 
 const getAllPost = async (req, res, next) => {
