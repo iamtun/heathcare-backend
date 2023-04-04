@@ -99,8 +99,23 @@ const findDoctorProfileByAccountId = async (req, res, next) => {
                 }).populate('doctor');
 
                 if (profile) {
-                    const person = await Person.findById(profile.doctor.person);
-                    profile['doctor']['person'] = person;
+                    const doctor = await Doctor.findById(profile.doctor._id)
+                        .populate('person')
+                        .populate('ratings');
+                    if (doctor.ratings.length === 0) doctor['rating'] = 5;
+                    else {
+                        const count_rating = doctor.ratings.reduce(
+                            (accumulator, currentValue) =>
+                                accumulator + currentValue,
+                            0
+                        );
+
+                        const avg_count_rating =
+                            count_rating / doctor.ratings.length;
+                        doctor['rating'] = Math.round(avg_count_rating);
+                    }
+
+                    profile['doctor'] = doctor;
 
                     res.status(200).json({
                         status: STATUS_SUCCESS,
@@ -132,7 +147,6 @@ const findDoctorProfileByAccountId = async (req, res, next) => {
 const findDoctorProfileById = async (req, res, next) => {
     const { id } = req.params;
 
-    console.log(id);
     try {
         const doctor = await Doctor.findById(id);
 
@@ -142,8 +156,23 @@ const findDoctorProfileById = async (req, res, next) => {
             }).populate('doctor');
 
             if (profile) {
-                const person = await Person.findById(profile.doctor.person);
-                profile['doctor']['person'] = person;
+                const doctor = await Doctor.findById(profile.doctor._id)
+                    .populate('person')
+                    .populate('ratings');
+                if (doctor.ratings.length === 0) doctor['rating'] = 5;
+                else {
+                    const count_rating = doctor.ratings.reduce(
+                        (accumulator, currentValue) =>
+                            accumulator + currentValue,
+                        0
+                    );
+
+                    const avg_count_rating =
+                        count_rating / doctor.ratings.length;
+                    doctor['rating'] = Math.round(avg_count_rating);
+                }
+
+                profile['doctor'] = doctor;
 
                 res.status(200).json({
                     status: STATUS_SUCCESS,

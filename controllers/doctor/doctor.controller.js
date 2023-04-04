@@ -134,7 +134,9 @@ const updateDoctorInfoById = async (req, res, next) => {
 const findDoctorById = async (req, res, next) => {
     try {
         const id = req.params.id;
-        const doctor = await Doctor.findById(id).populate('person');
+        const doctor = await Doctor.findById(id)
+            .populate('person')
+            .populate('ratings');
         if (!doctor) {
             return next(
                 new AppError(
@@ -146,6 +148,17 @@ const findDoctorById = async (req, res, next) => {
                 res,
                 next
             );
+        }
+
+        if (doctor.ratings.length === 0) doctor['rating'] = 5;
+        else {
+            const count_rating = doctor.ratings.reduce(
+                (accumulator, currentValue) => accumulator + currentValue,
+                0
+            );
+
+            const avg_count_rating = count_rating / doctor.ratings.length;
+            doctor['rating'] = Math.round(avg_count_rating);
         }
 
         res.status(200).json({ status: STATUS_SUCCESS, data: doctor });
