@@ -14,12 +14,12 @@ const doctorSchema = new Schema(
             type: Boolean,
             default: false,
         },
-        rating: {
-            type: Number,
-            min: 0,
-            max: 5,
-            default: 5,
-        },
+        ratings: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'ratings',
+            },
+        ],
         work_type: {
             type: String,
             require: true,
