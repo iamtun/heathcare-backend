@@ -35,7 +35,9 @@ const createNewPost = async (req, res, next) => {
 };
 
 const getAllPost = async (req, res, next) => {
-    const posts = await Post.find({}).populate('author');
+    const posts = await Post.find({}).populate('author').sort({
+        createdAt: -1,
+    });
 
     const post_list = await Promise.all(
         posts.map(async (post) => {

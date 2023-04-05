@@ -100,7 +100,10 @@ const getCommentListByPostId = async (req, res, next) => {
 
     const comments = await Comment.find({ post_id: id })
         .populate('doctor_id')
-        .populate('patient_id');
+        .populate('patient_id')
+        .sort({
+            createdAt: -1,
+        });
 
     const _comments = await Promise.all(
         comments.map(async (comment) => {

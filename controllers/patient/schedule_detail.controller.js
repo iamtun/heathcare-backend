@@ -342,7 +342,15 @@ const updateResultExam = async (req, res, next) => {
 };
 
 const findById = Base.getOne(ScheduleDetailSchema);
-const getAll = Base.getAll(ScheduleDetailSchema);
+const getAll = async (req, res, next) => {
+    const schedule_details = await ScheduleDetailSchema.find({
+        result_exam: { $ne: null },
+    });
+    return res.status(200).json({
+        status: STATUS_SUCCESS,
+        data: schedule_details,
+    });
+};
 
 /**
  * 0: bình thường
