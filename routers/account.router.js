@@ -8,6 +8,7 @@ router
     .get(AccountController.getAllAccount)
     .delete(AccountController.removeAccount);
 
+router.route('/phone/:phone').get(AccountController.getAccountByPhoneNumber);
 router.route('/:id').get(AccountController.getAccount);
 
 export default router;
