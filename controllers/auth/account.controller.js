@@ -106,4 +106,30 @@ const removeAccount = async (req, res, next) => {
         return next(new AppError(400, STATUS_FAIL, 'No phone number'));
     }
 };
-export default { getAccount, getAllAccount, removeAccount };
+
+const getAccountByPhoneNumber = async (req, res, next) => {
+    const { phone } = req.params;
+    const account = await Account.findOne({ phone_number: phone });
+    if (account) {
+        return res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: {
+                is_exist: true,
+            },
+        });
+    }
+
+    return res.status(404).json({
+        status: STATUS_FAIL,
+        data: {
+            is_exist: false,
+        },
+    });
+};
+
+export default {
+    getAccount,
+    getAllAccount,
+    removeAccount,
+    getAccountByPhoneNumber,
+};
