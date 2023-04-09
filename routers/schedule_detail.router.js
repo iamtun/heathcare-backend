@@ -29,6 +29,10 @@ router
     .get(ScheduleDetailController.getAllScheduleListOfDoctor);
 
 router
+    .route('/doctor/schedule-list-waiting/:id')
+    .get(ScheduleDetailController.getAllScheduleListWaitingOfDoctor);
+
+router
     .route('/doctor/accept/:id')
     .put(
         AuthController.authentication,

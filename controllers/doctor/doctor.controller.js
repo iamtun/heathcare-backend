@@ -381,11 +381,24 @@ const createConversationAndMessage = async (patientId, doctorId, content) => {
                 last_message: new mongoose.Types.ObjectId(message.id),
             },
             { new: true }
-        );
+        ).populate('last_message');
+
+        const _patient = await Patient.findById(
+            __conversation.members[0]
+        ).populate('person');
+
+        const _doctor = await Doctor.findById(
+            __conversation.members[1]
+        ).populate('person');
+
+        const conversation_custom = {
+            ...__conversation._doc,
+            members: [_patient, _doctor],
+        };
 
         return {
             message: message,
-            conversation: __conversation,
+            conversation: conversation_custom,
         };
     } catch (error) {
         return {
