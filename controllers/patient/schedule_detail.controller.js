@@ -771,46 +771,6 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
     const doctorId = req.params.id;
     const { filter } = req.query;
 
-    const is_waiting = filter === 'waiting' ? true : false;
-
-    // if(!is_waiting && is_get_all) {
-    //     const schedule_details = await ScheduleDetailSchema.find({
-    //         doctor: doctorId,
-    //         status: is_waiting == false,
-    //         day_exam: { $gte: new Date() },
-    //     })
-    //         .populate('schedule')
-    //         .populate('doctor')
-    //         .populate('patient');
-
-    //     const detail_list_result = await Promise.all(
-    //         schedule_details.map(async (detail) => {
-    //             const doctor_person = await Person.findById(
-    //                 detail.doctor.person
-    //             );
-    //             const patient_person = await Person.findById(
-    //                 detail.patient.person
-    //             );
-    //             const conversation = await Conversation.findOne({
-    //                 members: [detail.patient._id, detail.doctor._id],
-    //             });
-
-    //             detail['doctor']['person'] = doctor_person;
-    //             detail['patient']['person'] = patient_person;
-    //             return {
-    //                 ...detail._doc,
-    //                 conversation_id: conversation ? conversation._id : null,
-    //             };
-    //         })
-    //     );
-
-    //     res.status(200).json({
-    //         status: STATUS_SUCCESS,
-    //         size: detail_list_result.length,
-    //         data: detail_list_result,
-    //     });
-    // }
-
     if (filter === 'view_result_exam') {
         const schedule_details = await ScheduleDetailSchema.find({
             doctor: doctorId,
@@ -891,7 +851,7 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
     if (filter === 'view_waiting_accept') {
         const schedule_details = await ScheduleDetailSchema.find({
             doctor: doctorId,
-            status: is_waiting == false,
+            status: false,
             day_exam: { $gte: new Date() },
         })
             .populate('schedule')
