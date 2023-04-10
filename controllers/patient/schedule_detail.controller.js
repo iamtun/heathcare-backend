@@ -772,11 +772,50 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
     const { filter } = req.query;
 
     const is_waiting = filter === 'waiting' ? true : false;
-    const is_get_all = filter === 'view_all' ? true : false;
 
-    if (is_get_all) {
+    // if(!is_waiting && is_get_all) {
+    //     const schedule_details = await ScheduleDetailSchema.find({
+    //         doctor: doctorId,
+    //         status: is_waiting == false,
+    //         day_exam: { $gte: new Date() },
+    //     })
+    //         .populate('schedule')
+    //         .populate('doctor')
+    //         .populate('patient');
+
+    //     const detail_list_result = await Promise.all(
+    //         schedule_details.map(async (detail) => {
+    //             const doctor_person = await Person.findById(
+    //                 detail.doctor.person
+    //             );
+    //             const patient_person = await Person.findById(
+    //                 detail.patient.person
+    //             );
+    //             const conversation = await Conversation.findOne({
+    //                 members: [detail.patient._id, detail.doctor._id],
+    //             });
+
+    //             detail['doctor']['person'] = doctor_person;
+    //             detail['patient']['person'] = patient_person;
+    //             return {
+    //                 ...detail._doc,
+    //                 conversation_id: conversation ? conversation._id : null,
+    //             };
+    //         })
+    //     );
+
+    //     res.status(200).json({
+    //         status: STATUS_SUCCESS,
+    //         size: detail_list_result.length,
+    //         data: detail_list_result,
+    //     });
+    // }
+
+    if (filter === 'view_result_exam') {
         const schedule_details = await ScheduleDetailSchema.find({
             doctor: doctorId,
+            status: true,
+            result_exam: { $ne: null },
         })
             .populate('schedule')
             .populate('doctor')
@@ -803,12 +842,53 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
             })
         );
 
-        res.status(200).json({
+        return res.status(200).json({
             status: STATUS_SUCCESS,
             size: detail_list_result.length,
             data: detail_list_result,
         });
-    } else {
+    }
+
+    if (filter === 'view_wating_exam') {
+        const schedule_details = await ScheduleDetailSchema.find({
+            doctor: doctorId,
+            status: true,
+            result_exam: null,
+            day_exam: { $gte: new Date() },
+        })
+            .populate('schedule')
+            .populate('doctor')
+            .populate('patient');
+
+        const detail_list_result = await Promise.all(
+            schedule_details.map(async (detail) => {
+                const doctor_person = await Person.findById(
+                    detail.doctor.person
+                );
+                const patient_person = await Person.findById(
+                    detail.patient.person
+                );
+                const conversation = await Conversation.findOne({
+                    members: [detail.patient._id, detail.doctor._id],
+                });
+
+                detail['doctor']['person'] = doctor_person;
+                detail['patient']['person'] = patient_person;
+                return {
+                    ...detail._doc,
+                    conversation_id: conversation ? conversation._id : null,
+                };
+            })
+        );
+
+        return res.status(200).json({
+            status: STATUS_SUCCESS,
+            size: detail_list_result.length,
+            data: detail_list_result,
+        });
+    }
+
+    if (filter === 'view_waiting_accept') {
         const schedule_details = await ScheduleDetailSchema.find({
             doctor: doctorId,
             status: is_waiting == false,
@@ -839,30 +919,42 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
             })
         );
 
-        res.status(200).json({
+        return res.status(200).json({
             status: STATUS_SUCCESS,
             size: detail_list_result.length,
             data: detail_list_result,
         });
     }
 
-    // const schedule_details = await ScheduleDetailSchema.find({
-    //     doctor: doctorId,
-    // })
-    //     .populate('schedule')
-    //     .populate('doctor');
+    const schedule_details = await ScheduleDetailSchema.find({
+        doctor: doctorId,
+    })
+        .populate('schedule')
+        .populate('doctor')
+        .populate('patient');
 
-    // const detail_list_result = await Promise.all(
-    //     schedule_details.map(async (detail) => {
-    //         const person = await Person.findById(detail.doctor.person);
-    //         detail['doctor']['person'] = person;
-    //         return detail;
-    //     })
-    // );
-    // res.status(200).json({
-    //     status: STATUS_SUCCESS,
-    //     data: detail_list_result,
-    // });
+    const detail_list_result = await Promise.all(
+        schedule_details.map(async (detail) => {
+            const doctor_person = await Person.findById(detail.doctor.person);
+            const patient_person = await Person.findById(detail.patient.person);
+            const conversation = await Conversation.findOne({
+                members: [detail.patient._id, detail.doctor._id],
+            });
+
+            detail['doctor']['person'] = doctor_person;
+            detail['patient']['person'] = patient_person;
+            return {
+                ...detail._doc,
+                conversation_id: conversation ? conversation._id : null,
+            };
+        })
+    );
+
+    return res.status(200).json({
+        status: STATUS_SUCCESS,
+        size: detail_list_result.length,
+        data: detail_list_result,
+    });
 };
 
 const getAllScheduleListWaitingOfDoctor = async (req, res, next) => {
