@@ -114,6 +114,7 @@ const getAccountByPhoneNumber = async (req, res, next) => {
         return res.status(200).json({
             status: STATUS_SUCCESS,
             data: {
+                rule: account.rule,
                 is_exist: true,
             },
         });
