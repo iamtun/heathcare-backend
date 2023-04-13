@@ -19,7 +19,6 @@ const createRule = async (req, res, next) => {
         if (start && end && notification && type) {
             let rules = [];
             if (type === 'BMI') {
-                console.log(typeof gender);
                 if (typeof gender === 'undefined')
                     return next(
                         new AppError(

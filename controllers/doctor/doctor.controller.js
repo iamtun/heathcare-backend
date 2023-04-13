@@ -17,6 +17,7 @@ import Message from '../../models/message.model.js';
 import Notification from '../../models/notification.model.js';
 import Patient from '../../models/patient/patient.model.js';
 import mongoose from 'mongoose';
+import ScheduleDetailSchema from '../../models/schedule_detail.model.js';
 
 const createDoctor = async (req, res, next) => {
     const { rule, account_id, file } = req;
@@ -290,6 +291,20 @@ const cancelScheduleWithPatientId = async (req, res, next) => {
     if (id !== null && work_type !== null && doctor_id) {
         if (rule === RULE_DOCTOR) {
             if (work_type === 'blood') {
+                const schedule_deleted = await ScheduleDetailSchema.find({
+                    patient: id,
+                    doctor: doctor_id,
+                    day_exam: { $gte: new Date() },
+                });
+
+                await Promise.all(
+                    schedule_deleted.map(async (schedule) => {
+                        return ScheduleDetailSchema.findByIdAndDelete(
+                            schedule._id
+                        );
+                    })
+                );
+
                 const patient = await Patient.findByIdAndUpdate(
                     id,
                     {
@@ -301,7 +316,7 @@ const cancelScheduleWithPatientId = async (req, res, next) => {
                 const notification = new Notification({
                     from: doctor_id,
                     to: id,
-                    content: `Bác sĩ chịu trách nhiệm về  huyết áp đã dừng theo dõi sức khỏe của bạn`,
+                    content: `Bác sĩ chịu trách nhiệm về  huyết áp đã dừng theo dõi sức khỏe của bạn, các lịch khám giữa 2 bạn sẽ bị xóa,\nVui lòng đăng ký lịch khám để bác sĩ khác có thể theo dõi sức khỏe của bạn`,
                     rule: RULE_SYSTEM,
                 });
 
@@ -319,6 +334,20 @@ const cancelScheduleWithPatientId = async (req, res, next) => {
             }
 
             if (work_type === 'glycemic') {
+                const schedule_deleted = await ScheduleDetailSchema.find({
+                    patient: id,
+                    doctor: doctor_id,
+                    day_exam: { $gte: new Date() },
+                });
+
+                await Promise.all(
+                    schedule_deleted.map(async (schedule) => {
+                        return ScheduleDetailSchema.findByIdAndDelete(
+                            schedule._id
+                        );
+                    })
+                );
+
                 const patient = await Patient.findByIdAndUpdate(
                     id,
                     {
@@ -330,7 +359,7 @@ const cancelScheduleWithPatientId = async (req, res, next) => {
                 const notification = new Notification({
                     from: doctor_id,
                     to: id,
-                    content: `Bác sĩ chịu trách nhiệm về  đường huyết đã dừng theo dõi sức khỏe của bạn`,
+                    content: `Bác sĩ chịu trách nhiệm về  đường huyết đã dừng theo dõi sức khỏe của bạn, các lịch khám giữa 2 bạn sẽ bị xóa,\nVui lòng đăng ký lịch khám để bác sĩ khác có thể theo dõi sức khỏe của bạn`,
                     rule: RULE_SYSTEM,
                 });
 
@@ -411,16 +440,29 @@ const createConversationAndMessage = async (patientId, doctorId, content) => {
 const moveDoctorExamPatient = async (req, res, next) => {
     const { rule } = req;
     const { id } = req.params;
-    const { work_type, doctor_id, reason } = req.body;
+    const { work_type, doctor_new_id, doctor_old_id, reason } = req.body;
 
-    if (id !== null && work_type !== null && doctor_id && reason) {
+    if (id !== null && work_type !== null && doctor_new_id && reason) {
         if (rule === RULE_DOCTOR) {
             if (work_type === 'blood') {
+                const schedule_deleted = await ScheduleDetailSchema.find({
+                    patient: id,
+                    doctor: doctor_old_id,
+                    day_exam: { $gte: new Date() },
+                });
+
+                await Promise.all(
+                    schedule_deleted.map(async (schedule) => {
+                        return ScheduleDetailSchema.findByIdAndDelete(
+                            schedule._id
+                        );
+                    })
+                );
                 const patient = await Patient.findByIdAndUpdate(
                     id,
                     {
                         doctor_blood_id: new mongoose.Types.ObjectId(
-                            `${doctor_id}`
+                            `${doctor_new_id}`
                         ),
                     },
                     { new: true }
@@ -428,23 +470,23 @@ const moveDoctorExamPatient = async (req, res, next) => {
 
                 if (patient) {
                     const notification = new Notification({
-                        from: doctor_id,
+                        from: doctor_new_id,
                         to: id,
-                        content: `Bác sĩ chịu trách nhiệm về  huyết áp đã chuyển bạn cho một bác sĩ khác. Lý do: ${reason}`,
+                        content: `Bác sĩ chịu trách nhiệm về  huyết áp đã chuyển bạn cho một bác sĩ khác. Lý do: ${reason}\nVui lòng đăng ký lịch để được bác sĩ mới tư vấn!`,
                         rule: RULE_SYSTEM,
                     });
 
                     const _notification = await notification.save();
 
                     const _conversation = await Conversation.findOne({
-                        members: [id, doctor_id],
+                        members: [id, doctor_new_id],
                     });
 
                     if (!_conversation) {
                         const { conversation, message } =
                             await createConversationAndMessage(
                                 id,
-                                doctor_id,
+                                doctor_new_id,
                                 'Chào bạn, từ hôm nay tôi sẽ chịu trách nhiệm về việc theo dõi huyết áp và đưa ra lời khuyên cho bạn!'
                             );
 
@@ -472,11 +514,24 @@ const moveDoctorExamPatient = async (req, res, next) => {
             }
 
             if (work_type === 'glycemic') {
+                const schedule_deleted = await ScheduleDetailSchema.find({
+                    patient: id,
+                    doctor: doctor_old_id,
+                    day_exam: { $gte: new Date() },
+                });
+
+                await Promise.all(
+                    schedule_deleted.map(async (schedule) => {
+                        return ScheduleDetailSchema.findByIdAndDelete(
+                            schedule._id
+                        );
+                    })
+                );
                 const patient = await Patient.findByIdAndUpdate(
                     id,
                     {
                         doctor_glycemic_id: new mongoose.Types.ObjectId(
-                            `${doctor_id}`
+                            `${doctor_new_id}`
                         ),
                     },
                     { new: true }
@@ -484,23 +539,23 @@ const moveDoctorExamPatient = async (req, res, next) => {
 
                 if (patient) {
                     const notification = new Notification({
-                        from: doctor_id,
+                        from: doctor_new_id,
                         to: id,
-                        content: `Bác sĩ chịu trách nhiệm về  đường huyết đã chuyển bạn cho bác sĩ khác. Lý do: ${reason}`,
+                        content: `Bác sĩ chịu trách nhiệm về  đường huyết đã chuyển bạn cho bác sĩ khác. Lý do: ${reason}\nVui lòng đăng ký lịch để được bác sĩ mới tư vấn!`,
                         rule: RULE_SYSTEM,
                     });
 
                     const _notification = await notification.save();
 
                     const _conversation = await Conversation.findOne({
-                        members: [id, doctor_id],
+                        members: [id, doctor_new_id],
                     });
 
                     if (!_conversation) {
                         const { conversation, message } =
                             await createConversationAndMessage(
                                 id,
-                                doctor_id,
+                                doctor_new_id,
                                 'Chào bạn, từ hôm nay tôi sẽ chịu trách nhiệm về việc theo dõi đường huyết và đưa ra lời khuyên cho bạn!'
                             );
 
