@@ -315,7 +315,10 @@ const updateResultExam = async (req, res, next) => {
                         status: STATUS_SUCCESS,
                         data: {
                             schedule_detail,
-                            notification: _notification,
+                            notification: {
+                                ..._notification._doc,
+                                schedule_detail_id: schedule_detail._id,
+                            },
                             message: _message,
                         },
                     });
@@ -1016,7 +1019,10 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
                     status: 'success',
                     data: {
                         schedule_detail,
-                        notification,
+                        notification: {
+                            ...notification._doc,
+                            schedule_detail_id: schedule_detail._id,
+                        },
                         message,
                         conversation,
                     },
@@ -1027,7 +1033,10 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
                 status: STATUS_SUCCESS,
                 data: {
                     schedule_detail,
-                    notification,
+                    notification: {
+                        ...notification._doc,
+                        schedule_detail_id: schedule_detail._id,
+                    },
                     message: null,
                     conversation: null,
                 },
@@ -1084,7 +1093,10 @@ const deleteScheduleDetail = async (req, res, next) => {
                 status: STATUS_SUCCESS,
                 data: {
                     schedule_detail_id: doc._id,
-                    notification,
+                    notification: {
+                        ...notification._doc,
+                        schedule_detail_id: doc._id,
+                    },
                 },
             });
         } else if (schedule_detail.doctor._id.toString() === from) {
@@ -1111,7 +1123,10 @@ const deleteScheduleDetail = async (req, res, next) => {
                 status: STATUS_SUCCESS,
                 data: {
                     schedule_detail_id: doc._id,
-                    notification,
+                    notification: {
+                        ...notification._doc,
+                        schedule_detail_id: doc._id,
+                    },
                 },
             });
         }
