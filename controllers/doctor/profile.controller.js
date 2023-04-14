@@ -1,7 +1,10 @@
 import Profile from '../../models/doctor/profile.model.js';
 import Person from '../../models/person.model.js';
 import Doctor from '../../models/doctor/doctor.model.js';
+import Patient from '../../models/patient/patient.model.js';
 import AppError from '../../utils/error.util.js';
+import Rating from '../../models/doctor/rating.model.js';
+
 import {
     RULE_DOCTOR,
     STATUS_FAIL,
@@ -113,6 +116,19 @@ const findDoctorProfileByAccountId = async (req, res, next) => {
                         const avg_count_rating =
                             count_rating / doctor.ratings.length;
                         doctor['rating'] = Math.round(avg_count_rating);
+
+                        const pop_ratings = await Promise.all(
+                            doctor.ratings.map(async (rating) => {
+                                const patient = await Patient.findById(
+                                    rating.patient_id
+                                ).populate('person');
+
+                                rating['patient_id'] = patient;
+                                return rating;
+                            })
+                        );
+
+                        doctor['ratings'] = pop_ratings;
                     }
 
                     profile['doctor'] = doctor;
