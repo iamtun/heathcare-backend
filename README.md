@@ -1,0 +1,2 @@
+-   build docker: `docker build -t heathcare/node:v1 .`
+-   run container from image : `docker-compose up`
