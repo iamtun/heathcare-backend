@@ -155,12 +155,17 @@ const createScheduleDetail = async (req, res, next) => {
                         schedule_detail['doctor']['person']
                     );
 
+                    const _person_patient = await Person.findById(
+                        schedule_detail['patient']['person']
+                    );
+
                     const time = await Shift.findById(
                         schedule_detail['schedule']['time']
                     );
 
                     schedule_detail['schedule']['time'] = time;
                     schedule_detail['doctor']['person'] = _person;
+                    schedule_detail['patient']['person'] = _person_patient;
 
                     //create notification
                     const _notification = new Notification({
