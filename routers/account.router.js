@@ -6,7 +6,8 @@ const router = express.Router();
 router
     .route('/')
     .get(AccountController.getAllAccount)
-    .delete(AccountController.removeAccount);
+    .delete(AccountController.removeAccount)
+    .put(AccountController.forgotPassword);
 
 router.route('/phone/:phone').get(AccountController.getAccountByPhoneNumber);
 router.route('/:id').get(AccountController.getAccount);

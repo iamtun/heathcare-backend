@@ -5,8 +5,12 @@ import Profile from '../../models/doctor/profile.model.js';
 
 import AppError from '../../utils/error.util.js';
 import Base from '../utils/base.controller.js';
-import { STATUS_FAIL, STATUS_SUCCESS } from '../../common/constant.js';
-
+import {
+    MESSAGE_NO_ENOUGH_IN_4,
+    STATUS_FAIL,
+    STATUS_SUCCESS,
+} from '../../common/constant.js';
+import bcrypt from 'bcryptjs';
 const getAllAccount = Base.getAll(Account);
 const getAccount = Base.getOne(Account);
 
@@ -128,9 +132,53 @@ const getAccountByPhoneNumber = async (req, res, next) => {
     });
 };
 
+const forgotPassword = async (req, res, next) => {
+    const { phone_number, password } = req.body;
+
+    try {
+        if (phone_number) {
+            const account = await Account.findOne({
+                phone_number: phone_number,
+            });
+
+            if (account) {
+                const _password = await bcrypt.hash(password, 12);
+                account.password = _password;
+
+                const _account = await account.save();
+                if (_account) {
+                    return res.status(201).json({
+                        status: STATUS_SUCCESS,
+                        message:
+                            'Mật khẩu của bạn đã được cập nhật thành công!',
+                    });
+                } else {
+                    return res.status(400).json({
+                        status: STATUS_SUCCESS,
+                        message: 'Mật khẩu của bạn đã được cập nhật thất bại!',
+                    });
+                }
+            } else {
+                return next(
+                    new AppError(
+                        404,
+                        STATUS_FAIL,
+                        `Tải khoản với số điện thoại: ${phone_number} không tồn tại!`
+                    )
+                );
+            }
+        }
+
+        return next(new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4));
+    } catch (error) {
+        return next(error);
+    }
+};
+
 export default {
     getAccount,
     getAllAccount,
     removeAccount,
     getAccountByPhoneNumber,
+    forgotPassword,
 };
