@@ -5,6 +5,7 @@ import Doctor from '../../models/doctor/doctor.model.js';
 import Base from './base.controller.js';
 import { STATUS_SUCCESS } from '../../common/constant.js';
 import Message from '../../models/message.model.js';
+import moment from 'moment';
 
 const findConversationBy2Id = async (patient_id, doctor_id) => {
     const conversation = await Conversation.findOne({
@@ -76,7 +77,13 @@ const getConversationListByPatientId = async (req, res, next) => {
     );
     res.status(200).json({
         status: STATUS_SUCCESS,
-        data: __conversations,
+        data: __conversations
+            .sort((a, b) =>
+                moment
+                    .utc(a.last_message.createdAt)
+                    .diff(moment.utc(b.last_message.createdAt))
+            )
+            .reverse(),
     });
 };
 
@@ -111,7 +118,13 @@ const getConversationListByDoctorId = async (req, res, next) => {
 
     res.status(200).json({
         status: STATUS_SUCCESS,
-        data: __conversations,
+        data: __conversations
+            .sort((a, b) =>
+                moment
+                    .utc(a.last_message.createdAt)
+                    .diff(moment.utc(b.last_message.createdAt))
+            )
+            .reverse(),
     });
 };
 
