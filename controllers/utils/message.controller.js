@@ -23,9 +23,15 @@ const createMessage = async (req, res, next) => {
             _conversation.last_message = doc._id;
             const __conversation = await _conversation.save();
 
+            const data = {
+                ...doc._doc,
+                receiverId: _conversation.members.filter(
+                    (member) => member.id !== doc.senderId
+                )[0],
+            };
             return res.status(201).json({
                 status: STATUS_SUCCESS,
-                data: doc,
+                data,
             });
         }
 
