@@ -1002,8 +1002,12 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
             const doctor = await Doctor.findById(
                 schedule_detail['doctor']._id
             ).populate('person');
-            schedule_detail['doctor'] = doctor;
 
+            const patient = await Patient.findById(
+                schedule_detail['patient']._id
+            ).populate('person');
+            schedule_detail['doctor'] = doctor;
+            schedule_detail['patient'] = patient;
             const notification = await _notification.save();
 
             const _conversation = await Conversation.findOne({
