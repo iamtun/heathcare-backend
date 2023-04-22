@@ -999,6 +999,11 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
                 rule: RULE_NOTIFICATION_REGISTER_SCHEDULE,
             });
 
+            const doctor = await Doctor.findById(
+                schedule_detail['doctor']._id
+            ).populate('person');
+            schedule_detail['doctor'] = doctor;
+
             const notification = await _notification.save();
 
             const _conversation = await Conversation.findOne({
