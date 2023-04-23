@@ -35,7 +35,11 @@ const createDoctor = async (req, res, next) => {
             const { personModel, error } = await createPerson(person);
             if (error) {
                 return next(
-                    new AppError(400, STATUS_FAIL, 'account id exist'),
+                    new AppError(
+                        400,
+                        STATUS_FAIL,
+                        'Tài khoản bác sĩ đã tồn tại!'
+                    ),
                     req,
                     res,
                     next
@@ -104,7 +108,7 @@ const updateDoctorInfoById = async (req, res, next) => {
                         new AppError(
                             404,
                             STATUS_FAIL,
-                            `Don't find doctor with id = ${id}`
+                            `Không tìm thấy bác sĩ với id = ${id}`
                         ),
                         req,
                         res,
@@ -143,7 +147,7 @@ const findDoctorById = async (req, res, next) => {
                 new AppError(
                     404,
                     STATUS_FAIL,
-                    `Don't find doctor with id = ${id}`
+                    `Không tìm thấy bác sĩ với id = ${id}`
                 ),
                 req,
                 res,
@@ -192,7 +196,7 @@ const getDoctorListWaitingAccept = async (req, res, next) => {
         );
         if (doctors.length === 0) {
             return next(
-                new AppError(404, STATUS_FAIL, `Don't find list doctor`),
+                new AppError(404, STATUS_FAIL, `Danh sách bác sĩ trống`),
                 req,
                 res,
                 next
@@ -255,7 +259,7 @@ const createRemindForPatientById = async (req, res, next) => {
                         new AppError(
                             404,
                             STATUS_FAIL,
-                            `Don't find conversation with member = [${id}, ${from}]`
+                            `Không tìm thấy cuộc trò chuyện với thành viên = [${id}, ${from}]`
                         ),
                         req,
                         res,

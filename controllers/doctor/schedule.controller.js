@@ -40,7 +40,11 @@ const createSchedule = async (req, res, next) => {
         const isExist = await checkScheduleExist(doctor, day, time);
         if (isExist) {
             return next(
-                new AppError(400, STATUS_FAIL, 'Schedule was existed!'),
+                new AppError(
+                    400,
+                    STATUS_FAIL,
+                    'Bạn đã đăng ký ca làm này. Vui lòng kiểm tra lại!'
+                ),
                 req,
                 res,
                 next
@@ -86,7 +90,11 @@ const findScheduleById = async (req, res, next) => {
     }
 
     return next(
-        new AppError(404, STATUS_FAIL, `schedule with id = ${id} not found`),
+        new AppError(
+            404,
+            STATUS_FAIL,
+            `Lịch với mã = ${id} không được tìm thấy!`
+        ),
         req,
         res,
         next
@@ -191,7 +199,11 @@ const deleteScheduleById = async (req, res, next) => {
         }
 
         return next(
-            new AppError(400, STATUS_FAIL, 'You not author of this schedule'),
+            new AppError(
+                403,
+                STATUS_FAIL,
+                'Bạn không được quyền xóa lịch của người khác'
+            ),
             req,
             res,
             next
