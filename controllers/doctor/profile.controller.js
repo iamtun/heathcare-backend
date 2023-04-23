@@ -6,6 +6,7 @@ import AppError from '../../utils/error.util.js';
 import Rating from '../../models/doctor/rating.model.js';
 
 import {
+    MESSAGE_NO_ENOUGH_IN_4,
     RULE_DOCTOR,
     STATUS_FAIL,
     STATUS_SUCCESS,
@@ -75,11 +76,7 @@ const createProfileToDoctor = async (req, res, next) => {
             }
         } else {
             return next(
-                new AppError(
-                    400,
-                    STATUS_FAIL,
-                    'Please provide enough information!'
-                ),
+                new AppError(400, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
                 req,
                 res,
                 next
@@ -140,19 +137,19 @@ const findDoctorProfileByAccountId = async (req, res, next) => {
                 } else {
                     res.status(404).json({
                         status: STATUS_FAIL,
-                        message: `no find profile with doctor id ${doctor._id}`,
+                        message: `Không tìm thấy thông tin cá nhân với mã bác sĩ =  ${doctor._id}`,
                     });
                 }
             } else {
                 res.status(404).json({
                     status: STATUS_FAIL,
-                    message: `no find doctor with person id: ${person._id}`,
+                    message: `Không tìm thấy bác sĩ với mã thông tin cá nhân = ${person._id}`,
                 });
             }
         } else {
             res.status(404).json({
                 status: STATUS_FAIL,
-                message: `no find person with account id: ${id}`,
+                message: `Không tìm thấy tải khoản với mã tài khoản ${account_id}`,
             });
         }
     } catch (error) {
@@ -197,13 +194,13 @@ const findDoctorProfileById = async (req, res, next) => {
             } else {
                 res.status(404).json({
                     status: STATUS_FAIL,
-                    message: `no find profile with doctor id ${doctor._id}`,
+                    message: `Không tìm thấy thông tin cá nhân bác sĩ với mã: ${doctor._id}`,
                 });
             }
         } else {
             res.status(404).json({
                 status: STATUS_FAIL,
-                message: `no find doctor with person id: ${person._id}`,
+                message: `Không tìm thấy thông tin cá nhân bác sĩ với mã: ${id}`,
             });
         }
     } catch (error) {
