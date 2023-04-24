@@ -1,3 +1,4 @@
+import moment from 'moment';
 import {
     MESSAGE_NO_PERMISSION,
     RULE_ADMIN,
@@ -15,11 +16,18 @@ const createShift = async (req, res, next) => {
     if (rule === RULE_ADMIN) {
         const { name, time_start, time_end } = req.body;
         const isExist = await Shift.findOne({ name });
-        if (
-            isExist &&
-            time_start === isExist?.time_start &&
-            time_end === isExist?.time_end
-        ) {
+        const _time_start = new Date(time_start);
+
+        const DutyDayStartTimeInput = moment(
+            [_time_start.getHours(), _time_start.getMinutes()],
+            'HH:mm'
+        );
+        const DutyDayStartTimeDB = moment(
+            [isExist?.time_start.getHours(), isExist?.time_start.getMinutes()],
+            'HH:mm'
+        );
+
+        if (DutyDayStartTimeInput.diff(DutyDayStartTimeDB, 'minutes') === 0) {
             return next(
                 new AppError(400, STATUS_FAIL, 'Ca làm đã tồn tại'),
                 req,
