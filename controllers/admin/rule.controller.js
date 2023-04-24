@@ -14,7 +14,7 @@ const createRule = async (req, res, next) => {
     const { rule } = req;
 
     if (rule === RULE_ADMIN) {
-        const { start, end, notification, type, gender } = req.body;
+        const { start, end, notification, type, gender, case_gly } = req.body;
 
         if (start && end && notification && type) {
             let rules = [];
@@ -33,6 +33,18 @@ const createRule = async (req, res, next) => {
                 rules = await Rule.find({ type: type, gender: gender });
             } else {
                 rules = await Rule.find({ type: type });
+            }
+            if (type === 'GLYCEMIC' && !case_gly) {
+                return next(
+                    new AppError(
+                        401,
+                        STATUS_FAIL,
+                        'Bạn cần nhập trường hợp đối với rule là GLYCEMIC'
+                    ),
+                    req,
+                    res,
+                    next
+                );
             }
             const maxRuleEnd = rules.map((rule) => rule.end);
             const max = Math.max(...maxRuleEnd);
@@ -61,7 +73,7 @@ const createRule = async (req, res, next) => {
                             res,
                             next
                         );
-                    if (start > 30)
+                    if (rules.length === 0 && start > 30)
                         return next(
                             new AppError(
                                 401,
