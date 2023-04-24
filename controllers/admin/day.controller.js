@@ -10,6 +10,18 @@ import Base from '../utils/base.controller.js';
 const createDay = async (req, res, next) => {
     const { rule } = req;
     if (rule === RULE_ADMIN) {
+        const days = await Day.find({});
+        const index = days.findIndex(
+            (day) => day.day_number === req.body.day_number
+        );
+        if (index > -1) {
+            return next(
+                new AppError(400, STATUS_FAIL, 'Ngày làm này đã tồn tại!'),
+                req,
+                res,
+                next
+            );
+        }
         return Base.createOne(Day)(req, res, next);
     } else {
         return next(

@@ -17,7 +17,7 @@ const ruleSchema = new Schema(
         gender: {
             type: Boolean,
         },
-        case: {
+        case_gly: {
             type: Number,
             require: true,
             min: 1,
