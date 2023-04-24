@@ -15,19 +15,40 @@ const createShift = async (req, res, next) => {
     const { rule } = req;
     if (rule === RULE_ADMIN) {
         const { name, time_start, time_end } = req.body;
-        const isExist = await Shift.findOne({ name });
+        const isExist = await Shift.find({ name });
         const _time_start = new Date(time_start);
+        const _time_end = new Date(time_end);
 
-        const DutyDayStartTimeInput = moment(
+        const DutyStartTimeInput = moment(
             [_time_start.getHours(), _time_start.getMinutes()],
             'HH:mm'
         );
-        const DutyDayStartTimeDB = moment(
-            [isExist?.time_start.getHours(), isExist?.time_start.getMinutes()],
+
+        const DutyStartTimeDB = moment(
+            [
+                isExist[isExist.length - 1]?.time_start.getHours(),
+                isExist[isExist.length - 1]?.time_start.getMinutes(),
+            ],
             'HH:mm'
         );
 
-        if (DutyDayStartTimeInput.diff(DutyDayStartTimeDB, 'minutes') === 0) {
+        const DutyEndTimeInput = moment(
+            [_time_end.getHours(), _time_end.getMinutes()],
+            'HH:mm'
+        );
+
+        const DutyEndTimeDB = moment(
+            [
+                isExist[isExist.length - 1]?.time_end.getHours(),
+                isExist[isExist.length - 1]?.time_end.getMinutes(),
+            ],
+            'HH:mm'
+        );
+
+        if (
+            DutyStartTimeInput.diff(DutyStartTimeDB, 'minutes') === 0 &&
+            DutyEndTimeInput.diff(DutyEndTimeDB, 'minutes') === 0
+        ) {
             return next(
                 new AppError(400, STATUS_FAIL, 'Ca làm đã tồn tại'),
                 req,
