@@ -4,6 +4,7 @@ import {
     MESSAGE_NO_PERMISSION,
     RULE_ADMIN,
     STATUS_FAIL,
+    STATUS_SUCCESS,
 } from '../../common/constant.js';
 import Base from '../utils/base.controller.js';
 import Rule from '../../models/rule.model.js';
@@ -148,7 +149,26 @@ const updateRule = async (req, res, next) => {
         );
     }
 };
-const getAllRules = Base.getAll(Rule);
+
+const METRICS = ['BMI', 'BLOOD', 'GLYCEMIC'];
+const getAllRules = async (req, res, next) => {
+    const { metric } = req.query;
+    if (METRICS.includes(metric)) {
+        const rules = await Rule.find({ type: metric });
+        return res.status(200).json({
+            status: STATUS_SUCCESS,
+            results: rules.length,
+            data: rules,
+        });
+    }
+
+    const rules = await Rule.find({});
+    return res.status(200).json({
+        status: STATUS_SUCCESS,
+        results: rules.length,
+        data: rules,
+    });
+};
 const findRuleById = Base.getOne(Rule);
 
 const censorship = async (req, res, next) => {
