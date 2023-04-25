@@ -35,6 +35,7 @@ const createGlycemic = async (req, res, next) => {
         patient: req.body.patient,
         case: req.body.case,
     });
+
     const _glycemics = glycemics.filter(
         (item) => moment(now).format('l') === moment(item.createdAt).format('l')
     );
@@ -48,6 +49,8 @@ const createGlycemic = async (req, res, next) => {
             )
         );
     }
+
+    req.body.case_gly = req.body.case;
     const { doc, error } = await baseController.createAndReturnObject(Glycemic)(
         req,
         res,
@@ -99,11 +102,23 @@ const createGlycemic = async (req, res, next) => {
                 notification = __notification;
             }
 
+            const rules = await Rule.find({ type: 'GLYCEMIC' });
+            const rule = rules.find(
+                (rule) =>
+                    doc.metric >= rule.start &&
+                    doc.metric <= rule.end &&
+                    rule.case_gly === doc.case
+            );
+
             return res.status(201).json({
                 status: STATUS_SUCCESS,
                 data: {
                     doc,
                     notification,
+                    rule: rule ?? {
+                        notification:
+                            'Thông báo cho chỉ số này hiện tại đang cập nhật',
+                    },
                 },
             });
         } catch (error) {
@@ -119,12 +134,16 @@ const getAllGlycemicByPatientId = async (req, res, next) => {
     const rules = await Rule.find({ type: 'GLYCEMIC' });
     const _glycemics = glycemics.map((gly) => {
         const rule = rules.find(
-            (rule) => gly.metric >= rule.start && gly.metric <= rule.end
+            (rule) =>
+                gly.metric >= rule.start &&
+                gly.metric <= rule.end &&
+                rule.case_gly === gly.case
         );
 
         return {
             ...gly._doc,
-            notification: rule?.notification ?? 'Chưa có thông báo',
+            notification:
+                rule ?? 'Thông báo cho chỉ số này hiện tại đang cập nhật',
         };
     });
 
