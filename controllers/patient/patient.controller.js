@@ -1,6 +1,7 @@
 import {
     MESSAGE_NO_ENOUGH_IN_4,
     MESSAGE_NO_PERMISSION,
+    RULE_ADMIN,
     RULE_PATIENT,
     STATUS_FAIL,
     STATUS_SUCCESS,
@@ -265,9 +266,29 @@ const updatePatientInfoById = async (req, res, next) => {
     }
 };
 
+const getAllPatient = async (req, res, next) => {
+    const { rule } = req;
+    if (rule === RULE_ADMIN) {
+        const patients = await Patient.find({}).populate('person');
+        return res.status(200).json({
+            status: STATUS_SUCCESS,
+            results: patients.length,
+            data: patients,
+        });
+    } else {
+        return next(
+            new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
+            req,
+            res,
+            next
+        );
+    }
+};
+
 export default {
     createPatient,
     findPatientByToken,
     findPatientById,
     updatePatientInfoById,
+    getAllPatient,
 };

@@ -138,7 +138,7 @@ const updateDoctorInfoById = async (req, res, next) => {
 
 const findDoctorById = async (req, res, next) => {
     try {
-        const id = req.params.id;
+        const { id } = req.params;
         const doctor = await Doctor.findById(id)
             .populate('person')
             .populate('ratings');
@@ -166,7 +166,20 @@ const findDoctorById = async (req, res, next) => {
             doctor['rating'] = Math.round(avg_count_rating);
         }
 
-        res.status(200).json({ status: STATUS_SUCCESS, data: doctor });
+        const schedule_details = await ScheduleDetailSchema.find({
+            doctor: id,
+            result_exam: { $ne: null },
+        }).populate('schedule');
+
+        const total_money = schedule_details.reduce(
+            (prev, current) => prev + current.schedule.fee,
+            0
+        );
+
+        res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: { ...doctor._doc, revenue: total_money },
+        });
     } catch (error) {
         next(error);
     }
@@ -183,7 +196,27 @@ const getAllDoctors = async (req, res, next) => {
                 next
             );
         }
-        res.status(200).json({ status: STATUS_SUCCESS, data: doctors });
+
+        const doctor_list = await Promise.all(
+            doctors.map(async (doctor) => {
+                const schedule_details = await ScheduleDetailSchema.find({
+                    doctor: doctor._id,
+                    result_exam: { $ne: null },
+                }).populate('schedule');
+
+                const total_money = schedule_details.reduce(
+                    (prev, current) => prev + current.schedule.fee,
+                    0
+                );
+
+                return { ...doctor._doc, revenue: total_money };
+            })
+        );
+
+        res.status(200).json({
+            status: STATUS_SUCCESS,
+            data: doctor_list,
+        });
     } catch (error) {
         next(error);
     }

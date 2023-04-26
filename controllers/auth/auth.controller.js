@@ -238,6 +238,7 @@ const authentication = async (req, res, next) => {
         }
     } catch (error) {
         console.error('err in auth -> ', error);
+        return next(new AppError(401, STATUS_FAIL, error)), req, res, next;
     }
 };
 

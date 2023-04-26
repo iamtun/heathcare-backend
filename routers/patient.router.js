@@ -16,6 +16,10 @@ router
     .get(AuthController.authentication, PatientController.findPatientByToken);
 
 router
+    .route('/admin')
+    .get(AuthController.authentication, PatientController.getAllPatient);
+
+router
     .route('/:id')
     .get(PatientController.findPatientById)
     .put(
