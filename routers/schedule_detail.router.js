@@ -39,6 +39,7 @@ router
         ScheduleDetailController.acceptScheduleDetailRegister
     );
 
+router.route('/:id/status').put(ScheduleDetailController.updateStatusExam);
 router
     .route('/:id')
     .put(

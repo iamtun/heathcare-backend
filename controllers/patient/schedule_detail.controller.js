@@ -247,7 +247,7 @@ const updateResultExam = async (req, res, next) => {
                 const detailUpdated =
                     await ScheduleDetailSchema.findByIdAndUpdate(
                         id,
-                        { result_exam: result_exam },
+                        { result_exam: result_exam, is_exam: false },
                         { new: true }
                     );
                 const patient_id = detailUpdated.patient;
@@ -966,9 +966,16 @@ const getAllScheduleDetailByPatientId = async (req, res, next) => {
         details.map(async (detail) => {
             const { doctor } = detail;
             const _doctor = await Doctor.findById(doctor).populate('person');
-            // console.log(_doctor);
+
+            const conversation = await Conversation.findOne({
+                members: [detail.patient._id, detail.doctor._id],
+            });
+
             detail['doctor'] = _doctor;
-            return detail;
+            return {
+                ...detail._doc,
+                conversation_id: conversation._id,
+            };
         })
     );
 
@@ -1176,6 +1183,36 @@ const getAllResultExamByPatientId = async (req, res, next) => {
     });
 };
 
+const updateStatusExam = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { is_exam } = req.body;
+        const schedule_detail = await ScheduleDetailSchema.findByIdAndUpdate(
+            { _id: id },
+            { is_exam: is_exam },
+            { new: true }
+        );
+
+        if (schedule_detail) {
+            return res.status(200).json({
+                status: STATUS_SUCCESS,
+                data: {
+                    is_exam,
+                },
+            });
+        }
+
+        return res.status(400).json({
+            status: STATUS_FAIL,
+            data: {
+                is_exam,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     getAll,
     findById,
@@ -1192,4 +1229,5 @@ export default {
     handleThreeMetric,
     getAllResultExamByPatientId,
     getAllScheduleListWaitingOfDoctor,
+    updateStatusExam,
 };

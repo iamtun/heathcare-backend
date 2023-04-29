@@ -5,6 +5,7 @@ import {
 } from '../../common/constant.js';
 import Doctor from '../../models/doctor/doctor.model.js';
 import Rating from '../../models/doctor/rating.model.js';
+import ScheduleDetailSchema from '../../models/schedule_detail.model.js';
 import AppError from '../../utils/error.util.js';
 import BaseController from '../utils/base.controller.js';
 
