@@ -122,7 +122,10 @@ const findPatientByToken = async (req, res, next) => {
                     scheduleDetailController.handleBMIStatus(
                         patient.person.gender,
                         last_bmi?.cal_bmi ?? false
-                    ),
+                    ) ?? {
+                        code: 5,
+                        status: 'Trường hợp chỉ số này đang được cập nhật',
+                    },
                     scheduleDetailController.handleGlycemicStatus(glycemic),
                     scheduleDetailController.handleBloodPressureStatus(
                         last_blood_pressures
