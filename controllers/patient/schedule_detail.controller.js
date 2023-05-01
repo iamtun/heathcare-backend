@@ -491,6 +491,11 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
                         code: 1,
                         status: 'Chỉ số  sức khỏe của bạn không được tốt',
                     };
+                if (bmi === 1 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và chỉ số sức khỏe không được tốt',
+                    };
                 if (bmi === 2 && glycemic === 0)
                     return {
                         code: 2,
@@ -529,6 +534,11 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
                     return {
                         code: 2,
                         status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn tiền huyết áp',
+                    };
+                if (bmi === 1 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai tiền huyết áp, chỉ số sức khỏe không được tốt',
                     };
                 if (bmi === 1 && glycemic === 0)
                     return {
@@ -574,6 +584,11 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
                         code: 2,
                         status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 1',
                     };
+                if (bmi === 1 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 1, chỉ số sức khỏe không được tốt',
+                    };
                 if (bmi === 1 && glycemic === 0)
                     return {
                         code: 1,
@@ -618,6 +633,11 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
                     return {
                         code: 2,
                         status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 2',
+                    };
+                if (bmi === 1 && glycemic === 2)
+                    return {
+                        code: 2,
+                        status: 'Tình trạng đường huyết của bạn đang ở mức báo động và đang trong giai đoạn cao huyết áp giai đoạn 2, chỉ số sức khỏe không được tốt',
                     };
                 if (bmi === 1 && glycemic === 0)
                     return {
