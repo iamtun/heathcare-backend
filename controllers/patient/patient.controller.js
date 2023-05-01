@@ -223,6 +223,20 @@ const updatePatientInfoById = async (req, res, next) => {
                             .populate('doctor_blood_id')
                             .populate('doctor_glycemic_id');
 
+                        if (patient?.doctor_blood_id) {
+                            const doctor = await Doctor.findById(
+                                patient.doctor_blood_id._id
+                            ).populate('person');
+                            patient['doctor_blood_id'] = doctor;
+                        }
+
+                        if (patient?.doctor_glycemic_id) {
+                            const doctor = await Doctor.findById(
+                                patient.doctor_glycemic_id._id
+                            ).populate('person');
+                            patient['doctor_glycemic_id'] = doctor;
+                        }
+
                         return res.status(201).json({
                             status: STATUS_SUCCESS,
                             data: patient,
