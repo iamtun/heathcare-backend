@@ -28,6 +28,7 @@ import 'moment/locale/vi.js';
 import Conversation from '../../models/conversation.model.js';
 import Message from '../../models/message.model.js';
 import doctorController from '../doctor/doctor.controller.js';
+import { calBMI } from './bmi.controller.js';
 moment.locale('vi');
 
 //patient register
@@ -754,6 +755,15 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                 const glycemics = await Glycemic.find({ patient: patient.id });
                 const glycemic = glycemics[glycemics.length - 1];
 
+                const _avgBMI = bmis.reduce((accumulator, currentValue) => {
+                    return (
+                        accumulator +
+                        calBMI(currentValue.weight, currentValue.height)
+                    );
+                }, 0);
+
+                const __avgBMI = parseFloat((_avgBMI / bmis.length).toFixed(2));
+
                 const blood_pressures = await BloodPressure.find({
                     patient: patient.id,
                 });
@@ -763,7 +773,7 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                 const status = {
                     bmi: handleBMIStatus(
                         patient.person.gender,
-                        last_bmi?.cal_bmi ?? null
+                        __avgBMI ?? null
                     ),
                     glycemic: handleGlycemicStatus(glycemic),
                     blood_pressure:
@@ -771,7 +781,7 @@ const getAllPatientExamByIdDoctor = async (req, res, next) => {
                     message: handleThreeMetric(
                         handleBMIStatus(
                             patient.person.gender,
-                            last_bmi?.cal_bmi ?? null
+                            __avgBMI ?? null
                         ),
                         handleGlycemicStatus(glycemic),
                         handleBloodPressureStatus(last_blood_pressures)

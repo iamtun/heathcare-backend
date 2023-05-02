@@ -17,6 +17,8 @@ import { createPerson, updatePerson } from '../../utils/person.util.js';
 import baseController from '../utils/base.controller.js';
 
 import scheduleDetailController from './schedule_detail.controller.js';
+
+import { calBMI } from './bmi.controller.js';
 const createPatient = async (req, res, next) => {
     const { rule, account_id, file } = req;
     if (rule === RULE_PATIENT) {
@@ -101,6 +103,15 @@ const findPatientByToken = async (req, res, next) => {
             const glycemics = await Glycemic.find({ patient: patient.id });
             const glycemic = glycemics[glycemics.length - 1];
 
+            const _avgBMI = bmis.reduce((accumulator, currentValue) => {
+                return (
+                    accumulator +
+                    calBMI(currentValue.weight, currentValue.height)
+                );
+            }, 0);
+
+            const __avgBMI = parseFloat((_avgBMI / bmis.length).toFixed(2));
+
             const blood_pressures = await BloodPressure.find({
                 patient: patient.id,
             });
@@ -110,7 +121,7 @@ const findPatientByToken = async (req, res, next) => {
             const status = {
                 bmi: scheduleDetailController.handleBMIStatus(
                     patient.person.gender,
-                    last_bmi?.cal_bmi ?? false
+                    __avgBMI ?? false
                 ),
                 glycemic:
                     scheduleDetailController.handleGlycemicStatus(glycemic),
@@ -121,7 +132,7 @@ const findPatientByToken = async (req, res, next) => {
                 message: scheduleDetailController.handleThreeMetric(
                     scheduleDetailController.handleBMIStatus(
                         patient.person.gender,
-                        last_bmi?.cal_bmi ?? false
+                        __avgBMI ?? false
                     ) ?? {
                         code: 5,
                         status: 'Trường hợp chỉ số này đang được cập nhật',

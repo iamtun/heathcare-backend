@@ -19,7 +19,7 @@ import {
     handleBMIStatus,
 } from './schedule_detail.controller.js';
 
-const calBMI = (w, h) => {
+export const calBMI = (w, h) => {
     return parseFloat((w / ((h * h) / 10000)).toFixed(2));
 };
 
