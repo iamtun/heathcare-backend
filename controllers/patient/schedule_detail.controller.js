@@ -248,7 +248,18 @@ const updateResultExam = async (req, res, next) => {
                 const detailUpdated =
                     await ScheduleDetailSchema.findByIdAndUpdate(
                         id,
-                        { result_exam: result_exam, is_exam: false },
+                        {
+                            result_exam:
+                                result_exam +
+                                `. Đánh giá: ${
+                                    anamnesis === 0
+                                        ? 'Bình Thường'
+                                        : anamnesis === 1
+                                        ? 'Tiểu đường típ 1'
+                                        : 'Tiểu đường típ 2'
+                                }`,
+                            is_exam: false,
+                        },
                         { new: true }
                     );
                 const patient_id = detailUpdated.patient;
