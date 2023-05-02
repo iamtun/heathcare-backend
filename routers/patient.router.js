@@ -3,7 +3,7 @@ import AuthController from '../controllers/auth/auth.controller.js';
 import PatientController from '../controllers/patient/patient.controller.js';
 import UploadCloud from '../configs/cloudinary.config.js';
 import RatingController from '../controllers/patient/rating.controller.js';
-
+import ScheduleDetailController from '../controllers/patient/schedule_detail.controller.js';
 const router = express.Router();
 
 router
@@ -18,6 +18,10 @@ router
 router
     .route('/admin')
     .get(AuthController.authentication, PatientController.getAllPatient);
+
+router
+    .route('/:id/histories')
+    .get(ScheduleDetailController.getAllExamHistoriesById);
 
 router
     .route('/:id')

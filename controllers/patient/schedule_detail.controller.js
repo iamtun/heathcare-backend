@@ -1233,6 +1233,45 @@ const updateStatusExam = async (req, res, next) => {
     }
 };
 
+const getAllExamHistoriesById = async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const schedules = await ScheduleDetailSchema.find({
+            patient: id,
+            result_exam: { $ne: null },
+        });
+
+        const histories = await Promise.all(
+            schedules.map(async (schedule) => {
+                const doctor = await Doctor.findById(schedule.doctor).populate(
+                    'person'
+                );
+
+                return {
+                    _id: schedule._id,
+                    content_exam: schedule.content_exam,
+                    result_exam: schedule.result_exam,
+                    doctor: {
+                        _id: doctor._id,
+                        username: doctor.person.username,
+                        work_type: doctor.work_type,
+                    },
+                    createdAt: schedule.updatedAt,
+                    created_at: schedule.day_exam,
+                };
+            })
+        );
+
+        return res.status(200).json({
+            status: STATUS_SUCCESS,
+            results: histories.length,
+            data: histories,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     getAll,
     findById,
@@ -1250,4 +1289,5 @@ export default {
     getAllResultExamByPatientId,
     getAllScheduleListWaitingOfDoctor,
     updateStatusExam,
+    getAllExamHistoriesById,
 };

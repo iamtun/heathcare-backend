@@ -1,10 +1,12 @@
 import {
     MESSAGE_NO_ENOUGH_IN_4,
+    RULE_SYSTEM,
     STATUS_FAIL,
     STATUS_SUCCESS,
 } from '../../common/constant.js';
 import Doctor from '../../models/doctor/doctor.model.js';
 import Rating from '../../models/doctor/rating.model.js';
+import Notification from '../../models/notification.model.js';
 import ScheduleDetailSchema from '../../models/schedule_detail.model.js';
 import AppError from '../../utils/error.util.js';
 import BaseController from '../utils/base.controller.js';
@@ -26,9 +28,26 @@ const createRatingForDoctor = async (req, res, next) => {
                     doctor.ratings.push(doc._id);
                     await doctor.save();
 
+                    const _rating = await Rating.findById(doc._doc._id)
+                        .populate('schedule_id')
+                        .populate('patient_id');
+
+                    const { schedule_id, patient_id, rating } = _rating;
+                    let notification = null;
+
+                    if (schedule_id) {
+                        notification = new Notification({
+                            to: schedule_id['doctor']._id,
+                            from: schedule_id['patient']._id,
+                            content: `Bệnh nhân ${patient_id.person.username}vừa đánh giá bác sĩ ${rating} sao`,
+                            rule: RULE_SYSTEM,
+                        });
+                    }
+
                     return res.status(201).json({
                         status: STATUS_SUCCESS,
-                        data: doc,
+                        data: _rating,
+                        notification,
                     });
                 } else {
                     return next(
