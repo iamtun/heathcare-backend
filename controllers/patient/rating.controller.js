@@ -5,6 +5,7 @@ import {
     STATUS_SUCCESS,
 } from '../../common/constant.js';
 import Doctor from '../../models/doctor/doctor.model.js';
+import Patient from '../../models/patient/patient.model.js';
 import Rating from '../../models/doctor/rating.model.js';
 import Notification from '../../models/notification.model.js';
 import ScheduleDetailSchema from '../../models/schedule_detail.model.js';
@@ -28,18 +29,22 @@ const createRatingForDoctor = async (req, res, next) => {
                     doctor.ratings.push(doc._id);
                     await doctor.save();
 
-                    const _rating = await Rating.findById(doc._doc._id)
-                        .populate('schedule_id')
-                        .populate('patient_id');
+                    const _rating = await Rating.findById(
+                        doc._doc._id
+                    ).populate('schedule_id');
 
                     const { schedule_id, patient_id, rating } = _rating;
                     let notification = null;
 
-                    if (schedule_id) {
+                    const patient = await Patient.findById(patient_id).populate(
+                        'person'
+                    );
+
+                    if (schedule_id && patient) {
                         notification = new Notification({
                             to: schedule_id['doctor']._id,
                             from: schedule_id['patient']._id,
-                            content: `Bệnh nhân ${patient_id.person.username}vừa đánh giá bác sĩ ${rating} sao`,
+                            content: `Bệnh nhân ${patient.person.username} vừa đánh giá bác sĩ ${rating} sao`,
                             rule: RULE_SYSTEM,
                         });
                     }
