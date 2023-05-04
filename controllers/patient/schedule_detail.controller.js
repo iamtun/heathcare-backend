@@ -69,7 +69,7 @@ const createScheduleDetail = async (req, res, next) => {
                             new AppError(
                                 401,
                                 STATUS_FAIL,
-                                'Mỗi ngày bạn chỉ được đăng ký tối đa một ca khám!'
+                                'Mỗi ngày bạn chỉ được đăng ký tối đa hai ca khám!'
                             ),
                             req,
                             res,
