@@ -423,24 +423,23 @@ export const handleGlycemicStatus = (glycemic = { metric: null, case: 0 }) => {
         switch (glycemic.case) {
             case 1:
                 {
-                    if (metric && metric < 90) return 1;
-                    else if (metric && metric <= 130) return 0;
-                    else if (metric > 130) return 2;
+                    if (metric && metric < 100) return 0;
+                    else if (metric && metric <= 125) return 1;
+                    else if (metric > 126) return 2;
                     else return -1;
                 }
                 break;
             case 2:
                 {
-                    if (metric && metric < 70) return 1;
-                    else if (metric && metric < 180) return 0;
-                    else if (metric && metric > 180) return 2;
+                    if (metric && metric < 140) return 0;
+                    else if (metric && metric < 199) return 1;
+                    else if (metric && metric > 200) return 2;
                     else return -1;
                 }
                 break;
             case 3: {
-                if (metric && metric < 110) return 1;
-                else if (metric && metric < 150) return 0;
-                else if (metric && metric > 150) return 2;
+                if (metric && metric < 120) return 0;
+                else if (metric && metric > 120) return 1;
                 else return -1;
             }
         }
@@ -460,20 +459,23 @@ export const handleGlycemicStatus = (glycemic = { metric: null, case: 0 }) => {
 
 export const handleBloodPressureStatus = (blood = null) => {
     if (blood === null) return -1;
-    if (blood.systolic < 120 && blood.diastole < 80) return 0;
+    if (blood.systolic < 130 && blood.diastole < 85) return 0;
     else if (
-        blood.systolic >= 120 &&
-        blood.systolic <= 129 &&
-        blood.diastole < 80
+        blood.systolic >= 130 &&
+        blood.systolic <= 159 &&
+        blood.diastole >= 85 &&
+        blood.diastole < 99
     )
         return 1;
     else if (
-        (blood.systolic >= 130 && blood.systolic <= 139) ||
-        (blood.diastole >= 80 && blood.diastole < 90)
+        blood.systolic >= 160 &&
+        blood.systolic < 180 &&
+        blood.diastole >= 100 &&
+        blood.diastole < 109
     )
         return 2;
-    else if (blood.systolic > 140 || blood.diastole > 90) return 3;
-    else if (blood.systolic > 180 || blood.diastole > 120) return 4;
+    else if (blood.systolic >= 180 && blood.diastole >= 110) return 3;
+    else if (blood.systolic >= 180 && blood.diastole >= 120) return 4;
 };
 
 const handleThreeMetric = (bmi, glycemic, blood) => {
