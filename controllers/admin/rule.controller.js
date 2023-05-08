@@ -11,6 +11,8 @@ import Rule from '../../models/rule.model.js';
 import AppError from '../../utils/error.util.js';
 import Doctor from '../../models/doctor/doctor.model.js';
 
+const METRICS = ['BMI', 'BLOOD', 'GLYCEMIC'];
+
 const createRule = async (req, res, next) => {
     const { rule } = req;
 
@@ -118,27 +120,26 @@ const createRule = async (req, res, next) => {
 
 const updateRule = async (req, res, next) => {
     const { rule } = req;
+    const { id } = req.params;
 
     if (rule === RULE_ADMIN) {
-        const { start, end, notification, type } = req.body;
-        if (start && end && notification && type) {
-            if (start < end) {
-                return Base.updateOne(Rule)(req, res, next);
-            } else {
-                return next(
-                    new AppError(401, STATUS_FAIL, MESSAGE_ERROR_NUMBER_RULE),
-                    req,
-                    res,
-                    next
+        const { notification } = req.body;
+
+        if (notification) {
+            try {
+                const rule_updated = await Rule.findByIdAndUpdate(
+                    id,
+                    { notification },
+                    { new: true }
                 );
+
+                return res.status(201).json({
+                    status: STATUS_SUCCESS,
+                    data: rule_updated,
+                });
+            } catch (error) {
+                next(error);
             }
-        } else {
-            return next(
-                new AppError(401, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
-                req,
-                res,
-                next
-            );
         }
     } else {
         return next(
@@ -150,7 +151,6 @@ const updateRule = async (req, res, next) => {
     }
 };
 
-const METRICS = ['BMI', 'BLOOD', 'GLYCEMIC'];
 const getAllRules = async (req, res, next) => {
     const { metric } = req.query;
     if (METRICS.includes(metric)) {
