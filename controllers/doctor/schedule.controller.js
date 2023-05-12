@@ -36,38 +36,52 @@ const createSchedule = async (req, res, next) => {
     const { rule } = req;
     if (rule === RULE_DOCTOR) {
         const { doctor, day, time } = req.body;
+        const doctor_resp = await Doctor.findById(doctor);
 
-        const isExist = await checkScheduleExist(doctor, day, time);
-        if (isExist) {
+        if (!doctor_resp.is_accepted) {
             return next(
                 new AppError(
-                    400,
+                    403,
                     STATUS_FAIL,
-                    'Bạn đã đăng ký ca làm này. Vui lòng kiểm tra lại!'
+                    'Tài khoản bạn chưa được kích hoạt không thể đăng ký'
                 ),
                 req,
                 res,
                 next
             );
+        } else {
+            const isExist = await checkScheduleExist(doctor, day, time);
+            if (isExist) {
+                return next(
+                    new AppError(
+                        400,
+                        STATUS_FAIL,
+                        'Bạn đã đăng ký ca làm này. Vui lòng kiểm tra lại!'
+                    ),
+                    req,
+                    res,
+                    next
+                );
+            }
+
+            const { doc, error } = await Base.createAndReturnObject(Schedule)(
+                req,
+                res,
+                next
+            );
+
+            if (error) {
+                return next(error);
+            }
+
+            const { _id } = doc;
+
+            const schedule = await findScheduleByIdAndPopulate(_id);
+            res.status(201).json({
+                status: STATUS_SUCCESS,
+                data: schedule,
+            });
         }
-
-        const { doc, error } = await Base.createAndReturnObject(Schedule)(
-            req,
-            res,
-            next
-        );
-
-        if (error) {
-            return next(error);
-        }
-
-        const { _id } = doc;
-
-        const schedule = await findScheduleByIdAndPopulate(_id);
-        res.status(201).json({
-            status: STATUS_SUCCESS,
-            data: schedule,
-        });
     } else {
         return next(
             new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
