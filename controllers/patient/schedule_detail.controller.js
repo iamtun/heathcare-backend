@@ -489,9 +489,9 @@ const handleThreeMetric = (bmi, glycemic, blood) => {
         return { code: -1, status: 'Bạn chưa nhập đầy đủ thông tin' };
     }
 
-    if (blood === -1) {
+    if (blood === -2) {
         return {
-            code: -2,
+            code: 2,
             status: 'Chỉ số huyết áp bạn nhập ngoài tính toán, vui lòng liên hệ bác sĩ',
         };
     }
