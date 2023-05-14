@@ -83,6 +83,7 @@ const createScheduleDetail = async (req, res, next) => {
 
                     if (
                         patient['doctor_blood_id'] &&
+                        _schedule['doctor'].work_type === 'blood' &&
                         _schedule['doctor']._id.toString() !==
                             patient['doctor_blood_id'].toString()
                     ) {
@@ -90,7 +91,7 @@ const createScheduleDetail = async (req, res, next) => {
                             new AppError(
                                 401,
                                 STATUS_FAIL,
-                                'Bạn đã có bác sĩ phụ trách cho nhóm bệnh đường huyết này. Bạn có thể  liên hệ bác sĩ đang phụ trách để  hủy'
+                                'Bạn đã có bác sĩ phụ trách cho nhóm bệnh huyết áp này. Bạn có thể  liên hệ bác sĩ đang phụ trách để  hủy'
                             ),
                             req,
                             res,
@@ -100,6 +101,7 @@ const createScheduleDetail = async (req, res, next) => {
 
                     if (
                         patient['doctor_glycemic_id'] &&
+                        _schedule['doctor'].work_type === 'glycemic' &&
                         _schedule['doctor']._id.toString() !==
                             patient['doctor_glycemic_id'].toString()
                     ) {
@@ -107,7 +109,7 @@ const createScheduleDetail = async (req, res, next) => {
                             new AppError(
                                 401,
                                 STATUS_FAIL,
-                                'Bạn đã có bác sĩ phụ trách cho nhóm bệnh huyết áp này. Bạn có thể  liên hệ bác sĩ đang phụ trách để  hủy'
+                                'Bạn đã có bác sĩ phụ trách cho nhóm bệnh đường huyết này. Bạn có thể  liên hệ bác sĩ đang phụ trách để  hủy'
                             ),
                             req,
                             res,
