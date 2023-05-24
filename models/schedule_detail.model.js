@@ -39,6 +39,10 @@ const scheduleDetailSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        prescription: {
+            type: String,
+            default: null,
+        },
     },
     {
         timestamps: true,

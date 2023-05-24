@@ -245,7 +245,7 @@ const createRemindForPatientById = async (req, res, next) => {
     const { rule } = req;
     if (rule === RULE_DOCTOR) {
         const { id } = req.params;
-        const { from, content } = req.body;
+        const { from, content, prescription } = req.body;
 
         try {
             if (id && from && content) {
@@ -259,6 +259,7 @@ const createRemindForPatientById = async (req, res, next) => {
                         conversation: conversation._id,
                         senderId: from,
                         content: `Nhắc nhở: ${content}`,
+                        prescription: `Đơn thuốc \n${prescription}`,
                     });
 
                     const _message = await message.save();
