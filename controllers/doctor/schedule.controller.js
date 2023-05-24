@@ -133,9 +133,13 @@ const getAllSchedule = async (req, res, next) => {
         })
     );
 
+    const schedule_list_doctor_undeleted = schedule_list.filter(
+        (schedule) => !schedule.doctor.deleted
+    );
+
     res.status(200).json({
         status: STATUS_SUCCESS,
-        data: schedule_list,
+        data: schedule_list_doctor_undeleted,
     });
 };
 

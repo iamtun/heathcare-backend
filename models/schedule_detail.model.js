@@ -35,6 +35,10 @@ const scheduleDetailSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        re_examination: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,
