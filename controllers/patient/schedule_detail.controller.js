@@ -227,6 +227,157 @@ const createScheduleDetail = async (req, res, next) => {
                     next
                 );
             }
+        } else if (rule === RULE_DOCTOR) {
+            const { content_exam, schedule, day_exam, patient_id } = req.body;
+
+            const person = await Person.findOne({ account: account_id });
+
+            const doctor = await Doctor.findOne({
+                person: person._id,
+            });
+
+            if (doctor) {
+                if (content_exam && schedule && day_exam && patient_id) {
+                    const schedule_details = await ScheduleDetailSchema.find({
+                        doctor: doctor._id,
+                        status: false,
+                    });
+
+                    //handle filter schedule detail equal day & month
+                    const details_filter = schedule_details.filter(
+                        (schedule) => {
+                            console.log(
+                                doctor._id,
+                                schedule.day_exam,
+                                moment(day_exam).format(
+                                    'YYYY-MM-DD[T00:00:00.000Z]'
+                                ),
+                                moment(schedule.day_exam).diff(day_exam, 'm')
+                            );
+                            return (
+                                moment(schedule.day_exam).diff(
+                                    day_exam,
+                                    'day'
+                                ) === 0
+                            );
+                        }
+                    );
+
+                    if (details_filter.length > 0) {
+                        return next(
+                            new AppError(
+                                401,
+                                STATUS_FAIL,
+                                'Ca khám này bạn đã có lịch'
+                            ),
+                            req,
+                            res,
+                            next
+                        );
+                    }
+
+                    const _schedule = await Schedule.findById(
+                        schedule
+                    ).populate('doctor');
+
+                    req.body.doctor = _schedule.doctor;
+                    req.body.patient = patient_id;
+                    const { doc, error } = await Base.createAndReturnObject(
+                        ScheduleDetailSchema
+                    )(req, res, next);
+
+                    //Chưa check chính xác được ca khám vào giờ đó đã được đăng ký
+                    if (error) {
+                        return next(
+                            new AppError(
+                                405,
+                                STATUS_FAIL,
+                                'Ca này bạn đã có lịch vui lòng chọn ca khác'
+                            ),
+                            req,
+                            res,
+                            next
+                        );
+                    }
+
+                    let schedule_detail = await ScheduleDetailSchema.findById(
+                        doc._id
+                    )
+                        .populate('patient')
+                        .populate('schedule')
+                        .populate('doctor');
+
+                    const _person = await Person.findById(
+                        schedule_detail['doctor']['person']
+                    );
+
+                    const _person_patient = await Person.findById(patient_id);
+
+                    const time = await Shift.findById(
+                        schedule_detail['schedule']['time']
+                    );
+
+                    schedule_detail['schedule']['time'] = time;
+                    schedule_detail['doctor']['person'] = _person;
+                    schedule_detail['patient']['person'] = _person_patient;
+
+                    //create notification
+                    const _notification = new Notification({
+                        from: schedule_detail['doctor']._id,
+                        to: patient_id,
+                        content: `Bác sĩ ${
+                            person.username
+                        } đã đăng ký lịch tái khám vào lúc ${moment(
+                            day_exam
+                        ).format(
+                            'llll'
+                        )}. Vui lòng tiến hành xác nhận hoặc hủy (nếu bận)`,
+                        rule: RULE_NOTIFICATION_REGISTER_SCHEDULE,
+                    });
+
+                    const notification = await _notification.save();
+
+                    // const conversation = await Conversation.findOne({
+                    //     members: [patient.id, schedule_detail.doctor.id],
+                    // });
+
+                    //create conversation
+                    // let _conversation = null;
+                    // if (!conversation) {
+                    //     const __conversation = new Conversation({
+                    //         members: [patient.id, schedule_detail.doctor.id],
+                    //     });
+                    //     _conversation = await __conversation.save();
+                    // }
+
+                    res.status(201).json({
+                        status: STATUS_SUCCESS,
+                        data: {
+                            schedule_detail,
+                            notification,
+                            // conversation: _conversation,
+                        },
+                    });
+                } else {
+                    return next(
+                        new AppError(401, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+                        req,
+                        res,
+                        next
+                    );
+                }
+            } else {
+                return next(
+                    new AppError(
+                        401,
+                        STATUS_FAIL,
+                        `Doctor with id ${patient_id} not found`
+                    ),
+                    req,
+                    res,
+                    next
+                );
+            }
         } else {
             return next(
                 new AppError(403, STATUS_FAIL, MESSAGE_NO_PERMISSION),
