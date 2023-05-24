@@ -46,170 +46,188 @@ const createScheduleDetail = async (req, res, next) => {
             const patient_id = patient.id;
             req.body.patient = patient_id;
 
-            if (patient) {
-                if (content_exam && schedule && day_exam) {
-                    const schedule_details = await ScheduleDetailSchema.find(
-                        {}
-                    );
+            const now = new Date();
+            const is_before_one_day = moment(now).diff(day_exam, 'day');
+            //Lịch khám phải đăng ký trước 1 ngày
+            if (is_before_one_day > 0) {
+                if (patient) {
+                    if (content_exam && schedule && day_exam) {
+                        const schedule_details =
+                            await ScheduleDetailSchema.find({});
 
-                    //handle filter schedule detail equal day & month
-                    const details_filter = schedule_details.filter(
-                        (schedule) => {
-                            return (
-                                schedule.day_exam.getDate() ===
-                                    new Date(day_exam).getDate() &&
-                                schedule.day_exam.getMonth() ===
-                                    new Date(day_exam).getMonth()
+                        //handle filter schedule detail equal day & month
+                        const details_filter = schedule_details.filter(
+                            (schedule) => {
+                                return (
+                                    schedule.day_exam.getDate() ===
+                                        new Date(day_exam).getDate() &&
+                                    schedule.day_exam.getMonth() ===
+                                        new Date(day_exam).getMonth()
+                                );
+                            }
+                        );
+
+                        if (details_filter.length > 1) {
+                            return next(
+                                new AppError(
+                                    401,
+                                    STATUS_FAIL,
+                                    'Mỗi ngày bạn chỉ được đăng ký tối đa hai ca khám!'
+                                ),
+                                req,
+                                res,
+                                next
                             );
                         }
-                    );
 
-                    if (details_filter.length > 1) {
-                        return next(
-                            new AppError(
-                                401,
-                                STATUS_FAIL,
-                                'Mỗi ngày bạn chỉ được đăng ký tối đa hai ca khám!'
-                            ),
-                            req,
-                            res,
-                            next
+                        const _schedule = await Schedule.findById(
+                            schedule
+                        ).populate('doctor');
+
+                        if (
+                            patient['doctor_blood_id'] &&
+                            _schedule['doctor'].work_type === 'blood' &&
+                            _schedule['doctor']._id.toString() !==
+                                patient['doctor_blood_id'].toString()
+                        ) {
+                            return next(
+                                new AppError(
+                                    401,
+                                    STATUS_FAIL,
+                                    'Bạn đã có bác sĩ phụ trách cho nhóm bệnh huyết áp này. Bạn có thể  liên hệ bác sĩ đang phụ trách để  hủy'
+                                ),
+                                req,
+                                res,
+                                next
+                            );
+                        }
+
+                        if (
+                            patient['doctor_glycemic_id'] &&
+                            _schedule['doctor'].work_type === 'glycemic' &&
+                            _schedule['doctor']._id.toString() !==
+                                patient['doctor_glycemic_id'].toString()
+                        ) {
+                            return next(
+                                new AppError(
+                                    401,
+                                    STATUS_FAIL,
+                                    'Bạn đã có bác sĩ phụ trách cho nhóm bệnh đường huyết này. Bạn có thể  liên hệ bác sĩ đang phụ trách để  hủy'
+                                ),
+                                req,
+                                res,
+                                next
+                            );
+                        }
+
+                        req.body.doctor = _schedule.doctor;
+                        const { doc, error } = await Base.createAndReturnObject(
+                            ScheduleDetailSchema
+                        )(req, res, next);
+
+                        //Chưa check chính xác được ca khám vào giờ đó đã được đăng ký
+                        if (error) {
+                            return next(
+                                new AppError(
+                                    401,
+                                    STATUS_FAIL,
+                                    'Ca khám này của bác sĩ đã có người đăng ký vui lòng chọn ca khác'
+                                ),
+                                req,
+                                res,
+                                next
+                            );
+                        }
+
+                        let schedule_detail =
+                            await ScheduleDetailSchema.findById(doc._id)
+                                .populate('patient')
+                                .populate('schedule')
+                                .populate('doctor');
+
+                        const doctor = schedule_detail['doctor'];
+                        if (doctor['work_type'] === 'glycemic') {
+                            await Patient.findByIdAndUpdate(patient_id, {
+                                doctor_glycemic_id: doctor.id,
+                            });
+                        } else {
+                            await Patient.findByIdAndUpdate(patient_id, {
+                                doctor_blood_id: doctor.id,
+                            });
+                        }
+
+                        const _person = await Person.findById(
+                            schedule_detail['doctor']['person']
                         );
-                    }
 
-                    const _schedule = await Schedule.findById(
-                        schedule
-                    ).populate('doctor');
-
-                    if (
-                        patient['doctor_blood_id'] &&
-                        _schedule['doctor'].work_type === 'blood' &&
-                        _schedule['doctor']._id.toString() !==
-                            patient['doctor_blood_id'].toString()
-                    ) {
-                        return next(
-                            new AppError(
-                                401,
-                                STATUS_FAIL,
-                                'Bạn đã có bác sĩ phụ trách cho nhóm bệnh huyết áp này. Bạn có thể  liên hệ bác sĩ đang phụ trách để  hủy'
-                            ),
-                            req,
-                            res,
-                            next
+                        const _person_patient = await Person.findById(
+                            schedule_detail['patient']['person']
                         );
-                    }
 
-                    if (
-                        patient['doctor_glycemic_id'] &&
-                        _schedule['doctor'].work_type === 'glycemic' &&
-                        _schedule['doctor']._id.toString() !==
-                            patient['doctor_glycemic_id'].toString()
-                    ) {
-                        return next(
-                            new AppError(
-                                401,
-                                STATUS_FAIL,
-                                'Bạn đã có bác sĩ phụ trách cho nhóm bệnh đường huyết này. Bạn có thể  liên hệ bác sĩ đang phụ trách để  hủy'
-                            ),
-                            req,
-                            res,
-                            next
+                        const time = await Shift.findById(
+                            schedule_detail['schedule']['time']
                         );
-                    }
 
-                    req.body.doctor = _schedule.doctor;
-                    const { doc, error } = await Base.createAndReturnObject(
-                        ScheduleDetailSchema
-                    )(req, res, next);
+                        schedule_detail['schedule']['time'] = time;
+                        schedule_detail['doctor']['person'] = _person;
+                        schedule_detail['patient']['person'] = _person_patient;
 
-                    //Chưa check chính xác được ca khám vào giờ đó đã được đăng ký
-                    if (error) {
-                        return next(
-                            new AppError(
-                                401,
-                                STATUS_FAIL,
-                                'Ca khám này của bác sĩ đã có người đăng ký vui lòng chọn ca khác'
-                            ),
-                            req,
-                            res,
-                            next
-                        );
-                    }
+                        //create notification
+                        const _notification = new Notification({
+                            from: patient.id,
+                            to: schedule_detail['doctor']._id,
+                            content: `Bệnh nhân ${
+                                person.username
+                            } đã đăng ký lịch khám vào lúc ${moment(
+                                day_exam
+                            ).format(
+                                'llll'
+                            )}. Vui lòng tiến hành xác nhận hoặc hủy (nếu bận)`,
+                            rule: RULE_NOTIFICATION_REGISTER_SCHEDULE,
+                        });
 
-                    let schedule_detail = await ScheduleDetailSchema.findById(
-                        doc._id
-                    )
-                        .populate('patient')
-                        .populate('schedule')
-                        .populate('doctor');
+                        const notification = await _notification.save();
 
-                    const doctor = schedule_detail['doctor'];
-                    if (doctor['work_type'] === 'glycemic') {
-                        await Patient.findByIdAndUpdate(patient_id, {
-                            doctor_glycemic_id: doctor.id,
+                        // const conversation = await Conversation.findOne({
+                        //     members: [patient.id, schedule_detail.doctor.id],
+                        // });
+
+                        //create conversation
+                        // let _conversation = null;
+                        // if (!conversation) {
+                        //     const __conversation = new Conversation({
+                        //         members: [patient.id, schedule_detail.doctor.id],
+                        //     });
+                        //     _conversation = await __conversation.save();
+                        // }
+
+                        res.status(201).json({
+                            status: STATUS_SUCCESS,
+                            data: {
+                                schedule_detail,
+                                notification,
+                                // conversation: _conversation,
+                            },
                         });
                     } else {
-                        await Patient.findByIdAndUpdate(patient_id, {
-                            doctor_blood_id: doctor.id,
-                        });
+                        return next(
+                            new AppError(
+                                401,
+                                STATUS_FAIL,
+                                MESSAGE_NO_ENOUGH_IN_4
+                            ),
+                            req,
+                            res,
+                            next
+                        );
                     }
-
-                    const _person = await Person.findById(
-                        schedule_detail['doctor']['person']
-                    );
-
-                    const _person_patient = await Person.findById(
-                        schedule_detail['patient']['person']
-                    );
-
-                    const time = await Shift.findById(
-                        schedule_detail['schedule']['time']
-                    );
-
-                    schedule_detail['schedule']['time'] = time;
-                    schedule_detail['doctor']['person'] = _person;
-                    schedule_detail['patient']['person'] = _person_patient;
-
-                    //create notification
-                    const _notification = new Notification({
-                        from: patient.id,
-                        to: schedule_detail['doctor']._id,
-                        content: `Bệnh nhân ${
-                            person.username
-                        } đã đăng ký lịch khám vào lúc ${moment(
-                            day_exam
-                        ).format(
-                            'llll'
-                        )}. Vui lòng tiến hành xác nhận hoặc hủy (nếu bận)`,
-                        rule: RULE_NOTIFICATION_REGISTER_SCHEDULE,
-                    });
-
-                    const notification = await _notification.save();
-
-                    // const conversation = await Conversation.findOne({
-                    //     members: [patient.id, schedule_detail.doctor.id],
-                    // });
-
-                    //create conversation
-                    // let _conversation = null;
-                    // if (!conversation) {
-                    //     const __conversation = new Conversation({
-                    //         members: [patient.id, schedule_detail.doctor.id],
-                    //     });
-                    //     _conversation = await __conversation.save();
-                    // }
-
-                    res.status(201).json({
-                        status: STATUS_SUCCESS,
-                        data: {
-                            schedule_detail,
-                            notification,
-                            // conversation: _conversation,
-                        },
-                    });
                 } else {
                     return next(
-                        new AppError(401, STATUS_FAIL, MESSAGE_NO_ENOUGH_IN_4),
+                        new AppError(
+                            401,
+                            STATUS_FAIL,
+                            `Patient with id ${patient_id} not found`
+                        ),
                         req,
                         res,
                         next
@@ -220,7 +238,7 @@ const createScheduleDetail = async (req, res, next) => {
                     new AppError(
                         401,
                         STATUS_FAIL,
-                        `Patient with id ${patient_id} not found`
+                        `Bạn phải đăng ký lịch trước một ngày để bác sĩ có thể duyệt`
                     ),
                     req,
                     res,
@@ -1184,16 +1202,23 @@ const getAllScheduleDetailByPatientId = async (req, res, next) => {
 const acceptScheduleDetailRegister = async (req, res, next) => {
     const { rule } = req;
     if (rule === RULE_DOCTOR) {
-        const schedule_detail = await ScheduleDetailSchema.findByIdAndUpdate(
-            { _id: req.params.id },
-            { status: true },
-            { new: true }
-        )
+        const schedule_detail = await ScheduleDetailSchema.findById({
+            _id: req.params.id,
+        })
             .populate('schedule')
             .populate('doctor');
 
         if (schedule_detail) {
             //create notification
+
+            const schedule_detail =
+                await ScheduleDetailSchema.findByIdAndUpdate(
+                    { _id: req.params.id },
+                    { status: true },
+                    { new: true }
+                )
+                    .populate('schedule')
+                    .populate('doctor');
             const _notification = new Notification({
                 from: schedule_detail['doctor']._id,
                 to: schedule_detail['patient']._id,
@@ -1278,6 +1303,7 @@ const acceptScheduleDetailRegister = async (req, res, next) => {
 const deleteScheduleDetail = async (req, res, next) => {
     const { reason, from } = req.body;
     const { id } = req.params;
+    const now = new Date();
 
     const schedule_detail = await ScheduleDetailSchema.findOne({
         _id: id,
@@ -1286,79 +1312,87 @@ const deleteScheduleDetail = async (req, res, next) => {
         .populate('patient')
         .populate('doctor');
 
+    console.log(schedule_detail);
     if (schedule_detail) {
-        if (schedule_detail.patient._id.toString() === from) {
-            //create notification
-            const person = await Person.findById(
-                schedule_detail['patient'].person
-            );
-            const _notification = new Notification({
-                from: schedule_detail['patient']._id,
-                to: schedule_detail['doctor']._id,
-                content: `Bệnh nhân ${
-                    person.username
-                } đã hủy lịch khám vào lúc ${moment(
-                    schedule_detail.day_exam
-                ).format('llll')}. Vì lý do ${reason}`,
-                rule: RULE_NOTIFICATION_CANCEL_SCHEDULE,
-            });
+        const is_before_one_day = moment(schedule_detail.day_exam).diff(
+            now,
+            'day'
+        );
 
-            const notification = await _notification.save();
+        if (is_before_one_day > 0) {
+            if (schedule_detail.patient._id.toString() === from) {
+                //create notification
+                const person = await Person.findById(
+                    schedule_detail['patient'].person
+                );
+                const _notification = new Notification({
+                    from: schedule_detail['patient']._id,
+                    to: schedule_detail['doctor']._id,
+                    content: `Bệnh nhân ${
+                        person.username
+                    } đã hủy lịch khám vào lúc ${moment(
+                        schedule_detail.day_exam
+                    ).format('llll')}. Vì lý do ${reason}`,
+                    rule: RULE_NOTIFICATION_CANCEL_SCHEDULE,
+                });
 
-            const doc = await ScheduleDetailSchema.findByIdAndDelete(id);
+                const notification = await _notification.save();
 
-            return res.status(200).json({
-                status: STATUS_SUCCESS,
-                data: {
-                    schedule_detail_id: doc._id,
-                    notification: {
-                        ...notification._doc,
+                const doc = await ScheduleDetailSchema.findByIdAndDelete(id);
+
+                return res.status(200).json({
+                    status: STATUS_SUCCESS,
+                    data: {
                         schedule_detail_id: doc._id,
+                        notification: {
+                            ...notification._doc,
+                            schedule_detail_id: doc._id,
+                        },
                     },
-                },
-            });
-        } else if (schedule_detail.doctor._id.toString() === from) {
-            //create notification
-            const person = await Person.findById(
-                schedule_detail['doctor'].person
-            );
-            const _notification = new Notification({
-                from: schedule_detail['doctor']._id,
-                to: schedule_detail['patient']._id,
-                content: `Bác sĩ ${
-                    person.username
-                } đã hủy lịch khám vào lúc ${moment(
-                    schedule_detail.day_exam
-                ).format('llll')}. Vì lý do ${reason}`,
-                rule: RULE_NOTIFICATION_CANCEL_SCHEDULE,
-            });
+                });
+            } else if (schedule_detail.doctor._id.toString() === from) {
+                //create notification
+                const person = await Person.findById(
+                    schedule_detail['doctor'].person
+                );
+                const _notification = new Notification({
+                    from: schedule_detail['doctor']._id,
+                    to: schedule_detail['patient']._id,
+                    content: `Bác sĩ ${
+                        person.username
+                    } đã hủy lịch khám vào lúc ${moment(
+                        schedule_detail.day_exam
+                    ).format('llll')}. Vì lý do ${reason}`,
+                    rule: RULE_NOTIFICATION_CANCEL_SCHEDULE,
+                });
 
-            const notification = await _notification.save();
+                const notification = await _notification.save();
 
-            const doc = await ScheduleDetailSchema.findByIdAndDelete(id);
+                const doc = await ScheduleDetailSchema.findByIdAndDelete(id);
 
-            return res.status(200).json({
-                status: STATUS_SUCCESS,
-                data: {
-                    schedule_detail_id: doc._id,
-                    notification: {
-                        ...notification._doc,
+                return res.status(200).json({
+                    status: STATUS_SUCCESS,
+                    data: {
                         schedule_detail_id: doc._id,
+                        notification: {
+                            ...notification._doc,
+                            schedule_detail_id: doc._id,
+                        },
                     },
-                },
+                });
+            }
+        } else {
+            return res.status(400).json({
+                status: STATUS_FAIL,
+                message: `Bạn phải hủy lịch trước một ngày`,
             });
         }
-
-        return res.status(400).json({
+    } else {
+        return res.status(404).json({
             status: STATUS_FAIL,
-            message: `Không tìm thấy lịch đăng ký với id = ${req.params.id} `,
+            message: `Không tìm thấy lịch đăng ký với id = ${id} `,
         });
     }
-
-    return res.status(404).json({
-        status: STATUS_FAIL,
-        message: `Không tìm thấy lịch đăng ký với id = ${id} `,
-    });
 };
 
 const getAllResultExamByPatientId = async (req, res, next) => {
