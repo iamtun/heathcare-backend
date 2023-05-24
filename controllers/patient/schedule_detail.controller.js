@@ -246,18 +246,10 @@ const createScheduleDetail = async (req, res, next) => {
                     //handle filter schedule detail equal day & month
                     const details_filter = schedule_details.filter(
                         (schedule) => {
-                            console.log(
-                                doctor._id,
-                                schedule.day_exam,
-                                moment(day_exam).format(
-                                    'YYYY-MM-DD[T00:00:00.000Z]'
-                                ),
-                                moment(schedule.day_exam).diff(day_exam, 'm')
-                            );
                             return (
                                 moment(schedule.day_exam).diff(
                                     day_exam,
-                                    'day'
+                                    'm'
                                 ) === 0
                             );
                         }
