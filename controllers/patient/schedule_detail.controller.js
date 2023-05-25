@@ -47,14 +47,17 @@ const createScheduleDetail = async (req, res, next) => {
             req.body.patient = patient_id;
 
             const now = new Date();
-            const is_before_one_day = moment(now).diff(day_exam, 'day');
+            const is_before_one_day = moment(day_exam).diff(now, 'days', true);
             //Lịch khám phải đăng ký trước 1 ngày
-            if (is_before_one_day > 0) {
+            if (Math.round(is_before_one_day) > 0) {
                 if (patient) {
                     if (content_exam && schedule && day_exam) {
                         const schedule_details =
-                            await ScheduleDetailSchema.find({});
+                            await ScheduleDetailSchema.find();
 
+                        const schedule_registed = await Schedule.findOne({
+                            _id: schedule,
+                        });
                         //handle filter schedule detail equal day & month
                         const details_filter = schedule_details.filter(
                             (schedule) => {
@@ -62,11 +65,16 @@ const createScheduleDetail = async (req, res, next) => {
                                     schedule.day_exam.getDate() ===
                                         new Date(day_exam).getDate() &&
                                     schedule.day_exam.getMonth() ===
-                                        new Date(day_exam).getMonth()
+                                        new Date(day_exam).getMonth() &&
+                                    schedule.doctor.toString() ===
+                                        schedule_registed.doctor.toString() &&
+                                    schedule.patient.toString() ===
+                                        patient._id.toString()
                                 );
                             }
                         );
 
+                        //block register three schedule
                         if (details_filter.length > 1) {
                             return next(
                                 new AppError(
@@ -120,6 +128,29 @@ const createScheduleDetail = async (req, res, next) => {
                             );
                         }
 
+                        const schedule_patient_filter = schedule_details.filter(
+                            (schedule) =>
+                                moment(schedule.day_exam).diff(
+                                    day_exam,
+                                    'm'
+                                ) === 0 &&
+                                schedule.doctor.toString() ===
+                                    schedule_registed.doctor.toString()
+                        );
+
+                        if (schedule_patient_filter.length > 0) {
+                            return next(
+                                new AppError(
+                                    400,
+                                    STATUS_FAIL,
+                                    'Ca khám này của bác sĩ đã có người đăng ký vui lòng chọn ca khác'
+                                ),
+                                req,
+                                res,
+                                next
+                            );
+                        }
+
                         req.body.doctor = _schedule.doctor;
                         const { doc, error } = await Base.createAndReturnObject(
                             ScheduleDetailSchema
@@ -127,6 +158,7 @@ const createScheduleDetail = async (req, res, next) => {
 
                         //Chưa check chính xác được ca khám vào giờ đó đã được đăng ký
                         if (error) {
+                            // console.log(error);
                             return next(
                                 new AppError(
                                     401,
@@ -1312,14 +1344,14 @@ const deleteScheduleDetail = async (req, res, next) => {
         .populate('patient')
         .populate('doctor');
 
-    console.log(schedule_detail);
     if (schedule_detail) {
         const is_before_one_day = moment(schedule_detail.day_exam).diff(
             now,
-            'day'
+            'days',
+            true
         );
 
-        if (is_before_one_day > 0) {
+        if (Math.round(is_before_one_day) > 0) {
             if (schedule_detail.patient._id.toString() === from) {
                 //create notification
                 const person = await Person.findById(
