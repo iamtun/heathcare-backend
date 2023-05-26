@@ -1033,6 +1033,7 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
             status: true,
             result_exam: { $ne: null },
         })
+            .sort({ day_exam: -1 })
             .populate('schedule')
             .populate('doctor')
             .populate('patient');
@@ -1483,7 +1484,7 @@ const getAllExamHistoriesById = async (req, res, next) => {
         const schedules = await ScheduleDetailSchema.find({
             patient: id,
             result_exam: { $ne: null },
-        });
+        }).sort({ day_exam: -1 });
 
         const histories = await Promise.all(
             schedules.map(async (schedule) => {
@@ -1502,6 +1503,7 @@ const getAllExamHistoriesById = async (req, res, next) => {
                     },
                     createdAt: schedule.updatedAt,
                     created_at: schedule.day_exam,
+                    prescription: schedule.prescription,
                 };
             })
         );
