@@ -438,7 +438,7 @@ const updateResultExam = async (req, res, next) => {
         const { rule } = req;
         const { id } = req.params;
         if (rule === RULE_DOCTOR) {
-            const { result_exam, anamnesis } = req.body;
+            const { result_exam, anamnesis, prescription } = req.body;
             if (result_exam) {
                 const detailUpdated =
                     await ScheduleDetailSchema.findByIdAndUpdate(
@@ -454,6 +454,7 @@ const updateResultExam = async (req, res, next) => {
                                         : 'Tiểu đường típ 2'
                                 }`,
                             is_exam: false,
+                            prescription,
                         },
                         { new: true }
                     );
@@ -496,7 +497,7 @@ const updateResultExam = async (req, res, next) => {
                                 : anamnesis === 1
                                 ? 'Tiểu đường típ 1'
                                 : 'Tiểu đường típ 2'
-                        }`,
+                        }\n${prescription ? `Thuốc ${prescription}` : ''}`,
                     });
 
                     const _message = await message.save();
