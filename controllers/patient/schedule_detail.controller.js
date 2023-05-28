@@ -1071,8 +1071,9 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
             doctor: doctorId,
             status: true,
             result_exam: null,
-            day_exam: { $gte: new Date() },
+            // day_exam: { $gte: new Date().toISOString() },
         })
+            .sort({ day_exam: 1 })
             .populate('schedule')
             .populate('doctor')
             .populate('patient');
@@ -1098,10 +1099,14 @@ const getAllScheduleListOfDoctor = async (req, res, next) => {
             })
         );
 
+        const detail_list_after_now = detail_list_result.filter((schedule) =>
+            moment(schedule.day_exam).isAfter(new Date())
+        );
+
         return res.status(200).json({
             status: STATUS_SUCCESS,
-            size: detail_list_result.length,
-            data: detail_list_result,
+            size: detail_list_after_now.length,
+            data: detail_list_after_now,
         });
     }
 
