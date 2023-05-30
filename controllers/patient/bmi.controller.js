@@ -36,6 +36,24 @@ const spCreateBMI = async (req, res, next) => {
             next
         );
     }
+
+    if (
+        req.body.weight > 300 ||
+        req.body.height > 250 ||
+        req.body.weight <= 0 ||
+        req.body.height <= 0
+    ) {
+        return next(
+            new AppError(
+                400,
+                STATUS_FAIL,
+                'Chiều cao cân nặng này không khả dụng. Vui lòng nhập lại!'
+            ),
+            req,
+            res,
+            next
+        );
+    }
     req.body.cal_bmi = calBMI(req.body.weight, req.body.height);
     const bmi = await Base.createAndReturnObject(BMI)(req, res, next);
     const { doc, error } = bmi;

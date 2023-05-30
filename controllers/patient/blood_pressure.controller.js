@@ -28,6 +28,32 @@ const createBloodPressureMetric = async (req, res, next) => {
         );
     }
 
+    if (!req.body.systolic || !req.body.diastole) {
+        return next(
+            new AppError(
+                400,
+                STATUS_FAIL,
+                'Vui lòng nhập đầy đủ thông tin chỉ số huyết áp'
+            ),
+            req,
+            res,
+            next
+        );
+    }
+
+    if (req.body.systolic > 250 || req.body.diastole > 250) {
+        return next(
+            new AppError(
+                400,
+                STATUS_FAIL,
+                'Chỉ số huyết áp này không khả dụng. Vui lòng nhập lại'
+            ),
+            req,
+            res,
+            next
+        );
+    }
+
     const blood_pressures = await BloodPressure.find({
         patient: req.body.patient,
     });

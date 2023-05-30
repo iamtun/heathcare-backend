@@ -30,6 +30,28 @@ const createGlycemic = async (req, res, next) => {
         );
     }
 
+    if (!req.body.metric) {
+        return next(
+            new AppError(400, STATUS_FAIL, 'Vui lòng nhập chỉ số huyết áp'),
+            req,
+            res,
+            next
+        );
+    }
+
+    if (req.body.metric > 300) {
+        return next(
+            new AppError(
+                400,
+                STATUS_FAIL,
+                'Chỉ số đường huyết này không khả dụng. Vui lòng nhập lại'
+            ),
+            req,
+            res,
+            next
+        );
+    }
+
     const now = new Date();
     const glycemics = await Glycemic.find({
         patient: req.body.patient,
