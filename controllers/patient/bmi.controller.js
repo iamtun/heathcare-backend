@@ -24,6 +24,18 @@ export const calBMI = (w, h) => {
 };
 
 const spCreateBMI = async (req, res, next) => {
+    if (!req.body.weight || !req.body.height) {
+        return next(
+            new AppError(
+                400,
+                STATUS_FAIL,
+                'Bạn cần nhập đầy đủ thông tin của chiều cao và cân nặng'
+            ),
+            req,
+            res,
+            next
+        );
+    }
     req.body.cal_bmi = calBMI(req.body.weight, req.body.height);
     const bmi = await Base.createAndReturnObject(BMI)(req, res, next);
     const { doc, error } = bmi;
